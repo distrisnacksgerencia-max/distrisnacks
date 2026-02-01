@@ -2,137 +2,117 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>DistriSnacks</title>
 
 <style>
-:root{--c:#88003d}
-*{box-sizing:border-box;font-family:Calibri}
-
-body{margin:0;background:#fafafa}
+body{
+  margin:0;
+  font-family:Calibri,Arial,sans-serif;
+  background:#fafafa;
+}
 
 header{
-background:var(--c);
-padding:10px;
-position:sticky;
-top:0;
-z-index:50;
+  background:#88003d;
+  padding:10px;
 }
 
-header input{
-width:100%;
-padding:10px;
-border-radius:8px;
-border:none;
-font-size:16px;
+#search{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:none;
+  font-size:16px;
 }
 
-#wrap{display:flex}
-
-#side{
-width:220px;
-background:#fff;
-border-right:1px solid #ddd;
-padding:10px;
-position:fixed;
-top:60px;
-bottom:0;
-overflow:auto;
-transform:translateX(0);
-transition:.3s;
-z-index:20;
+#productos{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:14px;
+  padding:14px;
 }
 
-#side.hide{transform:translateX(-100%)}
-
-#main{margin-left:220px;padding:10px;width:100%}
-
-@media(max-width:768px){
-#side{top:55px}
-#main{margin-left:0}
-.grid{grid-template-columns:repeat(2,1fr)!important}
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:12px;
+@media(max-width:600px){
+  #productos{grid-template-columns:repeat(2,1fr);}
 }
 
 .card{
-background:#fff;
-border-radius:14px;
-padding:10px;
-text-align:center;
-box-shadow:0 2px 6px rgba(0,0,0,.08)
+  background:#fff;
+  border-radius:12px;
+  padding:10px;
+  text-align:center;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
 
-.card img{max-width:100%;height:120px;object-fit:contain}
+.card img{
+  max-width:100%;
+  height:140px;
+  object-fit:contain;
+}
 
-.price{color:var(--c);font-weight:bold;font-size:18px}
+.nombre{margin-top:6px;}
+.precio{color:#88003d;font-weight:bold;font-size:18px;}
 
 .ctrl{
-display:flex;
-justify-content:center;
-gap:6px;
-margin-top:6px
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  margin-top:6px;
 }
 
 .ctrl button{
-background:var(--c);
-color:#fff;
-border:none;
-width:32px;
-height:32px;
-border-radius:8px;
-font-size:18px
+  background:#88003d;
+  color:#fff;
+  border:none;
+  width:32px;
+  height:32px;
+  border-radius:6px;
+  font-size:18px;
 }
 
 .ctrl input{
-width:60px;
-text-align:center;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:16px
+  width:50px;
+  text-align:center;
 }
 
 /* quitar flechas */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button{
--webkit-appearance:none;margin:0
+  -webkit-appearance:none;margin:0;
 }
-input[type=number]{-moz-appearance:textfield}
+input[type=number]{-moz-appearance:textfield;}
 
-#cart{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#fff;
-border-top:2px solid var(--c);
-padding:8px;
-z-index:40
+#carrito{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  border-top:2px solid #88003d;
+  padding:8px;
 }
 
-#cartList{max-height:140px;overflow:auto;font-size:13px}
+#lista{font-size:13px;max-height:90px;overflow:auto;}
 
-#send{
-background:#25d366;
-border:none;
-color:#fff;
-width:100%;
-padding:12px;
-border-radius:10px;
-margin-top:6px;
-font-size:16px
+#enviar{
+  width:100%;
+  margin-top:6px;
+  padding:12px;
+  background:#25d366;
+  border:none;
+  color:#fff;
+  font-size:18px;
+  border-radius:8px;
 }
 
 footer{
-background:#000;
-color:#fff;
-padding:15px;
-text-align:center;
-margin-top:160px
+  margin-top:140px;
+  background:#000;
+  color:#fff;
+  text-align:center;
+  padding:20px;
 }
 </style>
 </head>
@@ -143,33 +123,23 @@ margin-top:160px
 <input id="search" placeholder="Buscar productos...">
 </header>
 
-<div id="wrap">
-<div id="side">
-<h3>Categorías</h3>
-<div id="cats"></div>
-<button onclick="showAll()">Todos</button>
-</div>
+<div id="productos"></div>
 
-<div id="main">
-<div class="grid" id="productos"></div>
-</div>
-</div>
-
-<div id="cart">
+<div id="carrito">
 <div><b>Pedido</b></div>
-<div id="cartList"></div>
-<div>Total: $<span id="total">0</span> | <span id="units">0</span> und</div>
+<div>Total: $<span id="total">0</span> | <span id="unds">0</span> und</div>
+<div id="lista"></div>
 
 <input id="nombre" placeholder="Nombre">
-<input id="dir" placeholder="Dirección">
-<input id="neg" placeholder="Negocio">
-<select id="nuevo">
+<input id="direccion" placeholder="Dirección">
+<input id="negocio" placeholder="Negocio">
+<select id="cliente">
 <option value="">Cliente?</option>
 <option>Nuevo</option>
 <option>Existente</option>
 </select>
 
-<button id="send">Enviar pedido</button>
+<button id="enviar">Enviar pedido</button>
 </div>
 
 <footer>
@@ -184,111 +154,99 @@ Tu aliado en distribución TAT
 <script>
 const SHEET="https://docs.google.com/spreadsheets/d/e/2PACX-1vTbugSqKIqAJ2ulSdijJDb94_ENrqE1mtXs2yo1Yz3wjxY7Jers8hh3TDJ4sxoA6CwJ2cIHGwVWGx0I/gviz/tq?tqx=out:json";
 
-const MAX=999,MINPED=25000;
-
-let productos=[],carrito={};
+const MAX=999;
+let productos=[];
+let carrito={};
 
 fetch(SHEET).then(r=>r.text()).then(t=>{
-const j=JSON.parse(t.substr(47).slice(0,-2)).table.rows;
-
-j.forEach(r=>{
-if(r.c[4]?.v!=="SI")return;
-
-productos.push({
-n:r.c[1]?.v,
-p:parseInt(String(r.c[2]?.v).replace(/\D/g,"")),
-img:r.c[3]?.v,
-cat:r.c[7]?.v||"Otros"
-});
-});
-
-renderProductos();
-buildCats();
+ const j=JSON.parse(t.substr(47).slice(0,-2));
+ j.table.rows.forEach(r=>{
+   if(r.c[4]?.v!=="SI") return;
+   productos.push({
+     n:r.c[1]?.v,
+     p:parseInt(r.c[2]?.v),
+     i:r.c[3]?.v
+   });
+ });
+ renderProductos();
 });
 
-function renderProductos(list=productos){
-const g=document.getElementById("productos");
-g.innerHTML="";
-list.forEach(p=>{
-g.innerHTML+=`
-<div class="card">
-<img src="${p.img}">
-<div>${p.n}</div>
-<div class="price">$${p.p}</div>
-<div class="ctrl">
-<button onclick="chg('${p.n}',-1)">−</button>
-<input type="number" min="0" max="${MAX}" value="${carrito[p.n]?.c||0}"
-oninput="set('${p.n}',this.value)">
-<button onclick="chg('${p.n}',1)">+</button>
-</div>
-</div>`;
-});
+function renderProductos(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const cont=document.getElementById("productos");
+ cont.innerHTML="";
+ productos.filter(p=>p.n.toLowerCase().includes(q)).forEach(p=>{
+   const c=carrito[p.n]?.c||0;
+   cont.innerHTML+=`
+   <div class="card">
+     <img src="${p.i}">
+     <div class="nombre">${p.n}</div>
+     <div class="precio">$${p.p}</div>
+     <div class="ctrl">
+       <button onclick="chg('${p.n}',-1)">−</button>
+       <input type="number" value="${c}" oninput="setv('${p.n}',this.value)">
+       <button onclick="chg('${p.n}',1)">+</button>
+     </div>
+   </div>`;
+ });
 }
 
 function chg(n,v){
-let c=(carrito[n]?.c||0)+v;
-if(c>MAX)c=MAX;if(c<0)c=0;
-if(c<=0)delete carrito[n];
-else carrito[n]={c,pr:productos.find(x=>x.n===n).p};
-render();
-renderProductos();
+ let c=(carrito[n]?.c||0)+v;
+ if(c>MAX)c=MAX;
+ if(c<0)c=0;
+ const p=productos.find(x=>x.n==n);
+ if(c==0) delete carrito[n];
+ else carrito[n]={c,pr:p.p};
+ render();
 }
 
-function set(n,v){
-if(v==="")return;
-let num=parseInt(v);
-if(isNaN(num))return;
-if(num>MAX)num=MAX;
-if(num<0)num=0;
-if(num<=0)delete carrito[n];
-else carrito[n]={c:num,pr:productos.find(x=>x.n===n).p};
-render();
-renderProductos();
+function setv(n,v){
+ if(v==="")return;
+ let c=parseInt(v);
+ if(isNaN(c))return;
+ if(c>MAX)c=MAX;
+ if(c<0)c=0;
+ const p=productos.find(x=>x.n==n);
+ if(c==0) delete carrito[n];
+ else carrito[n]={c,pr:p.p};
+ render();
 }
 
 function render(){
-let t=0,u=0,h="";
-for(let k in carrito){
-let s=carrito[k].c*carrito[k].pr;
-t+=s;u+=carrito[k].c;
-h+=`${carrito[k].c} x ${k} = $${s}<br>`;
-}
-cartList.innerHTML=h;
-total.innerText=t;
-units.innerText=u;
-}
-
-send.onclick=()=>{
-if(!nombre.value||!dir.value||!neg.value||!nuevo.value)
-return alert("Completa tus datos");
-
-let tot=parseInt(total.innerText);
-if(tot<MINPED)return alert("Pedido mínimo $25.000");
-
-let m=`Pedido DistriSnacks%0A`;
-for(let k in carrito){
-m+=`${carrito[k].c} x ${k}%0A`;
-}
-m+=`%0ATotal $${tot}%0A${nombre.value}%0A${dir.value}%0A${neg.value}%0A${nuevo.value}`;
-window.open("https://wa.me/573222643534?text="+m);
-carrito={};render();renderProductos();
+ let t=0,u=0,html="";
+ for(let k in carrito){
+   const s=carrito[k].c*carrito[k].pr;
+   t+=s;u+=carrito[k].c;
+   html+=`${carrito[k].c} x ${k} = $${s}<br>`;
+ }
+ document.getElementById("total").innerText=t;
+ document.getElementById("unds").innerText=u;
+ document.getElementById("lista").innerHTML=html;
+ renderProductos();
 }
 
-search.oninput=()=>{
-let q=search.value.toLowerCase();
-renderProductos(productos.filter(p=>p.n.toLowerCase().includes(q)));
-}
+document.getElementById("search").oninput=renderProductos;
 
-function buildCats(){
-let s=[...new Set(productos.map(p=>p.cat))];
-cats.innerHTML="";
-s.forEach(c=>{
-cats.innerHTML+=`<div onclick="filter('${c}')">${c}</div>`;
-});
-}
-
-function filter(c){renderProductos(productos.filter(p=>p.cat==c))}
-function showAll(){renderProductos()}
+document.getElementById("enviar").onclick=()=>{
+ if(!nombre.value||!direccion.value||!negocio.value||!cliente.value){
+   alert("Completa tus datos");
+   return;
+ }
+ if(Object.keys(carrito).length==0){
+   alert("Carrito vacío");
+   return;
+ }
+ let msg=`Pedido DistriSnacks%0A${nombre.value}%0A${negocio.value}%0A${direccion.value}%0ACliente:${cliente.value}%0A%0A`;
+ let total=0;
+ for(let k in carrito){
+   const s=carrito[k].c*carrito[k].pr;
+   total+=s;
+   msg+=`${carrito[k].c} x ${k} = $${s}%0A`;
+ }
+ msg+=`%0ATotal: $${total}`;
+ window.open("https://wa.me/573222643534?text="+msg);
+};
 </script>
 
 </body>
