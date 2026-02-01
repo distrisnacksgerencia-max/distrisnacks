@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DistriSnacks</title>
+<title>DISTRISNACKS</title>
 
 <style>
 *{box-sizing:border-box}
@@ -30,7 +30,7 @@ header{background:#88003d;color:white;padding:10px;display:flex;gap:10px;positio
 .precio{color:#88003d;font-weight:bold}
 .controles{display:flex;justify-content:center;gap:6px;margin-top:6px}
 .controles button{width:32px;height:32px;background:#88003d;color:white;border:none;border-radius:6px}
-.controles input{width:40px;text-align:center;border-radius:6px;border:1px solid #ccc}
+.controles input{width:50px;text-align:center;border-radius:6px;border:1px solid #ccc}
 
 #burbuja{position:fixed;bottom:15px;right:15px;background:#88003d;color:white;padding:10px 14px;border-radius:999px;z-index:15}
 
@@ -38,12 +38,15 @@ header{background:#88003d;color:white;padding:10px;display:flex;gap:10px;positio
 #panel.activo{bottom:0}
 
 .item{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.item input{width:40px}
+.item input{width:50px}
 .item button{border:none;background:#88003d;color:white;border-radius:6px;padding:4px 6px}
 
 input,select{width:100%;padding:8px;margin:4px 0;border-radius:8px;border:1px solid #ccc}
 #enviar{width:100%;padding:12px;background:#25D366;border:none;border-radius:10px;color:white}
 #enviar:disabled{background:#ccc}
+
+footer{background:#111;color:white;padding:20px;text-align:center;font-size:13px}
+footer a{color:white;text-decoration:none}
 </style>
 </head>
 
@@ -77,9 +80,23 @@ input,select{width:100%;padding:8px;margin:4px 0;border-radius:8px;border:1px so
 <button id="enviar" onclick="whatsapp()" disabled>Enviar pedido</button>
 </div>
 
+<footer>
+<b>DISTRISNACKS</b><br>
+Bogotá<br>
+📱 <a href="https://wa.me/573222643534">3222643534</a><br>
+✉ Distrisnacksgerencia@gmail.com<br><br>
+Lunes a viernes 8am – 6pm<br>
+Sábados 8am – 1pm<br><br>
+<i>Tu aliado en distribución TAT</i><br><br>
+© <span id="year"></span> DISTRISNACKS
+</footer>
+
 <script>
+document.getElementById("year").innerText=new Date().getFullYear();
+
 const SHEET="https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
 const MIN=25000;
+const MAX=999;
 
 let productos=[],marcas=[],carrito=JSON.parse(localStorage.getItem("carrito")||"{}");
 let marcaFiltro="",catFiltro="";
@@ -95,10 +112,6 @@ renderSidebar();renderMarcas();renderProductos();render();
 
 function toggleMenu(){sidebar.classList.toggle("activo")}
 function cerrarMenu(){sidebar.classList.remove("activo")}
-
-document.addEventListener("click",e=>{
-if(sidebar.classList.contains("activo")&&!sidebar.contains(e.target)&&e.target.id!=="menuBtn")cerrarMenu();
-});
 
 let sx=0,sy=0;
 sidebar.addEventListener("touchstart",e=>sx=e.touches[0].clientX);
@@ -122,21 +135,10 @@ document.getElementById("marcas").innerHTML+=`<div class="marca" onclick="marcaF
 
 function renderProductos(){
 productosDiv.innerHTML="";
-productos.filter(p=>
-(!marcaFiltro||p.marca===marcaFiltro)&&(!catFiltro||p.cat===catFiltro)&&p.n.toLowerCase().includes(buscar.value.toLowerCase())
-).forEach(p=>{
+productos.filter(p=>(!marcaFiltro||p.marca===marcaFiltro)&&(!catFiltro||p.cat===catFiltro)&&p.n.toLowerCase().includes(buscar.value.toLowerCase()))
+.forEach(p=>{
 const c=carrito[p.n]?.c||0;
-productosDiv.innerHTML+=`<div class="producto"><img src="${p.img}"><div class="nombre">${p.n}</div><div class="precio">$${p.p.toLocaleString()}</div><div class="controles"><button onclick="chg('${p.n}',-1)">−</button><input
-  type="number"
-  inputmode="numeric"
-  pattern="[0-9]*"
-  min="0"
-  max="999"
-  value="${c}"
-  onfocus="this.select()"
-  oninput="set('${p.n}',this.value)"
->
-<button onclick="chg('${p.n}',1)">+</button></div></div>`;
+productosDiv.innerHTML+=`<div class="producto"><img src="${p.img}"><div class="nombre">${p.n}</div><div class="precio">$${p.p.toLocaleString()}</div><div class="controles"><button onclick="chg('${p.n}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${c}" onfocus="this.select()" oninput="set('${p.n}',this.value)" onblur="renderProductos()"><button onclick="chg('${p.n}',1)">+</button></div></div>`;
 });
 }
 
@@ -145,40 +147,27 @@ const productosDiv=document.getElementById("productos");
 function chg(n,v){
 const p=productos.find(x=>x.n===n);
 let c=(carrito[n]?.c||0)+v;
+if(c>MAX)c=MAX;
 if(c<=0)delete carrito[n]; else carrito[n]={c,pr:p.p};
 save();render();renderProductos();
 }
 
 function set(n,v){
-if(v==="") return;              // permite borrar mientras escribe
-
+if(v==="")return;
+let num=parseInt(v);
+if(isNaN(num))return;
+if(num>MAX)num=MAX;
 const p=productos.find(x=>x.n===n);
-const num=parseInt(v);
-
-if(isNaN(num)) return;         // espera hasta que sea número válido
-
-if(num<=0) delete carrito[n];
-else carrito[n]={c:num,pr:p.p};
-
-save();
-render();                      // solo refresca carrito
-// ❌ NO renderProductos aquí
+if(num<=0)delete carrito[n]; else carrito[n]={c:num,pr:p.p};
+save();render();
 }
 
 function render(){
 let t=0,i=0,h="";
-for(let k in carrito){t+=carrito[k].pr*carrito[k].c;i+=carrito[k].c;
-h+=`<div class="item">${k}<div><button onclick="chg('${k}',-1)">−</button><input
-  type="number"
-  inputmode="numeric"
-  pattern="[0-9]*"
-  min="0"
-  max="999"
-  value="${carrito[k].c}"
-  onfocus="this.select()"
-  oninput="set('${k}',this.value)"
->
-<button onclick="chg('${k}',1)">+</button></div></div>`;}
+for(let k in carrito){
+t+=carrito[k].pr*carrito[k].c;i+=carrito[k].c;
+h+=`<div class="item">${k}<div><button onclick="chg('${k}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${carrito[k].c}" onfocus="this.select()" oninput="set('${k}',this.value)" onblur="renderProductos()"><button onclick="chg('${k}',1)">+</button></div></div>`;
+}
 lista.innerHTML=h;
 total.innerText=t.toLocaleString();
 totalBarra.innerText=t.toLocaleString();
@@ -191,7 +180,7 @@ function save(){localStorage.setItem("carrito",JSON.stringify(carrito))}
 ["cliente","negocio","direccion","tipo"].forEach(x=>window[x].oninput=render);
 
 function whatsapp(){
-let m=`Pedido:%0ACliente:${cliente.value}%0ANegocio:${negocio.value}%0ADirección:${direccion.value}%0ATipo:${tipo.value}%0A`;
+let m=`Pedido DISTRISNACKS:%0ACliente:${cliente.value}%0ANegocio:${negocio.value}%0ADirección:${direccion.value}%0ATipo:${tipo.value}%0A`;
 for(let k in carrito)m+=`${carrito[k].c} x ${k}%0A`;
 m+=`Total $${total.innerText}`;
 window.open("https://wa.me/573222643534?text="+m);
