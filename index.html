@@ -47,6 +47,18 @@ input,select{width:100%;padding:8px;margin:4px 0;border-radius:8px;border:1px so
 
 footer{background:#111;color:white;padding:20px;text-align:center;font-size:13px}
 footer a{color:white;text-decoration:none}
+
+/* Quitar flechas de inputs number */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 </style>
 </head>
 
@@ -166,7 +178,8 @@ function render(){
 let t=0,i=0,h="";
 for(let k in carrito){
 t+=carrito[k].pr*carrito[k].c;i+=carrito[k].c;
-h+=`<div class="item">${k}<div><button onclick="chg('${k}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${carrito[k].c}" onfocus="this.select()" oninput="set('${k}',this.value)" onblur="renderProductos()"><button onclick="chg('${k}',1)">+</button></div></div>`;
+h+=`<div class="item">${k}<div><button onclick="chg('${k}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${carrito[k].c}" onfocus="this.select()" oninput="set('${k}',this.value);render()" onblur="renderProductos()"><button onclick="chg('${k}',1)">+</button></div></div>`;
+
 }
 lista.innerHTML=h;
 total.innerText=t.toLocaleString();
