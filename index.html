@@ -28,9 +28,15 @@ header{background:#88003d;color:white;padding:10px;display:flex;gap:10px;positio
 .producto img{width:100%;border-radius:8px}
 .nombre{font-size:14px}
 .precio{color:#88003d;font-weight:bold}
+
 .controles{display:flex;justify-content:center;gap:6px;margin-top:6px}
 .controles button{width:32px;height:32px;background:#88003d;color:white;border:none;border-radius:6px}
-.controles input{width:50px;text-align:center;border-radius:6px;border:1px solid #ccc}
+.controles input,.item input{width:70px;text-align:center;font-size:14px;border-radius:6px;border:1px solid #ccc}
+
+/* quitar flechas */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
 
 #burbuja{position:fixed;bottom:15px;right:15px;background:#88003d;color:white;padding:10px 14px;border-radius:999px;z-index:15}
 
@@ -38,7 +44,6 @@ header{background:#88003d;color:white;padding:10px;display:flex;gap:10px;positio
 #panel.activo{bottom:0}
 
 .item{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.item input{width:50px}
 .item button{border:none;background:#88003d;color:white;border-radius:6px;padding:4px 6px}
 
 input,select{width:100%;padding:8px;margin:4px 0;border-radius:8px;border:1px solid #ccc}
@@ -47,18 +52,6 @@ input,select{width:100%;padding:8px;margin:4px 0;border-radius:8px;border:1px so
 
 footer{background:#111;color:white;padding:20px;text-align:center;font-size:13px}
 footer a{color:white;text-decoration:none}
-
-/* Quitar flechas de inputs number */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
 </style>
 </head>
 
@@ -97,18 +90,14 @@ input[type=number] {
 Bogotá<br>
 📱 <a href="https://wa.me/573222643534">3222643534</a><br>
 ✉ Distrisnacksgerencia@gmail.com<br><br>
-Lunes a viernes 8am – 6pm<br>
-Sábados 8am – 1pm<br><br>
-<i>Tu aliado en distribución TAT</i><br><br>
-© <span id="year"></span> DISTRISNACKS
+© <span id="year"></span>
 </footer>
 
 <script>
-document.getElementById("year").innerText=new Date().getFullYear();
+year.innerText=new Date().getFullYear();
 
 const SHEET="https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
-const MIN=25000;
-const MAX=999;
+const MIN=25000,MAX=999;
 
 let productos=[],marcas=[],carrito=JSON.parse(localStorage.getItem("carrito")||"{}");
 let marcaFiltro="",catFiltro="";
@@ -125,25 +114,24 @@ renderSidebar();renderMarcas();renderProductos();render();
 function toggleMenu(){sidebar.classList.toggle("activo")}
 function cerrarMenu(){sidebar.classList.remove("activo")}
 
-let sx=0,sy=0;
-sidebar.addEventListener("touchstart",e=>sx=e.touches[0].clientX);
-sidebar.addEventListener("touchend",e=>{if(e.changedTouches[0].clientX-sx<-80)cerrarMenu()});
-panel.addEventListener("touchstart",e=>sy=e.touches[0].clientY);
-panel.addEventListener("touchend",e=>{if(e.changedTouches[0].clientY-sy>100)panel.classList.remove("activo")});
-
 buscar.oninput=renderProductos;
 
 function renderSidebar(){
 const cats=[...new Set(productos.map(p=>p.cat).filter(Boolean))];
-sidebar.innerHTML+=`<div id="verTodos" onclick="marcaFiltro='';catFiltro='';cerrarMenu();renderProductos()">🏠 Ver todos</div>`;
-cats.forEach(c=>sidebar.innerHTML+=`<div class="cat" onclick="catFiltro='${c}';cerrarMenu();renderProductos()">${c}</div>`);
+sidebar.innerHTML=`<div id="verTodos" onclick="marcaFiltro='';catFiltro='';cerrarMenu();renderProductos()">🏠 Ver todos</div>`;
+cats.forEach(c=>{
+sidebar.innerHTML+=`<div class="cat" onclick="catFiltro='${c}';marcaFiltro='';cerrarMenu();renderProductos()">${c}</div>`;
+});
 }
 
 function renderMarcas(){
 marcas.forEach(m=>{
-document.getElementById("marcas").innerHTML+=`<div class="marca" onclick="marcaFiltro='${m.nombre}';renderProductos()"><img src="${m.logo}"><div>${m.nombre}</div></div>`;
+marcasDiv.innerHTML+=`<div class="marca" onclick="marcaFiltro='${m.nombre}';catFiltro='';renderProductos()"><img src="${m.logo}"><div>${m.nombre}</div></div>`;
 });
 }
+
+const productosDiv=document.getElementById("productos");
+const marcasDiv=document.getElementById("marcas");
 
 function renderProductos(){
 productosDiv.innerHTML="";
@@ -153,8 +141,6 @@ const c=carrito[p.n]?.c||0;
 productosDiv.innerHTML+=`<div class="producto"><img src="${p.img}"><div class="nombre">${p.n}</div><div class="precio">$${p.p.toLocaleString()}</div><div class="controles"><button onclick="chg('${p.n}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${c}" onfocus="this.select()" oninput="set('${p.n}',this.value)" onblur="renderProductos()"><button onclick="chg('${p.n}',1)">+</button></div></div>`;
 });
 }
-
-const productosDiv=document.getElementById("productos");
 
 function chg(n,v){
 const p=productos.find(x=>x.n===n);
@@ -179,7 +165,6 @@ let t=0,i=0,h="";
 for(let k in carrito){
 t+=carrito[k].pr*carrito[k].c;i+=carrito[k].c;
 h+=`<div class="item">${k}<div><button onclick="chg('${k}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${carrito[k].c}" onfocus="this.select()" oninput="set('${k}',this.value);render()" onblur="renderProductos()"><button onclick="chg('${k}',1)">+</button></div></div>`;
-
 }
 lista.innerHTML=h;
 total.innerText=t.toLocaleString();
