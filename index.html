@@ -8,7 +8,7 @@
 
     <style>
         *{box-sizing:border-box}
-        body{margin:0;font-family:Calibri;background:#f4f4f4}
+        body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4}
         
         /* HEADER Y LOGO */
         .header-container{background:#88003d;padding:10px;position:sticky;top:0;z-index:100;box-shadow: 0 2px 5px rgba(0,0,0,0.2)}
@@ -38,17 +38,14 @@
         .producto{background:white;border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1);position:relative;display:flex;flex-direction:column;justify-content:space-between}
         .producto img{width:100%;border-radius:8px;aspect-ratio:1/1;object-fit:cover}
         
-        /* PREMIUM STYLE */
         .producto.premium {border: 2px solid #ffbc00; background: #fffdf2; box-shadow: 0 4px 12px rgba(255,188,0,0.2)}
         .premium-tag {position:absolute; top:5px; left:5px; background:#ffbc00; color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold}
 
-        /* DESCUENTOS */
         .badge-desc{position:absolute;top:5px;right:5px;background:#e74c3c;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold}
         .precio-old{text-decoration:line-through;color:#999;font-size:12px;margin-right:5px}
         .nombre{font-size:14px;margin:8px 0;height:34px;overflow:hidden;line-height:1.2}
         .precio{color:#88003d;font-weight:bold;font-size:16px}
 
-        /* CONTROLES */
         .controles{display:flex;justify-content:center;gap:6px;margin-top:10px}
         .controles button{width:32px;height:32px;background:#88003d;color:white;border:none;border-radius:6px;cursor:pointer}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:6px}
@@ -58,36 +55,79 @@
         #panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:90%;transition:.4s;border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;z-index:2000;box-shadow:0 -5px 20px rgba(0,0,0,0.2)}
         #panel.activo{bottom:0}
 
-        /* CLIENTES Y PEDIDOS */
         .cliente-selector{background:#f9f9f9;padding:10px;border-radius:10px;margin-bottom:15px;border:1px solid #eee}
-        .historial-item{font-size:12px;background:#fff;padding:5px;margin-top:5px;border-radius:4px;border-left:3px solid #88003d}
-
+        .cliente-selector input, .cliente-selector select{width:100%; padding:10px; margin:5px 0; border-radius:6px; border:1px solid #ccc}
         .item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
-        .item-info{flex:1}
-        .item-precios{text-align:right;margin-right:10px}
         
         #enviar{width:100%;padding:15px;background:#25D366;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
-        #enviar:disabled{background:#ccc;cursor:not-allowed}
+        #enviar:disabled, #btn-imprimir:disabled{background:#ccc;cursor:not-allowed}
         
-        /* BOTON IMPRIMIR */
-        #imprimir{width:100%;padding:15px;background:#3498db;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
-        #imprimir:disabled{background:#ccc;cursor:not-allowed}
-
+        #btn-imprimir{width:100%;padding:15px;background:#444;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
         .btn-vaciar{background:#eee;color:#666;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer}
-
-        /* BOTON FLOTANTE SOPORTE */
         .btn-soporte{position:fixed;bottom:85px;right:20px;background:#00a884;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px}
 
-        /* UTILS */
+        /* MODAL DE CONFIRMACIÓN / PREVENTA */
+        #modal-confirmacion {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .modal-logo { height: 40px; margin-bottom: 10px; }
+        .modal-title { color: #88003d; font-weight: bold; font-size: 22px; margin-bottom: 15px; text-transform: uppercase; }
+        .resumen-caja { background: #f9f9f9; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 20px; border: 1px solid #eee; }
+        .resumen-linea { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+        .pregunta-dia { font-weight: bold; margin-bottom: 15px; display: block; color: #444; }
+        
+        .grid-dias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px; }
+        .btn-dia { 
+            padding: 10px 5px; border: 1px solid #ddd; border-radius: 8px; 
+            background: white; cursor: pointer; font-size: 13px; transition: 0.2s;
+        }
+        .btn-dia.selected { background: #88003d; color: white; border-color: #88003d; font-weight: bold; }
+        
+        .modal-footer { display: flex; gap: 10px; }
+        .btn-final { flex: 2; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; }
+        .btn-final.confirmar { background: #25D366; }
+        .btn-final.confirmar:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-final.cancelar { flex: 1; background: #eee; color: #666; }
+
         .hidden{display:none}
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
         footer{background:#111;color:white;padding:30px 20px 120px;text-align:center;font-size:13px}
+
+        @media print {
+            body * { visibility: hidden; }
+            #ticket-impresion, #ticket-impresion * { visibility: visible; }
+            #ticket-impresion {
+                display: block; position: absolute; left: 0; top: 0; width: 100%;
+                max-width: 80mm; padding: 5mm; font-family: 'Courier New', monospace;
+                font-size: 12px; line-height: 1.2; color: black; background: white;
+            }
+            .t-center { text-align: center; }
+            .t-bold { font-weight: bold; }
+            .t-line { border-bottom: 1px dashed #000; margin: 5px 0; }
+            .t-flex { display: flex; justify-content: space-between; }
+        }
     </style>
 </head>
 <body>
 
 <div class="header-container">
-    <img src="https://lh3.googleusercontent.com/d/1A1pYLXrHLmGHdXDg0KIoX1mbhQz2CpzG" alt="DISTRISNACKS" class="logo-main">
+    <img src="https://lh3.googleusercontent.com/d/13SvSDq6s5hS1jfe7HhBuKy4qHoGO1NEB" alt="DISTRISNACKS" class="logo-main">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca..." autocomplete="off">
@@ -101,7 +141,6 @@
 </div>
 
 <div id="marcas"></div>
-
 <div id="contenedor-principal"></div>
 
 <a href="https://wa.me/573222643534?text=Hola,%20necesito%20ayuda%20con%20mi%20pedido" class="btn-soporte" target="_blank">💬</a>
@@ -147,10 +186,36 @@
 
     <div id="mensaje" style="color:red; font-size:13px; margin:10px 0; text-align:center"></div>
     
-    <button id="enviar" onclick="enviarPedido()" disabled>Confirmar y Enviar WhatsApp</button>
-    <button id="imprimir" onclick="imprimirRecibo()" disabled>🖨 Imprimir Recibo</button>
+    <button id="enviar" onclick="mostrarConfirmacion()" disabled>Enviar pedido por WhatsApp</button>
+    <button id="btn-imprimir" onclick="imprimirPedido()" disabled>🖨️ Imprimir Pedido (Térmica)</button>
     <button class="btn-vaciar" onclick="vaciarCarrito()">Reiniciar / Nuevo Pedido</button>
 </div>
+
+<div id="modal-confirmacion">
+    <div class="modal-content">
+        <img src="https://lh3.googleusercontent.com/d/1A1pYLXrHLmGHdXDg0KIoX1mbhQz2CpzG" class="modal-logo">
+        <div class="modal-title">PREVENTA</div>
+        
+        <div class="resumen-caja" id="modal-resumen-valores">
+            </div>
+
+        <span class="pregunta-dia">¿Cuál sería el día ideal para llevar tu pedido?</span>
+        <div class="grid-dias">
+            <button class="btn-dia" onclick="seleccionarDia(this, 'Lunes')">Lunes</button>
+            <button class="btn-dia" onclick="seleccionarDia(this, 'Martes')">Martes</button>
+            <button class="btn-dia" onclick="seleccionarDia(this, 'Miércoles')">Miércoles</button>
+            <button class="btn-dia" onclick="seleccionarDia(this, 'Jueves')">Jueves</button>
+            <button class="btn-dia" onclick="seleccionarDia(this, 'Viernes')">Viernes</button>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-final cancelar" onclick="cerrarConfirmacion()">Cancelar</button>
+            <button class="btn-final confirmar" id="btn-confirmar-wa" disabled onclick="procesarEnvioFinal()">Confirmar y enviar</button>
+        </div>
+    </div>
+</div>
+
+<div id="ticket-impresion"></div>
 
 <footer>
     <b>DISTRISNACKS</b><br>
@@ -162,376 +227,234 @@
 
 <script>
     year.innerText = new Date().getFullYear();
-
     const SHEET = "https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
     const MIN_PEDIDO = 25000;
-    const MAX_DIGITOS = 999;
+    const MAX_VALOR = 999;
 
     let productos = [];
     let marcas = [];
     let carrito = JSON.parse(localStorage.getItem("carrito_distri") || "{}");
     let clientesDB = JSON.parse(localStorage.getItem("clientes_distri") || "[]");
-    
     let marcaFiltro = "";
     let catFiltro = "";
+    let diaElegido = "";
 
-    // Cargar Datos
     fetch(SHEET).then(r => r.text()).then(csv => {
         csv.split(/\r?\n/).slice(1).forEach(f => {
             const c = f.split(",").map(x => (x || "").replace(/"/g,"").trim());
-            
             if(c[4] === "SI") {
-                let precioBase = parseInt(c[2].replace(/\D/g,"")) || 0;
-                let descPorc = parseInt(c[8]) || 0;
-                let precioFinal = descPorc > 0 ? Math.round(precioBase * (1 - descPorc/100)) : precioBase;
-
-                productos.push({
-                    n: c[1],
-                    pOrig: precioBase,
-                    p: precioFinal,
-                    img: c[3],
-                    premium: c[5] === "SI",
-                    marca: c[6],
-                    cat: c[7],
-                    desc: descPorc
-                });
+                let pBase = parseInt(c[2].replace(/\D/g,"")) || 0;
+                let dPorc = parseInt(c[8]) || 0;
+                productos.push({ n: c[1], pOrig: pBase, p: dPorc > 0 ? Math.round(pBase * (1 - dPorc/100)) : pBase, img: c[3], premium: c[5] === "SI", marca: c[6], cat: c[7], desc: dPorc });
             }
-
-            if(c[9] && c[11] === "SI" && c[10]) {
-                if(!marcas.find(m => m.nombre === c[9])) {
-                    marcas.push({ nombre: c[9], logo: c[10] });
-                }
-            }
+            if(c[9] && c[11] === "SI" && c[10]) if(!marcas.find(m => m.nombre === c[9])) marcas.push({ nombre: c[9], logo: c[10] });
         });
-        
         marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
-
-        renderSidebar();
-        renderMarcas();
-        renderProductos();
-        renderCarrito();
-        actualizarSelectClientes();
+        renderSidebar(); renderMarcas(); renderProductos(); renderCarrito(); actualizarSelectClientes();
     });
-
-    // --- LOGICA DE UI ---
 
     function toggleMenu() { sidebar.classList.toggle("activo"); }
     function cerrarMenu() { sidebar.classList.remove("activo"); }
-    
-    document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target) && sidebar.classList.contains('activo')) {
-            cerrarMenu();
-        }
-    });
-
-    function limpiarFiltros() {
-        marcaFiltro = "";
-        catFiltro = "";
-        buscar.value = "";
-        cerrarMenu();
-        renderProductos();
-    }
+    function limpiarFiltros() { marcaFiltro = ""; catFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
 
     function renderSidebar() {
         const cats = [...new Set(productos.map(p => p.cat).filter(Boolean))];
-        let h = "";
-        cats.forEach(c => {
-            h += `<div class="cat" onclick="filtrarCat('${c}')">${c}</div>`;
-        });
+        let h = ""; cats.forEach(c => h += `<div class="cat" onclick="filtrarCat('${c}')">${c}</div>`);
         menuCats.innerHTML = h;
     }
 
-    function filtrarCat(c) {
-        catFiltro = c;
-        marcaFiltro = "";
-        buscar.value = "";
-        cerrarMenu();
-        renderProductos();
-    }
+    function filtrarCat(c) { catFiltro = c; marcaFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
 
     function renderMarcas() {
         marcasDiv.innerHTML = "";
         marcas.forEach(m => {
-            marcasDiv.innerHTML += `
-                <div class="marca" onclick="filtrarMarca('${m.nombre}')">
-                    <img src="${m.logo}">
-                    <div>${m.nombre}</div>
-                </div>`;
+            marcasDiv.innerHTML += `<div class="marca" onclick="filtrarMarca('${m.nombre}')"><img src="${m.logo}"><div>${m.nombre}</div></div>`;
         });
     }
 
-    function filtrarMarca(m) {
-        marcaFiltro = m;
-        catFiltro = "";
-        buscar.value = "";
-        renderProductos();
-    }
+    function filtrarMarca(m) { marcaFiltro = m; catFiltro = ""; buscar.value = ""; renderProductos(); }
 
-    buscar.oninput = () => {
-        if(buscar.value.trim() !== "") {
-            catFiltro = "";
-            marcaFiltro = "";
-        }
-        renderProductos();
-    };
+    buscar.oninput = () => { if(buscar.value.trim() !== "") { catFiltro = ""; marcaFiltro = ""; } renderProductos(); };
 
     const prodContenedor = document.getElementById("contenedor-principal");
     const marcasDiv = document.getElementById("marcas");
 
     function renderProductos() {
         prodContenedor.innerHTML = "";
-        let busqueda = buscar.value.toLowerCase();
-        
-        let prodsFiltrados = productos.filter(p => {
-            let coincideBusqueda = p.n.toLowerCase().includes(busqueda) || p.marca.toLowerCase().includes(busqueda);
-            let coincideCat = !catFiltro || p.cat === catFiltro;
-            let coincideMarca = !marcaFiltro || p.marca === marcaFiltro;
-            return coincideBusqueda && coincideCat && coincideMarca;
-        });
-
-        let categoriasPresentes = [...new Set(prodsFiltrados.map(p => p.cat))];
-        
-        let prodsPromo = prodsFiltrados.filter(p => p.desc > 0);
-        if (prodsPromo.length > 0 && !catFiltro && !marcaFiltro) {
-            renderSeccion("🔥 PROMOCIONES", prodsPromo);
-        }
-
-        categoriasPresentes.forEach(cat => {
-            let pCat = prodsFiltrados.filter(p => p.cat === cat);
-            if(pCat.length > 0) {
-                renderSeccion(cat, pCat);
-            }
-        });
+        let b = buscar.value.toLowerCase();
+        let f = productos.filter(p => (p.n.toLowerCase().includes(b) || p.marca.toLowerCase().includes(b)) && (!catFiltro || p.cat === catFiltro) && (!marcaFiltro || p.marca === marcaFiltro));
+        let cats = [...new Set(f.map(p => p.cat))];
+        let promos = f.filter(p => p.desc > 0);
+        if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("🔥 PROMOCIONES", promos);
+        cats.forEach(c => { let pc = f.filter(p => p.cat === c); if(pc.length > 0) renderSeccion(c, pc); });
     }
 
     function renderSeccion(titulo, lista) {
-        let section = document.createElement("div");
-        section.innerHTML = `<div class="seccion-titulo">${titulo}</div>`;
-        let grid = document.createElement("div");
-        grid.id = "productos"; 
-        
+        let s = document.createElement("div"); s.innerHTML = `<div class="seccion-titulo">${titulo}</div>`;
+        let g = document.createElement("div"); g.id = "productos";
         lista.forEach(p => {
             const cant = carrito[p.n]?.c || 0;
-            const itemHtml = `
+            g.innerHTML += `
                 <div class="producto ${p.premium ? 'premium' : ''}">
                     ${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}
                     ${p.desc > 0 ? `<span class="badge-desc">-${p.desc}%</span>` : ''}
                     <img src="${p.img}">
                     <div class="nombre">${p.n}</div>
-                    <div class="precio">
-                        ${p.desc > 0 ? `<span class="precio-old">$${p.pOrig.toLocaleString()}</span>` : ''}
-                        $${p.p.toLocaleString()}
-                    </div>
+                    <div class="precio">${p.desc > 0 ? `<span class="precio-old">$${p.pOrig.toLocaleString()}</span>` : ''} $${p.p.toLocaleString()}</div>
                     <div class="controles">
                         <button onclick="chg('${p.n}', -1)">−</button>
-                        <input type="number" value="${cant}" onchange="set('${p.n}', this.value)" onfocus="this.select()">
+                        <input type="number" value="${cant}" oninput="validarCant(this)" onchange="set('${p.n}', this.value)" onfocus="this.select()">
                         <button onclick="chg('${p.n}', 1)">+</button>
                     </div>
                 </div>`;
-            grid.innerHTML += itemHtml;
         });
-        section.appendChild(grid);
-        prodContenedor.appendChild(section);
+        s.appendChild(g); prodContenedor.appendChild(s);
     }
 
-    // --- LOGICA CARRITO ---
+    /* LIMITACIÓN SILENCIOSA 3 CIFRAS */
+    function validarCant(el) {
+        if(el.value.length > 3) el.value = el.value.slice(0, 3);
+        if(parseInt(el.value) > MAX_VALOR) el.value = MAX_VALOR;
+    }
 
     function chg(n, v) {
-        const p = productos.find(x => x.n === n);
         let c = (carrito[n]?.c || 0) + v;
-        if(c > MAX_DIGITOS) c = MAX_DIGITOS;
+        if(c > MAX_VALOR) c = MAX_VALOR;
         if(c <= 0) delete carrito[n]; 
-        else carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium };
+        else { const p = productos.find(x => x.n === n); carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium }; }
         save(); renderCarrito(); renderProductos();
     }
 
     function set(n, v) {
         let num = parseInt(v) || 0;
-        if(num > MAX_DIGITOS) num = MAX_DIGITOS;
-        const p = productos.find(x => x.n === n);
+        if(num > MAX_VALOR) num = MAX_VALOR;
         if(num <= 0) delete carrito[n]; 
-        else carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium };
+        else { const p = productos.find(x => x.n === n); carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium }; }
         save(); renderCarrito(); renderProductos();
     }
 
     function renderCarrito() {
-        let totalVal = 0, subtotalVal = 0, itemsCant = 0, h = "";
-        
+        let tot = 0, sub = 0, itemC = 0, h = "";
         for(let k in carrito) {
-            let item = carrito[k];
-            totalVal += item.pr * item.c;
-            subtotalVal += item.po * item.c;
-            itemsCant += item.c;
-            
-            h += `
-            <div class="item ${item.prem ? 'premium' : ''}" style="${item.prem ? 'border-left:4px solid #ffbc00; padding-left:5px' : ''}">
-                <div class="item-info">
-                    <div style="font-size:14px"><b>${k}</b></div>
-                    <div style="font-size:12px; color:#88003d">$${item.pr.toLocaleString()} c/u</div>
-                </div>
-                <div class="controles">
-                    <button onclick="chg('${k}',-1)">−</button>
-                    <input type="number" value="${item.c}" onchange="set('${k}', this.value)">
-                    <button onclick="chg('${k}',1)">+</button>
-                </div>
-            </div>`;
+            let i = carrito[k]; tot += i.pr * i.c; sub += i.po * i.c; itemC += i.c;
+            h += `<div class="item ${i.prem ? 'premium' : ''}"><div class="item-info"><div><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${i.pr.toLocaleString()} c/u</div></div><div class="controles"><button onclick="chg('${k}',-1)">−</button><input type="number" value="${i.c}" oninput="validarCant(this)" onchange="set('${k}', this.value)"><button onclick="chg('${k}',1)">+</button></div></div>`;
         }
-
         lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
-        total.innerText = totalVal.toLocaleString();
-        totalBarra.innerText = totalVal.toLocaleString();
-        subtotal.innerText = "$" + subtotalVal.toLocaleString();
-        ahorro.innerText = "- $" + (subtotalVal - totalVal).toLocaleString();
-        items.innerText = itemsCant;
-        
-        mensaje.innerText = totalVal < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
-        
-        const formularioOK = cliente.value && negocio.value && direccion.value && tipo.value;
-        const puedeEnviar = totalVal >= MIN_PEDIDO && formularioOK;
-        
-        enviar.disabled = !puedeEnviar;
-        imprimir.disabled = !puedeEnviar;
+        total.innerText = tot.toLocaleString(); totalBarra.innerText = tot.toLocaleString();
+        subtotal.innerText = "$" + sub.toLocaleString(); ahorro.innerText = "- $" + (sub - tot).toLocaleString();
+        items.innerText = itemC;
+        mensaje.innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
+        const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
+        enviar.disabled = !ok; btn_imprimir.disabled = !ok;
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
+    function vaciarCarrito() { if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; save(); renderCarrito(); renderProductos(); } }
+    function abrirCarrito() { panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
-    function vaciarCarrito() {
-        if(confirm("¿Deseas vaciar el carrito y comenzar un nuevo pedido?")) {
-            carrito = {};
-            save();
-            renderCarrito();
-            renderProductos();
-        }
-    }
-
-    function abrirCarrito() {
-        panel.classList.add('activo');
-        if(clientesDB.length > 0) historialArea.classList.remove("hidden");
-    }
-
-    // --- CLIENTES E HISTORIAL ---
     const historialArea = document.getElementById("historial-area");
-    ["cliente", "negocio", "direccion", "tipo"].forEach(x => {
-        window[x].oninput = renderCarrito;
-    });
+    ["cliente", "negocio", "direccion", "tipo"].forEach(x => window[x].oninput = renderCarrito);
 
-    function guardarClienteLocal() {
-        if(!cliente.value || !negocio.value) return;
+    /* MODAL Y ENVÍO WHATSAPP */
+    function mostrarConfirmacion() {
+        diaElegido = "";
+        document.querySelectorAll('.btn-dia').forEach(b => b.classList.remove('selected'));
+        document.getElementById('btn-confirmar-wa').disabled = true;
+        document.getElementById('modal-resumen-valores').innerHTML = `
+            <div class="resumen-linea"><span>Subtotal:</span> <span>${subtotal.innerText}</span></div>
+            <div class="resumen-linea" style="color:green"><span>Descuento:</span> <span>${ahorro.innerText}</span></div>
+            <div class="resumen-linea" style="font-weight:bold; font-size:16px; margin-top:10px; color:#88003d"><span>Total a pagar:</span> <span>$${total.innerText}</span></div>
+        `;
+        document.getElementById('modal-confirmacion').style.display = 'flex';
+    }
+
+    function seleccionarDia(btn, dia) {
+        diaElegido = dia;
+        document.querySelectorAll('.btn-dia').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('btn-confirmar-wa').disabled = false;
+    }
+
+    function cerrarConfirmacion() { document.getElementById('modal-confirmacion').style.display = 'none'; }
+
+    function procesarEnvioFinal() {
+        guardarClienteLocal();
+        let sub = 0, tot = 0, msgItems = "";
+        for(let k in carrito) {
+            let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
+            msgItems += `• ${i.c} x ${k}%0A`;
+        }
+        let ahr = sub - tot;
         
-        let index = clientesDB.findIndex(c => c.nombre === cliente.value);
-        let datos = {
-            nombre: cliente.value,
-            negocio: negocio.value,
-            dir: direccion.value,
-            tipo: tipo.value,
-            ultimoPedido: carrito
-        };
+        let m = `Hola, te compartimos el resumen de tu pedido y algunos detalles para coordinar la entrega.%0A%0A`;
+        m += `*Día ideal de entrega:* ${diaElegido}%0A%0A`;
+        m += `*DETALLES DEL CLIENTE*%0A`;
+        m += `--------------------------------%0A`;
+        m += `*Cliente:* ${cliente.value}%0A*Negocio:* ${negocio.value}%0A*Dirección:* ${direccion.value}%0A*Tipo:* ${tipo.value}%0A`;
+        m += `--------------------------------%0A%0A`;
+        m += `*RESUMEN DEL PEDIDO*%0A`;
+        m += `${msgItems}%0A`;
+        m += `--------------------------------%0A`;
+        m += `*SUBTOTAL:* $${sub.toLocaleString()}%0A`;
+        m += `*DESCUENTOS:* -$${ahr.toLocaleString()}%0A`;
+        m += `*TOTAL A PAGAR:* $${tot.toLocaleString()}%0A`;
+        m += `--------------------------------%0A`;
+        if(ahr > 0) m += `*¡Ahorro obtenido: $${ahr.toLocaleString()}!*%0A`;
 
-        if(index > -1) clientesDB[index] = datos;
-        else clientesDB.push(datos);
+        window.open("https://wa.me/573222643534?text=" + m);
+        cerrarConfirmacion();
+    }
 
+    /* CLIENTES LOCALES */
+    function guardarClienteLocal() {
+        if(!cliente.value) return;
+        let idx = clientesDB.findIndex(c => c.nombre === cliente.value);
+        let d = { nombre: cliente.value, negocio: negocio.value, dir: direccion.value, tipo: tipo.value, ultimoPedido: carrito };
+        if(idx > -1) clientesDB[idx] = d; else clientesDB.push(d);
         localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
         actualizarSelectClientes();
     }
 
     function actualizarSelectClientes() {
-        const select = document.getElementById("select-clientes");
-        select.innerHTML = '<option value="">-- Seleccionar cliente guardado --</option>';
-        clientesDB.forEach(c => {
-            select.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`;
-        });
+        const s = document.getElementById("select-clientes");
+        s.innerHTML = '<option value="">-- Seleccionar cliente guardado --</option>';
+        clientesDB.forEach(c => s.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`);
         if(clientesDB.length > 0) historialArea.classList.remove("hidden");
     }
 
-    function cargarCliente(nombre) {
-        if(!nombre) return;
-        const c = clientesDB.find(x => x.nombre === nombre);
+    function cargarCliente(n) {
+        if(!n) return;
+        const c = clientesDB.find(x => x.nombre === n);
         if(c) {
-            cliente.value = c.nombre;
-            negocio.value = c.negocio;
-            direccion.value = c.dir;
-            tipo.value = c.tipo;
-            if(confirm("¿Cargar también el último pedido de este cliente?")) {
-                carrito = c.ultimoPedido || {};
-                save();
-                renderProductos();
-            }
+            cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo;
+            if(confirm("¿Cargar último pedido?")) { carrito = c.ultimoPedido || {}; save(); renderProductos(); }
             renderCarrito();
         }
     }
 
     function eliminarClienteActual() {
-        const nombre = document.getElementById("select-clientes").value;
-        if(!nombre) return;
-        if(confirm("¿Eliminar a este cliente de la base de datos local?")) {
-            clientesDB = clientesDB.filter(c => c.nombre !== nombre);
+        const n = document.getElementById("select-clientes").value;
+        if(n && confirm("¿Eliminar cliente?")) {
+            clientesDB = clientesDB.filter(c => c.nombre !== n);
             localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
             actualizarSelectClientes();
         }
     }
 
-    // --- GENERADOR DE TEXTO (RECIBO Y WHATSAPP) ---
-    function construirContenidoPedido() {
-        let subtotalVal = 0;
-        let totalVal = 0;
-        let itemsTxt = "";
-        const fecha = new Date().toLocaleString();
-
+    function imprimirPedido() {
+        guardarClienteLocal();
+        const f = new Date().toLocaleString();
+        let sub = 0, tot = 0, hI = "";
         for(let k in carrito) {
-            let item = carrito[k];
-            let subtotalItem = item.pr * item.c;
-            subtotalVal += item.po * item.c;
-            totalVal += subtotalItem;
-            itemsTxt += `${k}\n${item.c} x $${item.pr.toLocaleString()} = $${subtotalItem.toLocaleString()}\n`;
+            let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
+            hI += `<div class="t-flex"><span style="width:15%">${i.c} x</span><span style="width:55%">${k}</span><span style="width:30%; text-align:right">$${(i.pr * i.c).toLocaleString()}</span></div>`;
         }
-
-        let ahorroVal = subtotalVal - totalVal;
-
-        let texto = `DISTRISNACKS\n`;
-        texto += `NO RESPONSABLE DE IVA\n`;
-        texto += `CUBIDES RIOS DAVID FERNANDO\n`;
-        texto += `CC 1032459217\n`;
-        texto += `DIR: CR 6 #30-10 SOACHA\n`;
-        texto += `EMAIL: DAFERVIDNANDO@GMAIL.COM\n`;
-        texto += `TEL: 3222643534\n`;
-        texto += `--------------------------------\n`;
-        texto += `FECHA: ${fecha}\n`;
-        texto += `--------------------------------\n`;
-        texto += `CLIENTE: ${cliente.value}\n`;
-        texto += `NEGOCIO: ${negocio.value}\n`;
-        texto += `DIR. ENTREGA: ${direccion.value}\n`;
-        texto += `TIPO: ${tipo.value}\n`;
-        texto += `--------------------------------\n`;
-        texto += itemsTxt;
-        texto += `--------------------------------\n`;
-        texto += `Subtotal: ${subtotalVal.toLocaleString()}\n`;
-        texto += `Descuentos: -${ahorroVal.toLocaleString()}\n`;
-        texto += `TOTAL A PAGAR: ${totalVal.toLocaleString()}\n`;
-        texto += `Usted ahorro: ${ahorroVal.toLocaleString()}\n`;
-        texto += `--------------------------------\n`;
-        texto += `No responsable de IVA segun art.\n437 E.T. - Este recibo no genera\nimpuestos descontables ni derecho a credito fiscal.\n`;
-        
-        return texto;
-    }
-
-    // --- ACCIONES FINALES ---
-
-    function enviarPedido() {
-        guardarClienteLocal();
-        const texto = construirContenidoPedido();
-        // Para WhatsApp usamos un formato con negritas simples
-        let m = "*NUEVO PEDIDO - DISTRISNACKS*\n" + texto;
-        window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
-    }
-
-    function imprimirRecibo() {
-        guardarClienteLocal();
-        const texto = construirContenidoPedido();
-        // Redirección directa al esquema RawBT
-        window.location.href = "rawbt://print?text=" + encodeURIComponent(texto);
+        const a = sub - tot;
+        const ticketDiv = document.getElementById("ticket-impresion");
+        ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size:16px">DISTRISNACKS</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hI}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top:10px">¡Gracias por su compra!</div>`;
+        window.print();
     }
 </script>
 
 </body>
 </html>
-
