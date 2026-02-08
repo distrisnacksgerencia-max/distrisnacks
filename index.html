@@ -38,14 +38,17 @@
         .producto{background:white;border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1);position:relative;display:flex;flex-direction:column;justify-content:space-between}
         .producto img{width:100%;border-radius:8px;aspect-ratio:1/1;object-fit:cover}
         
+        /* PREMIUM STYLE */
         .producto.premium {border: 2px solid #ffbc00; background: #fffdf2; box-shadow: 0 4px 12px rgba(255,188,0,0.2)}
         .premium-tag {position:absolute; top:5px; left:5px; background:#ffbc00; color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold}
 
+        /* DESCUENTOS */
         .badge-desc{position:absolute;top:5px;right:5px;background:#e74c3c;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold}
         .precio-old{text-decoration:line-through;color:#999;font-size:12px;margin-right:5px}
         .nombre{font-size:14px;margin:8px 0;height:34px;overflow:hidden;line-height:1.2}
         .precio{color:#88003d;font-weight:bold;font-size:16px}
 
+        /* CONTROLES */
         .controles{display:flex;justify-content:center;gap:6px;margin-top:10px}
         .controles button{width:32px;height:32px;background:#88003d;color:white;border:none;border-radius:6px;cursor:pointer}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:6px}
@@ -55,47 +58,30 @@
         #panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:90%;transition:.4s;border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;z-index:2000;box-shadow:0 -5px 20px rgba(0,0,0,0.2)}
         #panel.activo{bottom:0}
 
+        /* CLIENTES Y PEDIDOS */
         .cliente-selector{background:#f9f9f9;padding:10px;border-radius:10px;margin-bottom:15px;border:1px solid #eee}
+        .historial-item{font-size:12px;background:#fff;padding:5px;margin-top:5px;border-radius:4px;border-left:3px solid #88003d}
+
         .item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
+        .item-info{flex:1}
+        .item-precios{text-align:right;margin-right:10px}
         
         #enviar{width:100%;padding:15px;background:#25D366;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
-        #enviar:disabled, #btn-imprimir:disabled{background:#ccc;cursor:not-allowed}
+        #enviar:disabled{background:#ccc;cursor:not-allowed}
         
-        /* NUEVO BOTON IMPRIMIR */
-        #btn-imprimir{width:100%;padding:15px;background:#444;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
+        /* BOTON IMPRIMIR */
+        #imprimir{width:100%;padding:15px;background:#3498db;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
+        #imprimir:disabled{background:#ccc;cursor:not-allowed}
 
         .btn-vaciar{background:#eee;color:#666;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer}
+
+        /* BOTON FLOTANTE SOPORTE */
         .btn-soporte{position:fixed;bottom:85px;right:20px;background:#00a884;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px}
 
+        /* UTILS */
         .hidden{display:none}
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
         footer{background:#111;color:white;padding:30px 20px 120px;text-align:center;font-size:13px}
-
-        /* ESTILOS DE IMPRESIÓN TERMICA */
-        #ticket-impresion { display: none; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #ticket-impresion, #ticket-impresion * { visibility: visible; }
-            #ticket-impresion {
-                display: block;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                max-width: 80mm; /* Ancho estándar térmico */
-                padding: 5mm;
-                font-family: 'Courier New', Courier, monospace;
-                font-size: 12px;
-                line-height: 1.2;
-                color: black;
-                background: white;
-            }
-            .t-center { text-align: center; }
-            .t-bold { font-weight: bold; }
-            .t-line { border-bottom: 1px dashed #000; margin: 5px 0; }
-            .t-flex { display: flex; justify-content: space-between; }
-        }
     </style>
 </head>
 <body>
@@ -161,12 +147,10 @@
 
     <div id="mensaje" style="color:red; font-size:13px; margin:10px 0; text-align:center"></div>
     
-    <button id="enviar" onclick="enviarPedido()" disabled>Confirmar y Enviar Pedido (WhatsApp)</button>
-    <button id="btn-imprimir" onclick="imprimirPedido()" disabled>🖨️ Imprimir Pedido (Térmica)</button>
+    <button id="enviar" onclick="enviarPedido()" disabled>Confirmar y Enviar WhatsApp</button>
+    <button id="imprimir" onclick="imprimirRecibo()" disabled>🖨 Imprimir Recibo</button>
     <button class="btn-vaciar" onclick="vaciarCarrito()">Reiniciar / Nuevo Pedido</button>
 </div>
-
-<div id="ticket-impresion"></div>
 
 <footer>
     <b>DISTRISNACKS</b><br>
@@ -191,9 +175,11 @@
     let marcaFiltro = "";
     let catFiltro = "";
 
+    // Cargar Datos
     fetch(SHEET).then(r => r.text()).then(csv => {
         csv.split(/\r?\n/).slice(1).forEach(f => {
             const c = f.split(",").map(x => (x || "").replace(/"/g,"").trim());
+            
             if(c[4] === "SI") {
                 let precioBase = parseInt(c[2].replace(/\D/g,"")) || 0;
                 let descPorc = parseInt(c[8]) || 0;
@@ -210,19 +196,24 @@
                     desc: descPorc
                 });
             }
+
             if(c[9] && c[11] === "SI" && c[10]) {
                 if(!marcas.find(m => m.nombre === c[9])) {
                     marcas.push({ nombre: c[9], logo: c[10] });
                 }
             }
         });
+        
         marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
+
         renderSidebar();
         renderMarcas();
         renderProductos();
         renderCarrito();
         actualizarSelectClientes();
     });
+
+    // --- LOGICA DE UI ---
 
     function toggleMenu() { sidebar.classList.toggle("activo"); }
     function cerrarMenu() { sidebar.classList.remove("activo"); }
@@ -290,6 +281,7 @@
     function renderProductos() {
         prodContenedor.innerHTML = "";
         let busqueda = buscar.value.toLowerCase();
+        
         let prodsFiltrados = productos.filter(p => {
             let coincideBusqueda = p.n.toLowerCase().includes(busqueda) || p.marca.toLowerCase().includes(busqueda);
             let coincideCat = !catFiltro || p.cat === catFiltro;
@@ -298,6 +290,7 @@
         });
 
         let categoriasPresentes = [...new Set(prodsFiltrados.map(p => p.cat))];
+        
         let prodsPromo = prodsFiltrados.filter(p => p.desc > 0);
         if (prodsPromo.length > 0 && !catFiltro && !marcaFiltro) {
             renderSeccion("🔥 PROMOCIONES", prodsPromo);
@@ -305,7 +298,9 @@
 
         categoriasPresentes.forEach(cat => {
             let pCat = prodsFiltrados.filter(p => p.cat === cat);
-            if(pCat.length > 0) renderSeccion(cat, pCat);
+            if(pCat.length > 0) {
+                renderSeccion(cat, pCat);
+            }
         });
     }
 
@@ -313,11 +308,11 @@
         let section = document.createElement("div");
         section.innerHTML = `<div class="seccion-titulo">${titulo}</div>`;
         let grid = document.createElement("div");
-        grid.id = "productos";
+        grid.id = "productos"; 
         
         lista.forEach(p => {
             const cant = carrito[p.n]?.c || 0;
-            grid.innerHTML += `
+            const itemHtml = `
                 <div class="producto ${p.premium ? 'premium' : ''}">
                     ${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}
                     ${p.desc > 0 ? `<span class="badge-desc">-${p.desc}%</span>` : ''}
@@ -333,10 +328,13 @@
                         <button onclick="chg('${p.n}', 1)">+</button>
                     </div>
                 </div>`;
+            grid.innerHTML += itemHtml;
         });
         section.appendChild(grid);
         prodContenedor.appendChild(section);
     }
+
+    // --- LOGICA CARRITO ---
 
     function chg(n, v) {
         const p = productos.find(x => x.n === n);
@@ -358,11 +356,13 @@
 
     function renderCarrito() {
         let totalVal = 0, subtotalVal = 0, itemsCant = 0, h = "";
+        
         for(let k in carrito) {
             let item = carrito[k];
             totalVal += item.pr * item.c;
             subtotalVal += item.po * item.c;
             itemsCant += item.c;
+            
             h += `
             <div class="item ${item.prem ? 'premium' : ''}" style="${item.prem ? 'border-left:4px solid #ffbc00; padding-left:5px' : ''}">
                 <div class="item-info">
@@ -376,24 +376,31 @@
                 </div>
             </div>`;
         }
+
         lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
         total.innerText = totalVal.toLocaleString();
         totalBarra.innerText = totalVal.toLocaleString();
         subtotal.innerText = "$" + subtotalVal.toLocaleString();
         ahorro.innerText = "- $" + (subtotalVal - totalVal).toLocaleString();
         items.innerText = itemsCant;
+        
         mensaje.innerText = totalVal < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
+        
         const formularioOK = cliente.value && negocio.value && direccion.value && tipo.value;
-        const habilitar = totalVal >= MIN_PEDIDO && formularioOK;
-        enviar.disabled = !habilitar;
-        document.getElementById("btn-imprimir").disabled = !habilitar;
+        const puedeEnviar = totalVal >= MIN_PEDIDO && formularioOK;
+        
+        enviar.disabled = !puedeEnviar;
+        imprimir.disabled = !puedeEnviar;
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
 
     function vaciarCarrito() {
         if(confirm("¿Deseas vaciar el carrito y comenzar un nuevo pedido?")) {
-            carrito = {}; save(); renderCarrito(); renderProductos();
+            carrito = {};
+            save();
+            renderCarrito();
+            renderProductos();
         }
     }
 
@@ -402,15 +409,27 @@
         if(clientesDB.length > 0) historialArea.classList.remove("hidden");
     }
 
+    // --- CLIENTES E HISTORIAL ---
     const historialArea = document.getElementById("historial-area");
-    ["cliente", "negocio", "direccion", "tipo"].forEach(x => { window[x].oninput = renderCarrito; });
+    ["cliente", "negocio", "direccion", "tipo"].forEach(x => {
+        window[x].oninput = renderCarrito;
+    });
 
     function guardarClienteLocal() {
         if(!cliente.value || !negocio.value) return;
+        
         let index = clientesDB.findIndex(c => c.nombre === cliente.value);
-        let datos = { nombre: cliente.value, negocio: negocio.value, dir: direccion.value, tipo: tipo.value, ultimoPedido: carrito };
+        let datos = {
+            nombre: cliente.value,
+            negocio: negocio.value,
+            dir: direccion.value,
+            tipo: tipo.value,
+            ultimoPedido: carrito
+        };
+
         if(index > -1) clientesDB[index] = datos;
         else clientesDB.push(datos);
+
         localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
         actualizarSelectClientes();
     }
@@ -418,7 +437,9 @@
     function actualizarSelectClientes() {
         const select = document.getElementById("select-clientes");
         select.innerHTML = '<option value="">-- Seleccionar cliente guardado --</option>';
-        clientesDB.forEach(c => { select.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`; });
+        clientesDB.forEach(c => {
+            select.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`;
+        });
         if(clientesDB.length > 0) historialArea.classList.remove("hidden");
     }
 
@@ -426,9 +447,14 @@
         if(!nombre) return;
         const c = clientesDB.find(x => x.nombre === nombre);
         if(c) {
-            cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo;
+            cliente.value = c.nombre;
+            negocio.value = c.negocio;
+            direccion.value = c.dir;
+            tipo.value = c.tipo;
             if(confirm("¿Cargar también el último pedido de este cliente?")) {
-                carrito = c.ultimoPedido || {}; save(); renderProductos();
+                carrito = c.ultimoPedido || {};
+                save();
+                renderProductos();
             }
             renderCarrito();
         }
@@ -444,79 +470,65 @@
         }
     }
 
-    // --- LOGICA DE IMPRESIÓN ---
-    function imprimirPedido() {
-        guardarClienteLocal();
+    // --- GENERADOR DE TEXTO (RECIBO Y WHATSAPP) ---
+    function construirContenidoPedido() {
+        let subtotalVal = 0;
+        let totalVal = 0;
+        let itemsTxt = "";
         const fecha = new Date().toLocaleString();
-        let subtotalVal = 0, totalVal = 0, itemsHtml = "";
 
         for(let k in carrito) {
             let item = carrito[k];
+            let subtotalItem = item.pr * item.c;
             subtotalVal += item.po * item.c;
-            totalVal += item.pr * item.c;
-            itemsHtml += `
-                <div class="t-flex">
-                    <span style="width:15%">${item.c} x</span>
-                    <span style="width:55%">${k}</span>
-                    <span style="width:30%; text-align:right">$${(item.pr * item.c).toLocaleString()}</span>
-                </div>
-                <div style="font-size:10px; margin-bottom:4px; margin-left:15%">($${item.pr.toLocaleString()} c/u)</div>
-            `;
+            totalVal += subtotalItem;
+            itemsTxt += `${k}\n${item.c} x $${item.pr.toLocaleString()} = $${subtotalItem.toLocaleString()}\n`;
         }
 
-        const ahorroVal = subtotalVal - totalVal;
-        const ticketDiv = document.getElementById("ticket-impresion");
+        let ahorroVal = subtotalVal - totalVal;
+
+        let texto = `DISTRISNACKS\n`;
+        texto += `NO RESPONSABLE DE IVA\n`;
+        texto += `CUBIDES RIOS DAVID FERNANDO\n`;
+        texto += `CC 1032459217\n`;
+        texto += `DIR: CR 6 #30-10 SOACHA\n`;
+        texto += `EMAIL: DAFERVIDNANDO@GMAIL.COM\n`;
+        texto += `TEL: 3222643534\n`;
+        texto += `--------------------------------\n`;
+        texto += `FECHA: ${fecha}\n`;
+        texto += `--------------------------------\n`;
+        texto += `CLIENTE: ${cliente.value}\n`;
+        texto += `NEGOCIO: ${negocio.value}\n`;
+        texto += `DIR. ENTREGA: ${direccion.value}\n`;
+        texto += `TIPO: ${tipo.value}\n`;
+        texto += `--------------------------------\n`;
+        texto += itemsTxt;
+        texto += `--------------------------------\n`;
+        texto += `Subtotal: ${subtotalVal.toLocaleString()}\n`;
+        texto += `Descuentos: -${ahorroVal.toLocaleString()}\n`;
+        texto += `TOTAL A PAGAR: ${totalVal.toLocaleString()}\n`;
+        texto += `Usted ahorro: ${ahorroVal.toLocaleString()}\n`;
+        texto += `--------------------------------\n`;
+        texto += `No responsable de IVA segun art.\n437 E.T. - Este recibo no genera\nimpuestos descontables ni derecho\na credito fiscal.\n`;
         
-        ticketDiv.innerHTML = `
-            <div class="t-center t-bold" style="font-size:16px">DISTRISNACKS</div>
-            <div class="t-center">NO RESPONSABLE DE IVA</div>
-            <div class="t-center">CUBIDES RIOS DAVID FERNANDO</div>
-            <div class="t-center">CC 1032459217</div>
-            <div class="t-center">DIR: CR 6 #30-10 SOACHA</div>
-            <div class="t-center">EMAIL: DAFERVIDNANDO@GMAIL.COM</div>
-            <div class="t-center">TEL: 3222643534</div>
-            <div class="t-line"></div>
-            <div><span class="t-bold">FECHA:</span> ${fecha}</div>
-            <div><span class="t-bold">CLIENTE:</span> ${cliente.value}</div>
-            <div><span class="t-bold">NEGOCIO:</span> ${negocio.value}</div>
-            <div><span class="t-bold">DIR:</span> ${direccion.value}</div>
-            <div><span class="t-bold">TIPO:</span> ${tipo.value}</div>
-            <div class="t-line"></div>
-            <div class="t-flex t-bold">
-                <span style="width:15%">CANT</span>
-                <span style="width:55%">PRODUCTO</span>
-                <span style="width:30%; text-align:right">TOTAL</span>
-            </div>
-            <div class="t-line"></div>
-            ${itemsHtml}
-            <div class="t-line"></div>
-            <div class="t-flex"><span>SUBTOTAL:</span> <span>$${subtotalVal.toLocaleString()}</span></div>
-            <div class="t-flex"><span>DESCUENTOS:</span> <span>-$${ahorroVal.toLocaleString()}</span></div>
-            <div class="t-flex t-bold" style="font-size:14px"><span>TOTAL A PAGAR:</span> <span>$${totalVal.toLocaleString()}</span></div>
-            <div class="t-line"></div>
-            <div class="t-center t-bold">¡Ahorraste $${ahorroVal.toLocaleString()} en esta compra!</div>
-            <div class="t-line"></div>
-            <div class="t-center">Gracias por su compra</div>
-            <div style="font-size:10px; margin-top:10px;">
-                No responsable de IVA según art. 437 E.T.<br>
-                Este recibo no genera impuestos descontables ni derecho a crédito fiscal.
-            </div>
-        `;
-        window.print();
+        return texto;
     }
+
+    // --- ACCIONES FINALES ---
 
     function enviarPedido() {
         guardarClienteLocal();
-        let subtotalVal = 0, totalVal = 0, itemsMsg = "";
-        for(let k in carrito) {
-            let item = carrito[k];
-            subtotalVal += item.po * item.c;
-            totalVal += item.pr * item.c;
-            itemsMsg += `• ${item.c} x ${k}%0A`;
-        }
-        let ahorroVal = subtotalVal - totalVal;
-        let m = `*NUEVO PEDIDO - DISTRISNACKS*%0A--------------------------------%0A*Cliente:* ${cliente.value}%0A*Negocio:* ${negocio.value}%0A*Dirección:* ${direccion.value}%0A*Tipo:* ${tipo.value}%0A--------------------------------%0A${itemsMsg}--------------------------------%0A*SUBTOTAL:* $${subtotalVal.toLocaleString()}%0A*DESCUENTOS:* -$${ahorroVal.toLocaleString()}%0A*TOTAL A PAGAR:* $${totalVal.toLocaleString()}%0A--------------------------------%0A*¡Ahorro en esta compra: $${ahorroVal.toLocaleString()}!*%0A`;
-        window.open("https://wa.me/573222643534?text=" + m);
+        const texto = construirContenidoPedido();
+        // Para WhatsApp usamos un formato con negritas simples
+        let m = "*NUEVO PEDIDO - DISTRISNACKS*\n" + texto;
+        window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
+    }
+
+    function imprimirRecibo() {
+        guardarClienteLocal();
+        const texto = construirContenidoPedido();
+        // Redirección directa al esquema RawBT
+        window.location.href = "rawbt://print?text=" + encodeURIComponent(texto);
     }
 </script>
 
