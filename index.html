@@ -60,19 +60,12 @@
 
         /* CLIENTES Y PEDIDOS */
         .cliente-selector{background:#f9f9f9;padding:10px;border-radius:10px;margin-bottom:15px;border:1px solid #eee}
-        .historial-item{font-size:12px;background:#fff;padding:5px;margin-top:5px;border-radius:4px;border-left:3px solid #88003d}
-
         .item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
         .item-info{flex:1}
-        .item-precios{text-align:right;margin-right:10px}
         
         #enviar{width:100%;padding:15px;background:#25D366;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
-        #enviar:disabled{background:#ccc;cursor:not-allowed}
-        
-        /* BOTON IMPRIMIR */
         #imprimir{width:100%;padding:15px;background:#3498db;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
-        #imprimir:disabled{background:#ccc;cursor:not-allowed}
-
+        #enviar:disabled, #imprimir:disabled{background:#ccc;cursor:not-allowed}
         .btn-vaciar{background:#eee;color:#666;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer}
 
         /* BOTON FLOTANTE SOPORTE */
@@ -101,11 +94,9 @@
 </div>
 
 <div id="marcas"></div>
-
 <div id="contenedor-principal"></div>
 
 <a href="https://wa.me/573222643534?text=Hola,%20necesito%20ayuda%20con%20mi%20pedido" class="btn-soporte" target="_blank">💬</a>
-
 <div id="burbuja" onclick="abrirCarrito()">🛒 <span id="items">0</span> | $<span id="totalBarra">0</span></div>
 
 <div id="panel">
@@ -148,7 +139,7 @@
     <div id="mensaje" style="color:red; font-size:13px; margin:10px 0; text-align:center"></div>
     
     <button id="enviar" onclick="enviarPedido()" disabled>Confirmar y Enviar WhatsApp</button>
-    <button id="imprimir" onclick="imprimirRecibo()" disabled>🖨 Imprimir Recibo</button>
+    <button id="imprimir" onclick="imprimirPedido()" disabled>🖨 Imprimir Recibo</button>
     <button class="btn-vaciar" onclick="vaciarCarrito()">Reiniciar / Nuevo Pedido</button>
 </div>
 
@@ -162,7 +153,6 @@
 
 <script>
     year.innerText = new Date().getFullYear();
-
     const SHEET = "https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
     const MIN_PEDIDO = 25000;
     const MAX_DIGITOS = 999;
@@ -175,105 +165,46 @@
     let marcaFiltro = "";
     let catFiltro = "";
 
-    // Cargar Datos
     fetch(SHEET).then(r => r.text()).then(csv => {
         csv.split(/\r?\n/).slice(1).forEach(f => {
             const c = f.split(",").map(x => (x || "").replace(/"/g,"").trim());
-            
             if(c[4] === "SI") {
                 let precioBase = parseInt(c[2].replace(/\D/g,"")) || 0;
                 let descPorc = parseInt(c[8]) || 0;
                 let precioFinal = descPorc > 0 ? Math.round(precioBase * (1 - descPorc/100)) : precioBase;
-
-                productos.push({
-                    n: c[1],
-                    pOrig: precioBase,
-                    p: precioFinal,
-                    img: c[3],
-                    premium: c[5] === "SI",
-                    marca: c[6],
-                    cat: c[7],
-                    desc: descPorc
-                });
+                productos.push({ n: c[1], pOrig: precioBase, p: precioFinal, img: c[3], premium: c[5] === "SI", marca: c[6], cat: c[7], desc: descPorc });
             }
-
             if(c[9] && c[11] === "SI" && c[10]) {
-                if(!marcas.find(m => m.nombre === c[9])) {
-                    marcas.push({ nombre: c[9], logo: c[10] });
-                }
+                if(!marcas.find(m => m.nombre === c[9])) marcas.push({ nombre: c[9], logo: c[10] });
             }
         });
-        
         marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
-
-        renderSidebar();
-        renderMarcas();
-        renderProductos();
-        renderCarrito();
-        actualizarSelectClientes();
+        renderSidebar(); renderMarcas(); renderProductos(); renderCarrito(); actualizarSelectClientes();
     });
-
-    // --- LOGICA DE UI ---
 
     function toggleMenu() { sidebar.classList.toggle("activo"); }
     function cerrarMenu() { sidebar.classList.remove("activo"); }
+    function limpiarFiltros() { marcaFiltro = ""; catFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
     
-    document.addEventListener('click', (e) => {
-        if (!sidebar.contains(e.target) && !menuBtn.contains(e.target) && sidebar.classList.contains('activo')) {
-            cerrarMenu();
-        }
-    });
-
-    function limpiarFiltros() {
-        marcaFiltro = "";
-        catFiltro = "";
-        buscar.value = "";
-        cerrarMenu();
-        renderProductos();
-    }
-
     function renderSidebar() {
         const cats = [...new Set(productos.map(p => p.cat).filter(Boolean))];
         let h = "";
-        cats.forEach(c => {
-            h += `<div class="cat" onclick="filtrarCat('${c}')">${c}</div>`;
-        });
+        cats.forEach(c => h += `<div class="cat" onclick="filtrarCat('${c}')">${c}</div>`);
         menuCats.innerHTML = h;
     }
 
-    function filtrarCat(c) {
-        catFiltro = c;
-        marcaFiltro = "";
-        buscar.value = "";
-        cerrarMenu();
-        renderProductos();
-    }
+    function filtrarCat(c) { catFiltro = c; marcaFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
 
     function renderMarcas() {
         marcasDiv.innerHTML = "";
         marcas.forEach(m => {
-            marcasDiv.innerHTML += `
-                <div class="marca" onclick="filtrarMarca('${m.nombre}')">
-                    <img src="${m.logo}">
-                    <div>${m.nombre}</div>
-                </div>`;
+            marcasDiv.innerHTML += `<div class="marca" onclick="filtrarMarca('${m.nombre}')"><img src="${m.logo}"><div>${m.nombre}</div></div>`;
         });
     }
 
-    function filtrarMarca(m) {
-        marcaFiltro = m;
-        catFiltro = "";
-        buscar.value = "";
-        renderProductos();
-    }
+    function filtrarMarca(m) { marcaFiltro = m; catFiltro = ""; buscar.value = ""; renderProductos(); }
 
-    buscar.oninput = () => {
-        if(buscar.value.trim() !== "") {
-            catFiltro = "";
-            marcaFiltro = "";
-        }
-        renderProductos();
-    };
+    buscar.oninput = () => { if(buscar.value.trim() !== "") { catFiltro = ""; marcaFiltro = ""; } renderProductos(); };
 
     const prodContenedor = document.getElementById("contenedor-principal");
     const marcasDiv = document.getElementById("marcas");
@@ -281,256 +212,154 @@
     function renderProductos() {
         prodContenedor.innerHTML = "";
         let busqueda = buscar.value.toLowerCase();
-        
-        let prodsFiltrados = productos.filter(p => {
-            let coincideBusqueda = p.n.toLowerCase().includes(busqueda) || p.marca.toLowerCase().includes(busqueda);
-            let coincideCat = !catFiltro || p.cat === catFiltro;
-            let coincideMarca = !marcaFiltro || p.marca === marcaFiltro;
-            return coincideBusqueda && coincideCat && coincideMarca;
-        });
-
+        let prodsFiltrados = productos.filter(p => (p.n.toLowerCase().includes(busqueda) || p.marca.toLowerCase().includes(busqueda)) && (!catFiltro || p.cat === catFiltro) && (!marcaFiltro || p.marca === marcaFiltro));
         let categoriasPresentes = [...new Set(prodsFiltrados.map(p => p.cat))];
-        
         let prodsPromo = prodsFiltrados.filter(p => p.desc > 0);
-        if (prodsPromo.length > 0 && !catFiltro && !marcaFiltro) {
-            renderSeccion("🔥 PROMOCIONES", prodsPromo);
-        }
-
-        categoriasPresentes.forEach(cat => {
-            let pCat = prodsFiltrados.filter(p => p.cat === cat);
-            if(pCat.length > 0) {
-                renderSeccion(cat, pCat);
-            }
-        });
+        if (prodsPromo.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("🔥 PROMOCIONES", prodsPromo);
+        categoriasPresentes.forEach(cat => { let pCat = prodsFiltrados.filter(p => p.cat === cat); if(pCat.length > 0) renderSeccion(cat, pCat); });
     }
 
     function renderSeccion(titulo, lista) {
         let section = document.createElement("div");
         section.innerHTML = `<div class="seccion-titulo">${titulo}</div>`;
-        let grid = document.createElement("div");
-        grid.id = "productos"; 
-        
+        let grid = document.createElement("div"); grid.id = "productos";
         lista.forEach(p => {
             const cant = carrito[p.n]?.c || 0;
-            const itemHtml = `
-                <div class="producto ${p.premium ? 'premium' : ''}">
-                    ${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}
-                    ${p.desc > 0 ? `<span class="badge-desc">-${p.desc}%</span>` : ''}
-                    <img src="${p.img}">
-                    <div class="nombre">${p.n}</div>
-                    <div class="precio">
-                        ${p.desc > 0 ? `<span class="precio-old">$${p.pOrig.toLocaleString()}</span>` : ''}
-                        $${p.p.toLocaleString()}
-                    </div>
-                    <div class="controles">
-                        <button onclick="chg('${p.n}', -1)">−</button>
-                        <input type="number" value="${cant}" onchange="set('${p.n}', this.value)" onfocus="this.select()">
-                        <button onclick="chg('${p.n}', 1)">+</button>
-                    </div>
-                </div>`;
-            grid.innerHTML += itemHtml;
+            grid.innerHTML += `<div class="producto ${p.premium ? 'premium' : ''}">${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}${p.desc > 0 ? `<span class="badge-desc">-${p.desc}%</span>` : ''}<img src="${p.img}"><div class="nombre">${p.n}</div><div class="precio">${p.desc > 0 ? `<span class="precio-old">$${p.pOrig.toLocaleString()}</span>` : ''}$${p.p.toLocaleString()}</div><div class="controles"><button onclick="chg('${p.n}', -1)">−</button><input type="number" value="${cant}" onchange="set('${p.n}', this.value)" onfocus="this.select()"><button onclick="chg('${p.n}', 1)">+</button></div></div>`;
         });
-        section.appendChild(grid);
-        prodContenedor.appendChild(section);
+        section.appendChild(grid); prodContenedor.appendChild(section);
     }
-
-    // --- LOGICA CARRITO ---
 
     function chg(n, v) {
         const p = productos.find(x => x.n === n);
         let c = (carrito[n]?.c || 0) + v;
         if(c > MAX_DIGITOS) c = MAX_DIGITOS;
-        if(c <= 0) delete carrito[n]; 
-        else carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium };
+        if(c <= 0) delete carrito[n]; else carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium };
         save(); renderCarrito(); renderProductos();
     }
 
     function set(n, v) {
         let num = parseInt(v) || 0;
-        if(num > MAX_DIGITOS) num = MAX_DIGITOS;
         const p = productos.find(x => x.n === n);
-        if(num <= 0) delete carrito[n]; 
-        else carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium };
+        if(num <= 0) delete carrito[n]; else carrito[n] = { c: num > MAX_DIGITOS ? MAX_DIGITOS : num, pr: p.p, po: p.pOrig, prem: p.premium };
         save(); renderCarrito(); renderProductos();
     }
 
     function renderCarrito() {
         let totalVal = 0, subtotalVal = 0, itemsCant = 0, h = "";
-        
         for(let k in carrito) {
-            let item = carrito[k];
-            totalVal += item.pr * item.c;
-            subtotalVal += item.po * item.c;
-            itemsCant += item.c;
-            
-            h += `
-            <div class="item ${item.prem ? 'premium' : ''}" style="${item.prem ? 'border-left:4px solid #ffbc00; padding-left:5px' : ''}">
-                <div class="item-info">
-                    <div style="font-size:14px"><b>${k}</b></div>
-                    <div style="font-size:12px; color:#88003d">$${item.pr.toLocaleString()} c/u</div>
-                </div>
-                <div class="controles">
-                    <button onclick="chg('${k}',-1)">−</button>
-                    <input type="number" value="${item.c}" onchange="set('${k}', this.value)">
-                    <button onclick="chg('${k}',1)">+</button>
-                </div>
-            </div>`;
+            let item = carrito[k]; totalVal += item.pr * item.c; subtotalVal += item.po * item.c; itemsCant += item.c;
+            h += `<div class="item" style="${item.prem ? 'border-left:4px solid #ffbc00; padding-left:5px' : ''}"><div class="item-info"><div style="font-size:14px"><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${item.pr.toLocaleString()} c/u</div></div><div class="controles"><button onclick="chg('${k}',-1)">−</button><input type="number" value="${item.c}" onchange="set('${k}', this.value)"><button onclick="chg('${k}',1)">+</button></div></div>`;
         }
-
         lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
-        total.innerText = totalVal.toLocaleString();
-        totalBarra.innerText = totalVal.toLocaleString();
-        subtotal.innerText = "$" + subtotalVal.toLocaleString();
-        ahorro.innerText = "- $" + (subtotalVal - totalVal).toLocaleString();
-        items.innerText = itemsCant;
-        
+        total.innerText = totalVal.toLocaleString(); totalBarra.innerText = totalVal.toLocaleString(); subtotal.innerText = "$" + subtotalVal.toLocaleString(); ahorro.innerText = "- $" + (subtotalVal - totalVal).toLocaleString(); items.innerText = itemsCant;
         mensaje.innerText = totalVal < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
-        
-        const formularioOK = cliente.value && negocio.value && direccion.value && tipo.value;
-        const puedeEnviar = totalVal >= MIN_PEDIDO && formularioOK;
-        
-        enviar.disabled = !puedeEnviar;
-        imprimir.disabled = !puedeEnviar;
+        const fOK = cliente.value && negocio.value && direccion.value && tipo.value;
+        enviar.disabled = !(totalVal >= MIN_PEDIDO && fOK);
+        imprimir.disabled = !(totalVal >= MIN_PEDIDO && fOK);
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
+    function vaciarCarrito() { if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; save(); renderCarrito(); renderProductos(); } }
+    function abrirCarrito() { panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
-    function vaciarCarrito() {
-        if(confirm("¿Deseas vaciar el carrito y comenzar un nuevo pedido?")) {
-            carrito = {};
-            save();
-            renderCarrito();
-            renderProductos();
-        }
-    }
-
-    function abrirCarrito() {
-        panel.classList.add('activo');
-        if(clientesDB.length > 0) historialArea.classList.remove("hidden");
-    }
-
-    // --- CLIENTES E HISTORIAL ---
-    const historialArea = document.getElementById("historial-area");
-    ["cliente", "negocio", "direccion", "tipo"].forEach(x => {
-        window[x].oninput = renderCarrito;
-    });
+    ["cliente", "negocio", "direccion", "tipo"].forEach(x => window[x].oninput = renderCarrito);
 
     function guardarClienteLocal() {
         if(!cliente.value || !negocio.value) return;
-        
         let index = clientesDB.findIndex(c => c.nombre === cliente.value);
-        let datos = {
-            nombre: cliente.value,
-            negocio: negocio.value,
-            dir: direccion.value,
-            tipo: tipo.value,
-            ultimoPedido: carrito
-        };
-
-        if(index > -1) clientesDB[index] = datos;
-        else clientesDB.push(datos);
-
-        localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
-        actualizarSelectClientes();
+        let datos = { nombre: cliente.value, negocio: negocio.value, dir: direccion.value, tipo: tipo.value, ultimoPedido: carrito };
+        if(index > -1) clientesDB[index] = datos; else clientesDB.push(datos);
+        localStorage.setItem("clientes_distri", JSON.stringify(clientesDB)); actualizarSelectClientes();
     }
 
     function actualizarSelectClientes() {
         const select = document.getElementById("select-clientes");
         select.innerHTML = '<option value="">-- Seleccionar cliente guardado --</option>';
-        clientesDB.forEach(c => {
-            select.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`;
-        });
+        clientesDB.forEach(c => select.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`);
         if(clientesDB.length > 0) historialArea.classList.remove("hidden");
     }
 
     function cargarCliente(nombre) {
         if(!nombre) return;
         const c = clientesDB.find(x => x.nombre === nombre);
-        if(c) {
-            cliente.value = c.nombre;
-            negocio.value = c.negocio;
-            direccion.value = c.dir;
-            tipo.value = c.tipo;
-            if(confirm("¿Cargar también el último pedido de este cliente?")) {
-                carrito = c.ultimoPedido || {};
-                save();
-                renderProductos();
-            }
-            renderCarrito();
-        }
+        if(c) { cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo; if(confirm("¿Cargar último pedido?")) { carrito = c.ultimoPedido || {}; save(); renderProductos(); } renderCarrito(); }
     }
 
     function eliminarClienteActual() {
-        const nombre = document.getElementById("select-clientes").value;
-        if(!nombre) return;
-        if(confirm("¿Eliminar a este cliente de la base de datos local?")) {
-            clientesDB = clientesDB.filter(c => c.nombre !== nombre);
-            localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
-            actualizarSelectClientes();
-        }
+        const n = document.getElementById("select-clientes").value;
+        if(n && confirm("¿Eliminar cliente?")) { clientesDB = clientesDB.filter(c => c.nombre !== n); localStorage.setItem("clientes_distri", JSON.stringify(clientesDB)); actualizarSelectClientes(); }
     }
 
-    // --- GENERADOR DE TEXTO (RECIBO Y WHATSAPP) ---
-    function construirContenidoPedido() {
+    // --- GENERADOR DE TEXTO PROFESIONAL (FORMATEO TÉRMICO) ---
+    function formatLine(left, right, width = 32) {
+        let spaces = width - (left.length + right.length);
+        return left + " ".repeat(Math.max(1, spaces)) + right;
+    }
+
+    function generarTextoRecibo() {
+        const width = 32;
+        const fecha = new Date().toLocaleDateString();
+        const hora = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
         let subtotalVal = 0;
         let totalVal = 0;
-        let itemsTxt = "";
-        const fecha = new Date().toLocaleString();
+        let body = "";
 
         for(let k in carrito) {
             let item = carrito[k];
-            let subtotalItem = item.pr * item.c;
+            let itemTotal = item.pr * item.c;
             subtotalVal += item.po * item.c;
-            totalVal += subtotalItem;
-            itemsTxt += `${k}\n${item.c} x $${item.pr.toLocaleString()} = $${subtotalItem.toLocaleString()}\n`;
+            totalVal += itemTotal;
+            
+            // Fila de producto estilo factura
+            body += `${item.c} x ${k.substring(0, 18)}\n`;
+            body += formatLine("", `$${itemTotal.toLocaleString()}`, width) + "\n";
         }
 
         let ahorroVal = subtotalVal - totalVal;
 
-        let texto = `DISTRISNACKS\n`;
-        texto += `NO RESPONSABLE DE IVA\n`;
-        texto += `CUBIDES RIOS DAVID FERNANDO\n`;
-        texto += `CC 1032459217\n`;
-        texto += `DIR: CR 6 #30-10 SOACHA\n`;
-        texto += `EMAIL: DAFERVIDNANDO@GMAIL.COM\n`;
-        texto += `TEL: 3222643534\n`;
-        texto += `--------------------------------\n`;
-        texto += `FECHA: ${fecha}\n`;
-        texto += `--------------------------------\n`;
-        texto += `CLIENTE: ${cliente.value}\n`;
-        texto += `NEGOCIO: ${negocio.value}\n`;
-        texto += `DIR. ENTREGA: ${direccion.value}\n`;
-        texto += `TIPO: ${tipo.value}\n`;
-        texto += `--------------------------------\n`;
-        texto += itemsTxt;
-        texto += `--------------------------------\n`;
-        texto += `Subtotal: ${subtotalVal.toLocaleString()}\n`;
-        texto += `Descuentos: -${ahorroVal.toLocaleString()}\n`;
-        texto += `TOTAL A PAGAR: ${totalVal.toLocaleString()}\n`;
-        texto += `Usted ahorro: ${ahorroVal.toLocaleString()}\n`;
-        texto += `--------------------------------\n`;
-        texto += `No responsable de IVA segun art.\n437 E.T. - Este recibo no genera\nimpuestos descontables ni derecho\na credito fiscal.\n`;
+        let txt = `          DISTRISNACKS          \n`;
+        txt += `     NO RESPONSABLE DE IVA      \n`;
+        txt += `  CUBIDES RIOS DAVID FERNANDO   \n`;
+        txt += `         CC 1032459217          \n`;
+        txt += `     DIR: CR 6 #30-10 SOACHA    \n`;
+        txt += `  DAFERVIDNANDO@GMAIL.COM       \n`;
+        txt += `       TEL: 3222643534          \n`;
+        txt += "-".repeat(width) + "\n";
+        txt += `FECHA: ${fecha}   HORA: ${hora}\n`;
+        txt += `CLIENTE: ${cliente.value.toUpperCase()}\n`;
+        txt += `NEGOCIO: ${negocio.value.toUpperCase()}\n`;
+        txt += `DIR: ${direccion.value.toUpperCase()}\n`;
+        txt += `TIPO: ${tipo.value.toUpperCase()}\n`;
+        txt += "=".repeat(width) + "\n";
+        txt += `CANT  PRODUCTO           TOTAL  \n`;
+        txt += "-".repeat(width) + "\n";
+        txt += body;
+        txt += "-".repeat(width) + "\n";
+        txt += formatLine("SUBTOTAL:", `$${subtotalVal.toLocaleString()}`, width) + "\n";
+        txt += formatLine("DESCUENTOS:", `-$${ahorroVal.toLocaleString()}`, width) + "\n";
+        txt += formatLine("TOTAL A PAGAR:", `$${totalVal.toLocaleString()}`, width) + "\n";
+        txt += "-".repeat(width) + "\n";
+        txt += `   Usted ahorro: $${ahorroVal.toLocaleString()}   \n`;
+        txt += "-".repeat(width) + "\n";
+        txt += `No responsable de IVA segun art.\n437 E.T. Este recibo no genera \nimpuestos descontables ni derecho\na credito fiscal.\n\n`;
+        txt += `     GRACIAS POR SU COMPRA      \n\n\n`;
         
-        return texto;
+        return txt;
     }
-
-    // --- ACCIONES FINALES ---
 
     function enviarPedido() {
         guardarClienteLocal();
-        const texto = construirContenidoPedido();
-        // Para WhatsApp usamos un formato con negritas simples
-        let m = "*NUEVO PEDIDO - DISTRISNACKS*\n" + texto;
-        window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
+        const texto = generarTextoRecibo();
+        window.open("https://wa.me/573222643534?text=" + encodeURIComponent("*NUEVO PEDIDO - DISTRISNACKS*\n" + texto));
     }
 
-    function imprimirRecibo() {
+    function imprimirPedido() {
         guardarClienteLocal();
-        const texto = construirContenidoPedido();
-        // Redirección directa al esquema RawBT
+        const texto = generarTextoRecibo();
         window.location.href = "rawbt://print?text=" + encodeURIComponent(texto);
     }
 </script>
-
 </body>
 </html>
