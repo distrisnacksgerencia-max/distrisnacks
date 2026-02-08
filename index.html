@@ -4,53 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DISTRISNACKS</title>
+<link rel="icon" href="https://lh3.googleusercontent.com/d/1CoOOZSMmiRmuGCUDOAXsiCJQDKE9doDN">
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Calibri;background:#fff}
-header{background:#88003d;color:white;padding:10px;display:flex;gap:10px;position:sticky;top:0;z-index:10}
-#menuBtn{font-size:22px;cursor:pointer}
-#buscar{flex:1;padding:8px;border-radius:8px;border:none}
+body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4;overflow-x:hidden}
+header{background:#88003d;color:white;padding:10px;display:flex;gap:10px;position:sticky;top:0;z-index:100;align-items:center}
+#menuBtn{font-size:22px;cursor:pointer;padding:5px}
+#buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none}
 
-#sidebar{position:fixed;top:0;left:-260px;width:260px;height:100%;background:white;box-shadow:2px 0 10px rgba(0,0,0,.2);transition:.3s;padding:10px;z-index:20}
+#sidebar{position:fixed;top:0;left:-280px;width:260px;height:100%;background:white;box-shadow:2px 0 10px rgba(0,0,0,.2);transition:.3s;padding:15px;z-index:200;overflow-y:auto}
 #sidebar.activo{left:0}
-.cat{padding:8px;border-bottom:1px solid #eee;cursor:pointer}
-#verTodos{background:#88003d;color:white;padding:8px;border-radius:8px;text-align:center;margin-bottom:8px}
+#overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;z-index:150}
+#overlay.activo{display:block}
 
-#marcas{display:flex;gap:10px;overflow-x:auto;padding:10px}
-.marca{text-align:center;font-size:12px;min-width:70px;cursor:pointer}
-.marca img{width:60px;height:60px;border-radius:50%;border:2px solid #88003d;object-fit:cover}
+.cat-item{padding:12px;border-bottom:1px solid #eee;cursor:pointer;font-weight:bold;color:#444}
+.cat-item:hover{background:#f9f9f9}
+#verTodos{background:#88003d;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;cursor:pointer}
 
-#productos{padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:110px}
-@media(min-width:700px){#productos{grid-template-columns:repeat(3,1fr)}}
+#marcas{display:flex;gap:10px;overflow-x:auto;padding:15px;background:#fff}
+.marca{text-align:center;font-size:11px;min-width:75px;cursor:pointer}
+.marca img{width:65px;height:65px;border-radius:50%;border:2px solid #88003d;object-fit:cover;background:#fff}
 
-.producto{background:white;border-radius:12px;padding:8px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.15)}
-.producto img{width:100%;border-radius:8px}
-.nombre{font-size:14px}
-.precio{color:#88003d;font-weight:bold}
+.categoria-seccion{padding:10px;clear:both}
+.categoria-titulo{background:#eee;padding:8px 15px;border-radius:8px;font-weight:bold;color:#88003d;margin-bottom:10px;text-transform:uppercase;font-size:14px}
 
-.controles{display:flex;justify-content:center;gap:6px;margin-top:6px}
-.controles button{width:32px;height:32px;background:#88003d;color:white;border:none;border-radius:6px}
-.controles input,.item input{width:70px;text-align:center;font-size:14px;border-radius:6px;border:1px solid #ccc}
+#productos-container{padding-bottom:120px}
+.grid-productos{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 10px}
+@media(min-width:700px){.grid-productos{grid-template-columns:repeat(4,1fr)}}
 
-/* quitar flechas */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.producto{background:white;border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1);position:relative;border:1px solid #eee;display:flex;flex-direction:column;justify-content:space-between}
+.producto.premium{border:2px solid #ffbc00;background:linear-gradient(180deg, #fffcf0 0%, #ffffff 100%)}
+.premium-badge{position:absolute;top:5px;left:5px;background:#ffbc00;color:black;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:bold}
+
+.descuento-badge{position:absolute;top:5px;right:5px;background:#e91e63;color:white;font-size:11px;padding:3px 7px;border-radius:6px;font-weight:bold;z-index:1}
+
+.producto img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:8px;margin-bottom:8px}
+.nombre{font-size:13px;height:34px;overflow:hidden;line-height:1.2;margin-bottom:5px}
+.precio-old{text-decoration:line-through;color:#999;font-size:11px}
+.precio{color:#88003d;font-weight:bold;font-size:15px}
+
+.controles{display:flex;justify-content:center;gap:4px;margin-top:8px}
+.controles button{width:30px;height:30px;background:#88003d;color:white;border:none;border-radius:6px;font-size:18px;cursor:pointer}
+.controles input{width:50px;text-align:center;font-size:14px;border-radius:6px;border:1px solid #ccc;margin:0}
+
+/* Quitar flechas input number */
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 
-#burbuja{position:fixed;bottom:15px;right:15px;background:#88003d;color:white;padding:10px 14px;border-radius:999px;z-index:15}
+#burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 18px;border-radius:30px;z-index:140;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:bold}
 
-#panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:90%;transition:.3s;border-radius:18px 18px 0 0;padding:10px;overflow:auto;z-index:30}
+#panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:92%;transition:.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);border-radius:20px 20px 0 0;padding:20px;overflow:auto;z-index:300;box-shadow:0 -5px 20px rgba(0,0,0,0.2)}
 #panel.activo{bottom:0}
+.btn-cerrar-panel{width:100%;padding:10px;background:#f0f0f0;border:none;border-radius:10px;margin-bottom:15px;font-weight:bold;cursor:pointer}
 
-.item{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.item button{border:none;background:#88003d;color:white;border-radius:6px;padding:4px 6px}
+.item-carrito{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;font-size:14px}
+.item-carrito-controles{display:flex;align-items:center;gap:5px}
 
-input,select{width:100%;padding:8px;margin:4px 0;border-radius:8px;border:1px solid #ccc}
-#enviar{width:100%;padding:12px;background:#25D366;border:none;border-radius:10px;color:white}
-#enviar:disabled{background:#ccc}
+.seccion-cliente{background:#f9f9f9;padding:15px;border-radius:12px;margin:15px 0;border:1px solid #eee}
+.historial-item{padding:8px;background:white;margin-top:5px;border-radius:6px;font-size:12px;border-left:4px solid #88003d;display:flex;justify-content:space-between;align-items:center}
 
-footer{background:#111;color:white;padding:20px;text-align:center;font-size:13px}
+#enviar{width:100%;padding:15px;background:#25D366;border:none;border-radius:10px;color:white;font-weight:bold;font-size:16px;margin-top:15px;cursor:pointer}
+#enviar:disabled{background:#ccc;cursor:not-allowed}
+#vaciar{width:100%;padding:10px;background:#ff4444;color:white;border:none;border-radius:10px;margin-top:10px;cursor:pointer}
+
+footer{background:#111;color:white;padding:30px 20px 120px 20px;text-align:center;font-size:13px}
 footer a{color:white;text-decoration:none}
 </style>
 </head>
@@ -58,131 +76,431 @@ footer a{color:white;text-decoration:none}
 <body>
 
 <header>
-<span id="menuBtn" onclick="toggleMenu()">☰</span>
-<input id="buscar" placeholder="Buscar producto o marca">
+    <span id="menuBtn" onclick="toggleMenu()">☰</span>
+    <input id="buscar" placeholder="Buscar producto o marca..." oninput="filtrarGlobal()">
 </header>
 
+<div id="overlay" onclick="cerrarMenu()"></div>
+
 <div id="sidebar">
-<button onclick="cerrarMenu()" style="width:100%;margin-bottom:8px">⬅ Cerrar</button>
+    <button onclick="cerrarMenu()" style="width:100%; padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc; background:#fff">⬅ Cerrar Menú</button>
+    <div id="verTodos" onclick="limpiarFiltros()">🏠 Ver todo el catálogo</div>
+    <div id="lista-categorias"></div>
 </div>
 
 <div id="marcas"></div>
-<div id="productos"></div>
 
-<div id="burbuja" onclick="panel.classList.add('activo')">🛒 <span id="items">0</span> | $<span id="totalBarra">0</span></div>
+<div id="productos-container"></div>
+
+<div id="burbuja" onclick="abrirPanel()">
+    🛒 <span id="items-count">0</span> | $<span id="total-barra">0</span>
+</div>
 
 <div id="panel">
-<button onclick="panel.classList.remove('activo')">⬇ Ocultar</button>
-<div id="lista"></div>
-<h3>Total $<span id="total"></span></h3>
+    <button class="btn-cerrar-panel" onclick="cerrarPanel()">⬇ Continuar comprando</button>
+    
+    <h3>Mi Carrito</h3>
+    <div id="lista-carrito"></div>
+    <h3 style="text-align:right">Total: $<span id="total-carrito">0</span></h3>
+    
+    <div class="seccion-cliente">
+        <h4>Datos del Cliente</h4>
+        <input id="c_nombre" placeholder="Nombre completo" list="clientes-list">
+        <datalist id="clientes-list"></datalist>
+        <input id="c_negocio" placeholder="Nombre del Negocio">
+        <input id="c_direccion" placeholder="Dirección de entrega">
+        <input id="c_tel" placeholder="Teléfono" type="number">
+        <select id="c_tipo">
+            <option value="">Tipo de cliente</option>
+            <option>Nuevo</option>
+            <option>Existente</option>
+        </select>
+        <div id="historial-container" style="display:none; margin-top:10px">
+            <p style="font-size:12px; color:#666; margin:0">Último pedido detectado:</p>
+            <div id="ultimo-pedido-info"></div>
+        </div>
+    </div>
 
-<input id="cliente" placeholder="Cliente">
-<input id="negocio" placeholder="Negocio">
-<input id="direccion" placeholder="Dirección">
-<select id="tipo"><option value="">Tipo cliente</option><option>Nuevo</option><option>Existente</option></select>
-
-<div id="mensaje"></div>
-<button id="enviar" onclick="whatsapp()" disabled>Enviar pedido</button>
+    <div id="msg-minimo" style="color:red; font-size:12px; text-align:center; margin-bottom:10px"></div>
+    <button id="enviar" onclick="enviarPedido()" disabled>Enviar Pedido por WhatsApp</button>
+    <button id="vaciar" onclick="confirmarVaciar()">Nuevo Pedido / Limpiar Carrito</button>
 </div>
 
 <footer>
-<b>DISTRISNACKS</b><br>
-Bogotá<br>
-📱 <a href="https://wa.me/573222643534">3222643534</a><br>
-✉ Distrisnacksgerencia@gmail.com<br><br>
-© <span id="year"></span>
+    <img src="https://lh3.googleusercontent.com/d/1A1pYLXrHLmGHdXDg0KIoX1mbhQz2CpzG" alt="DISTRISNACKS" style="max-width:180px; margin-bottom:10px"><br>
+    <b>Distribuidora de Snacks</b><br>
+    Bogotá, Colombia<br>
+    📱 <a href="https://wa.me/573222643534">3222643534</a><br>
+    ✉ Distrisnacksgerencia@gmail.com<br><br>
+    © <span id="year"></span>
 </footer>
 
 <script>
-year.innerText=new Date().getFullYear();
+document.getElementById('year').innerText = new Date().getFullYear();
 
-const SHEET="https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
-const MIN=25000,MAX=999;
+const SHEET = "https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
+const MIN_PEDIDO = 25000;
+const MAX_DIGITOS = 999;
 
-let productos=[],marcas=[],carrito=JSON.parse(localStorage.getItem("carrito")||"{}");
-let marcaFiltro="",catFiltro="";
+let DB_PRODUCTOS = [];
+let DB_MARCAS = [];
+let carrito = JSON.parse(localStorage.getItem("carrito_distrisnacks") || "{}");
+let clientes = JSON.parse(localStorage.getItem("clientes_distrisnacks") || "[]");
 
-fetch(SHEET).then(r=>r.text()).then(csv=>{
-csv.split(/\r?\n/).slice(1).forEach(f=>{
-const c=f.split(",").map(x=>(x||"").replace(/"/g,"").trim());
-if(c[4]==="SI")productos.push({n:c[1],p:+c[2].replace(/\D/g,""),img:c[3],marca:c[6],cat:c[7]});
-if(c[9]&&c[11]==="SI")marcas.push({nombre:c[9],logo:c[10]});
+let filtroCat = "";
+let filtroMarca = "";
+let busqueda = "";
+
+// Carga de datos
+fetch(SHEET).then(r => r.text()).then(csv => {
+    const filas = csv.split(/\r?\n/).slice(1);
+    filas.forEach(f => {
+        const c = f.split(",").map(x => (x || "").replace(/"/g, "").trim());
+        
+        // Mapeo según instrucciones
+        if(c[4] === "SI") { // Col E: Activo
+            const precioBase = parseInt(c[2].replace(/\D/g, "")) || 0;
+            const descPorc = parseInt(c[8]) || 0; // Col I: Descuento
+            const precioFinal = descPorc > 0 ? Math.round(precioBase * (1 - descPorc/100)) : precioBase;
+            
+            DB_PRODUCTOS.push({
+                n: c[1],        // Nombre
+                pBase: precioBase,
+                p: precioFinal,
+                img: c[3],      // Col D: Imagen
+                premium: c[5] === "SI", // Col F
+                marca: c[6],    // Col G
+                cat: c[7],      // Col H
+                desc: descPorc
+            });
+        }
+        
+        // Marcas: Col J (9), K (10), L (11)
+        if(c[9] && c[11] === "SI" && c[10]) {
+            if(!DB_MARCAS.find(m => m.nombre === c[9])) {
+                DB_MARCAS.push({ nombre: c[9], logo: c[10] });
+            }
+        }
+    });
+    
+    renderTodo();
+    actualizarDatalistClientes();
 });
-renderSidebar();renderMarcas();renderProductos();render();
-});
 
-function toggleMenu(){sidebar.classList.toggle("activo")}
-function cerrarMenu(){sidebar.classList.remove("activo")}
-
-buscar.oninput=renderProductos;
-
-function renderSidebar(){
-const cats=[...new Set(productos.map(p=>p.cat).filter(Boolean))];
-sidebar.innerHTML=`<div id="verTodos" onclick="marcaFiltro='';catFiltro='';cerrarMenu();renderProductos()">🏠 Ver todos</div>`;
-cats.forEach(c=>{
-sidebar.innerHTML+=`<div class="cat" onclick="catFiltro='${c}';marcaFiltro='';cerrarMenu();renderProductos()">${c}</div>`;
-});
+function toggleMenu() { 
+    document.getElementById('sidebar').classList.toggle('activo');
+    document.getElementById('overlay').classList.toggle('activo');
 }
 
-function renderMarcas(){
-marcas.forEach(m=>{
-marcasDiv.innerHTML+=`<div class="marca" onclick="marcaFiltro='${m.nombre}';catFiltro='';renderProductos()"><img src="${m.logo}"><div>${m.nombre}</div></div>`;
-});
+function cerrarMenu() {
+    document.getElementById('sidebar').classList.remove('activo');
+    document.getElementById('overlay').classList.remove('activo');
 }
 
-const productosDiv=document.getElementById("productos");
-const marcasDiv=document.getElementById("marcas");
+function abrirPanel() { document.getElementById('panel').classList.add('activo'); }
+function cerrarPanel() { document.getElementById('panel').classList.remove('activo'); }
 
-function renderProductos(){
-productosDiv.innerHTML="";
-productos.filter(p=>(!marcaFiltro||p.marca===marcaFiltro)&&(!catFiltro||p.cat===catFiltro)&&p.n.toLowerCase().includes(buscar.value.toLowerCase()))
-.forEach(p=>{
-const c=carrito[p.n]?.c||0;
-productosDiv.innerHTML+=`<div class="producto"><img src="${p.img}"><div class="nombre">${p.n}</div><div class="precio">$${p.p.toLocaleString()}</div><div class="controles"><button onclick="chg('${p.n}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${c}" onfocus="this.select()" oninput="set('${p.n}',this.value)" onblur="renderProductos()"><button onclick="chg('${p.n}',1)">+</button></div></div>`;
-});
+function limpiarFiltros() {
+    filtroCat = "";
+    filtroMarca = "";
+    busqueda = "";
+    document.getElementById('buscar').value = "";
+    cerrarMenu();
+    renderTodo();
 }
 
-function chg(n,v){
-const p=productos.find(x=>x.n===n);
-let c=(carrito[n]?.c||0)+v;
-if(c>MAX)c=MAX;
-if(c<=0)delete carrito[n]; else carrito[n]={c,pr:p.p};
-save();render();renderProductos();
+function filtrarGlobal() {
+    busqueda = document.getElementById('buscar').value.toLowerCase();
+    // Al buscar, se prioriza el resultado global sobre la categoría activa
+    renderProductos();
 }
 
-function set(n,v){
-if(v==="")return;
-let num=parseInt(v);
-if(isNaN(num))return;
-if(num>MAX)num=MAX;
-const p=productos.find(x=>x.n===n);
-if(num<=0)delete carrito[n]; else carrito[n]={c:num,pr:p.p};
-save();render();
+function renderTodo() {
+    renderSidebar();
+    renderMarcas();
+    renderProductos();
+    actualizarCarritoUI();
 }
 
-function render(){
-let t=0,i=0,h="";
-for(let k in carrito){
-t+=carrito[k].pr*carrito[k].c;i+=carrito[k].c;
-h+=`<div class="item">${k}<div><button onclick="chg('${k}',-1)">−</button><input type="number" min="0" max="${MAX}" value="${carrito[k].c}" onfocus="this.select()" oninput="set('${k}',this.value);render()" onblur="renderProductos()"><button onclick="chg('${k}',1)">+</button></div></div>`;
-}
-lista.innerHTML=h;
-total.innerText=t.toLocaleString();
-totalBarra.innerText=t.toLocaleString();
-items.innerText=i;
-mensaje.innerText=t<MIN?"Pedido mínimo $25.000":"";
-enviar.disabled=!(t>=MIN&&cliente.value&&negocio.value&&direccion.value&&tipo.value);
+function renderSidebar() {
+    const cats = [...new Set(DB_PRODUCTOS.map(p => p.cat))].sort();
+    const div = document.getElementById('lista-categorias');
+    div.innerHTML = "";
+    cats.forEach(c => {
+        if(!c) return;
+        const item = document.createElement('div');
+        item.className = 'cat-item';
+        item.innerText = c;
+        item.onclick = () => {
+            filtroCat = c;
+            filtroMarca = "";
+            busqueda = "";
+            cerrarMenu();
+            renderProductos();
+        };
+        div.appendChild(item);
+    });
 }
 
-function save(){localStorage.setItem("carrito",JSON.stringify(carrito))}
-["cliente","negocio","direccion","tipo"].forEach(x=>window[x].oninput=render);
+function renderMarcas() {
+    const div = document.getElementById('marcas');
+    div.innerHTML = "";
+    // Solo mostrar marcas que tengan productos activos
+    const marcasConStock = DB_MARCAS.filter(m => DB_PRODUCTOS.some(p => p.marca === m.nombre));
+    
+    marcasConStock.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'marca';
+        item.innerHTML = `<img src="${m.logo}"><div>${m.nombre}</div>`;
+        item.onclick = () => {
+            filtroMarca = m.nombre;
+            filtroCat = "";
+            busqueda = "";
+            renderProductos();
+        };
+        div.appendChild(item);
+    });
+}
 
-function whatsapp(){
-let m=`Pedido DISTRISNACKS:%0ACliente:${cliente.value}%0ANegocio:${negocio.value}%0ADirección:${direccion.value}%0ATipo:${tipo.value}%0A`;
-for(let k in carrito)m+=`${carrito[k].c} x ${k}%0A`;
-m+=`Total $${total.innerText}`;
-window.open("https://wa.me/573222643534?text="+m);
-carrito={};save();render();renderProductos();
+function renderProductos() {
+    const container = document.getElementById('productos-container');
+    container.innerHTML = "";
+
+    // Lógica de filtrado
+    let filtrados = DB_PRODUCTOS.filter(p => {
+        const coincideBusqueda = p.n.toLowerCase().includes(busqueda) || p.marca.toLowerCase().includes(busqueda);
+        if (busqueda) return coincideBusqueda;
+        
+        if (filtroMarca) return p.marca === filtroMarca;
+        if (filtroCat) return p.cat === filtroCat;
+        return true;
+    });
+
+    // Agrupar por categorías
+    let categoriasFinales = [...new Set(filtrados.map(p => p.cat))];
+    
+    // Si hay productos con descuento, crear sección Promociones
+    const promos = filtrados.filter(p => p.desc > 0);
+    if(promos.length > 0 && !filtroMarca && !filtroCat) {
+        renderSeccion(container, "🔥 PROMOCIONES", promos);
+    }
+
+    categoriasFinales.forEach(cat => {
+        const productosDeCat = filtrados.filter(p => p.cat === cat);
+        if(productosDeCat.length > 0) {
+            renderSeccion(container, cat, productosDeCat);
+        }
+    });
+}
+
+function renderSeccion(container, titulo, prods) {
+    const sec = document.createElement('div');
+    sec.className = 'categoria-seccion';
+    sec.innerHTML = `<div class="categoria-titulo">${titulo}</div>`;
+    
+    const grid = document.createElement('div');
+    grid.className = 'grid-productos';
+    
+    prods.forEach(p => {
+        const cant = carrito[p.n]?.c || 0;
+        const card = document.createElement('div');
+        card.className = `producto ${p.premium ? 'premium' : ''}`;
+        
+        card.innerHTML = `
+            ${p.desc > 0 ? `<div class="descuento-badge">-${p.desc}%</div>` : ''}
+            ${p.premium ? `<div class="premium-badge">PREMIUM</div>` : ''}
+            <img src="${p.img}" onerror="this.style.display='none'">
+            <div class="nombre">${p.n}</div>
+            <div class="precios">
+                ${p.desc > 0 ? `<div class="precio-old">$${p.pBase.toLocaleString()}</div>` : ''}
+                <div class="precio">$${p.p.toLocaleString()}</div>
+            </div>
+            <div class="controles">
+                <button onclick="cambiarCant('${p.n}', -1)">−</button>
+                <input type="number" value="${cant}" onchange="setCant('${p.n}', this.value)" onfocus="this.select()">
+                <button onclick="cambiarCant('${p.n}', 1)">+</button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+    
+    sec.appendChild(grid);
+    container.appendChild(sec);
+}
+
+// Lógica de Carrito
+function cambiarCant(nombre, delta) {
+    const prod = DB_PRODUCTOS.find(p => p.n === nombre);
+    let cantActual = carrito[nombre]?.c || 0;
+    let nuevaCant = cantActual + delta;
+    setCant(nombre, nuevaCant);
+}
+
+function setCant(nombre, valor) {
+    const prod = DB_PRODUCTOS.find(p => p.n === nombre);
+    let n = parseInt(valor) || 0;
+    
+    if (n > MAX_DIGITOS) n = MAX_DIGITOS;
+    
+    if (n <= 0) {
+        delete carrito[nombre];
+    } else {
+        carrito[nombre] = { c: n, p: prod.p };
+    }
+    
+    localStorage.setItem("carrito_distrisnacks", JSON.stringify(carrito));
+    actualizarCarritoUI();
+    renderProductos(); // Para actualizar los inputs en la lista
+}
+
+function actualizarCarritoUI() {
+    const lista = document.getElementById('lista-carrito');
+    lista.innerHTML = "";
+    let total = 0;
+    let items = 0;
+
+    for (let k in carrito) {
+        const item = carrito[k];
+        total += item.c * item.p;
+        items += item.c;
+
+        const div = document.createElement('div');
+        div.className = 'item-carrito';
+        div.innerHTML = `
+            <div style="flex:1"><b>${k}</b><br><small>$${item.p.toLocaleString()}</small></div>
+            <div class="item-carrito-controles">
+                <button onclick="cambiarCant('${k}', -1)" style="border:none; background:#88003d; color:white; border-radius:4px; width:24px">−</button>
+                <input type="number" value="${item.c}" style="width:40px; text-align:center" onchange="setCant('${k}', this.value)">
+                <button onclick="cambiarCant('${k}', 1)" style="border:none; background:#88003d; color:white; border-radius:4px; width:24px">+</button>
+            </div>
+        `;
+        lista.appendChild(div);
+    }
+
+    document.getElementById('total-carrito').innerText = total.toLocaleString();
+    document.getElementById('total-barra').innerText = total.toLocaleString();
+    document.getElementById('items-count').innerText = items;
+    
+    // Validación de botón enviar
+    const btn = document.getElementById('enviar');
+    const msg = document.getElementById('msg-minimo');
+    const clienteOk = document.getElementById('c_nombre').value && document.getElementById('c_tel').value;
+    
+    if(total < MIN_PEDIDO) {
+        msg.innerText = `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}`;
+        btn.disabled = true;
+    } else if(!clienteOk) {
+        msg.innerText = "Completa nombre y teléfono";
+        btn.disabled = true;
+    } else {
+        msg.innerText = "";
+        btn.disabled = false;
+    }
+}
+
+function confirmarVaciar() {
+    if(confirm("¿Deseas vaciar el carrito para un nuevo pedido?")) {
+        carrito = {};
+        localStorage.setItem("carrito_distrisnacks", JSON.stringify(carrito));
+        actualizarCarritoUI();
+        renderProductos();
+    }
+}
+
+// Gestión de Clientes
+document.getElementById('c_nombre').oninput = function() {
+    const val = this.value;
+    const clienteEncontrado = clientes.find(c => c.nombre === val);
+    if(clienteEncontrado) {
+        document.getElementById('c_negocio').value = clienteEncontrado.negocio;
+        document.getElementById('c_direccion').value = clienteEncontrado.direccion;
+        document.getElementById('c_tel').value = clienteEncontrado.tel;
+        document.getElementById('c_tipo').value = "Existente";
+        
+        if(clienteEncontrado.ultimoPedido) {
+            const hist = document.getElementById('historial-container');
+            hist.style.display = "block";
+            document.getElementById('ultimo-pedido-info').innerHTML = `
+                <div class="historial-item">
+                    <span>${clienteEncontrado.fecha} - $${clienteEncontrado.totalPedido}</span>
+                    <button onclick='repetirPedido(${JSON.stringify(clienteEncontrado.ultimoPedido)})' style="background:#88003d; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:10px">REPETIR</button>
+                </div>
+            `;
+        }
+    } else {
+        document.getElementById('historial-container').style.display = "none";
+    }
+    actualizarCarritoUI();
+};
+
+document.getElementById('c_tel').oninput = actualizarCarritoUI;
+
+function actualizarDatalistClientes() {
+    const list = document.getElementById('clientes-list');
+    list.innerHTML = "";
+    clientes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.nombre;
+        list.appendChild(opt);
+    });
+}
+
+function repetirPedido(pedidoAnterior) {
+    if(confirm("¿Cargar los productos del último pedido al carrito?")) {
+        carrito = pedidoAnterior;
+        localStorage.setItem("carrito_distrisnacks", JSON.stringify(carrito));
+        actualizarCarritoUI();
+        renderProductos();
+        alert("Pedido cargado con éxito.");
+    }
+}
+
+function enviarPedido() {
+    const nombre = document.getElementById('c_nombre').value;
+    const negocio = document.getElementById('c_negocio').value;
+    const direccion = document.getElementById('c_direccion').value;
+    const tel = document.getElementById('c_tel').value;
+    const tipo = document.getElementById('c_tipo').value;
+    const totalPedido = document.getElementById('total-carrito').innerText;
+
+    // Guardar cliente
+    const clienteData = {
+        nombre, negocio, direccion, tel, 
+        ultimoPedido: carrito,
+        totalPedido,
+        fecha: new Date().toLocaleDateString()
+    };
+    
+    const index = clientes.findIndex(c => c.nombre === nombre);
+    if(index > -1) clientes[index] = clienteData;
+    else clientes.push(clienteData);
+    
+    localStorage.setItem("clientes_distrisnacks", JSON.stringify(clientes));
+
+    // WhatsApp
+    let m = `*PEDIDO DISTRISNACKS*%0A`;
+    m += `*Cliente:* ${nombre}%0A`;
+    m += `*Negocio:* ${negocio}%0A`;
+    m += `*Dirección:* ${direccion}%0A`;
+    m += `*Tipo:* ${tipo}%0A`;
+    m += `--------------------------%0A`;
+    
+    for (let k in carrito) {
+        m += `${carrito[k].c} x ${k} ($${(carrito[k].c * carrito[k].p).toLocaleString()})%0A`;
+    }
+    
+    m += `--------------------------%0A`;
+    m += `*TOTAL A PAGAR: $${totalPedido}*%0A%0A`;
+    m += `Generado el ${new Date().toLocaleString()}`;
+
+    window.open(`https://wa.me/573222643534?text=${m}`);
+    
+    // Reset tras éxito parcial
+    carrito = {};
+    localStorage.setItem("carrito_distrisnacks", JSON.stringify(carrito));
+    actualizarCarritoUI();
+    renderProductos();
+    cerrarPanel();
 }
 </script>
 
