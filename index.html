@@ -311,7 +311,6 @@
         s.appendChild(g); prodContenedor.appendChild(s);
     }
 
-    /* LIMITACIÓN SILENCIOSA 3 CIFRAS */
     function validarCant(el) {
         if(el.value.length > 3) el.value = el.value.slice(0, 3);
         if(parseInt(el.value) > MAX_VALOR) el.value = MAX_VALOR;
@@ -322,7 +321,9 @@
         if(c > MAX_VALOR) c = MAX_VALOR;
         if(c <= 0) delete carrito[n]; 
         else { const p = productos.find(x => x.n === n); carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium }; }
-        save(); renderCarrito(); renderProductos();
+        save(); renderCarrito(); 
+        const q = carrito[n] ? carrito[n].c : 0;
+        document.querySelectorAll('.producto').forEach(p => { if(p.querySelector('.nombre').innerText === n) p.querySelector('input').value = q; });
     }
 
     function set(n, v) {
@@ -330,7 +331,9 @@
         if(num > MAX_VALOR) num = MAX_VALOR;
         if(num <= 0) delete carrito[n]; 
         else { const p = productos.find(x => x.n === n); carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium }; }
-        save(); renderCarrito(); renderProductos();
+        save(); renderCarrito();
+        const q = carrito[n] ? carrito[n].c : 0;
+        document.querySelectorAll('.producto').forEach(p => { if(p.querySelector('.nombre').innerText === n) p.querySelector('input').value = q; });
     }
 
     function renderCarrito() {
@@ -340,12 +343,15 @@
             h += `<div class="item ${i.prem ? 'premium' : ''}"><div class="item-info"><div><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${i.pr.toLocaleString()} c/u</div></div><div class="controles"><button onclick="chg('${k}',-1)">−</button><input type="number" value="${i.c}" oninput="validarCant(this)" onchange="set('${k}', this.value)"><button onclick="chg('${k}',1)">+</button></div></div>`;
         }
         lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
-        total.innerText = tot.toLocaleString(); totalBarra.innerText = tot.toLocaleString();
-        subtotal.innerText = "$" + sub.toLocaleString(); ahorro.innerText = "- $" + (sub - tot).toLocaleString();
-        items.innerText = itemC;
-        mensaje.innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
+        document.getElementById('total').innerText = tot.toLocaleString(); 
+        document.getElementById('totalBarra').innerText = tot.toLocaleString();
+        document.getElementById('subtotal').innerText = "$" + sub.toLocaleString(); 
+        document.getElementById('ahorro').innerText = "- $" + (sub - tot).toLocaleString();
+        document.getElementById('items').innerText = itemC;
+        document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
-        enviar.disabled = !ok; btn_imprimir.disabled = !ok;
+        document.getElementById('enviar').disabled = !ok; 
+        document.getElementById('btn-imprimir').disabled = !ok;
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
@@ -355,15 +361,14 @@
     const historialArea = document.getElementById("historial-area");
     ["cliente", "negocio", "direccion", "tipo"].forEach(x => window[x].oninput = renderCarrito);
 
-    /* MODAL Y ENVÍO WHATSAPP */
     function mostrarConfirmacion() {
         diaElegido = "";
         document.querySelectorAll('.btn-dia').forEach(b => b.classList.remove('selected'));
         document.getElementById('btn-confirmar-wa').disabled = true;
         document.getElementById('modal-resumen-valores').innerHTML = `
-            <div class="resumen-linea"><span>Subtotal:</span> <span>${subtotal.innerText}</span></div>
-            <div class="resumen-linea" style="color:green"><span>Descuento:</span> <span>${ahorro.innerText}</span></div>
-            <div class="resumen-linea" style="font-weight:bold; font-size:16px; margin-top:10px; color:#88003d"><span>Total a pagar:</span> <span>$${total.innerText}</span></div>
+            <div class="resumen-linea"><span>Subtotal:</span> <span>${document.getElementById('subtotal').innerText}</span></div>
+            <div class="resumen-linea" style="color:green"><span>Descuento:</span> <span>${document.getElementById('ahorro').innerText}</span></div>
+            <div class="resumen-linea" style="font-weight:bold; font-size:16px; margin-top:10px; color:#88003d"><span>Total a pagar:</span> <span>$${document.getElementById('total').innerText}</span></div>
         `;
         document.getElementById('modal-confirmacion').style.display = 'flex';
     }
@@ -385,7 +390,6 @@
             msgItems += `• ${i.c} x ${k}%0A`;
         }
         let ahr = sub - tot;
-        
         let m = `Hola, te compartimos el resumen de tu pedido y algunos detalles para coordinar la entrega.%0A%0A`;
         m += `*Día ideal de entrega:* ${diaElegido}%0A%0A`;
         m += `*DETALLES DEL CLIENTE*%0A`;
@@ -400,16 +404,14 @@
         m += `*TOTAL A PAGAR:* $${tot.toLocaleString()}%0A`;
         m += `--------------------------------%0A`;
         if(ahr > 0) m += `*¡Ahorro obtenido: $${ahr.toLocaleString()}!*%0A`;
-
         window.open("https://wa.me/573222643534?text=" + m);
         cerrarConfirmacion();
     }
 
-    /* CLIENTES LOCALES */
     function guardarClienteLocal() {
         if(!cliente.value) return;
         let idx = clientesDB.findIndex(c => c.nombre === cliente.value);
-        let d = { nombre: cliente.value, negocio: negocio.value, dir: direccion.value, tipo: tipo.value, ultimoPedido: carrito };
+        let d = { nombre: cliente.value, negocio: negocio.value, dir: direccion.value, tipo: tipo.value, ultimoPedido: {...carrito} };
         if(idx > -1) clientesDB[idx] = d; else clientesDB.push(d);
         localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
         actualizarSelectClientes();
@@ -427,8 +429,14 @@
         const c = clientesDB.find(x => x.nombre === n);
         if(c) {
             cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo;
-            if(confirm("¿Cargar último pedido?")) { carrito = c.ultimoPedido || {}; save(); renderProductos(); }
+            if(c.ultimoPedido && Object.keys(c.ultimoPedido).length > 0) {
+                if(confirm("¿Cargar último pedido guardado para este cliente?")) { 
+                    carrito = {...c.ultimoPedido}; 
+                    save(); 
+                }
+            }
             renderCarrito();
+            renderProductos();
         }
     }
 
@@ -449,7 +457,6 @@
             let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
             hI += `<div class="t-flex"><span style="width:15%">${i.c} x</span><span style="width:55%">${k}</span><span style="width:30%; text-align:right">$${(i.pr * i.c).toLocaleString()}</span></div>`;
         }
-        const a = sub - tot;
         const ticketDiv = document.getElementById("ticket-impresion");
         ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size:16px">DISTRISNACKS</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hI}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top:10px">¡Gracias por su compra!</div>`;
         window.print();
