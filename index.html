@@ -294,8 +294,9 @@
         let g = document.createElement("div"); g.id = "productos";
         lista.forEach(p => {
             const cant = carrito[p.n]?.c || 0;
+            // Se agrega data-name para identificar exactamente el producto en las funciones de actualización
             g.innerHTML += `
-                <div class="producto ${p.premium ? 'premium' : ''}">
+                <div class="producto ${p.premium ? 'premium' : ''}" data-name="${p.n}">
                     ${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}
                     ${p.desc > 0 ? `<span class="badge-desc">-${p.desc}%</span>` : ''}
                     <img src="${p.img}">
@@ -323,7 +324,9 @@
         else { const p = productos.find(x => x.n === n); carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium }; }
         save(); renderCarrito(); 
         const q = carrito[n] ? carrito[n].c : 0;
-        document.querySelectorAll('.producto').forEach(p => { if(p.querySelector('.nombre').innerText === n) p.querySelector('input').value = q; });
+        // Solución: Usar data-name para encontrar el input exacto sin errores
+        const safeName = n.replace(/"/g, '\\"');
+        document.querySelectorAll(`.producto[data-name="${safeName}"] input`).forEach(el => el.value = q);
     }
 
     function set(n, v) {
@@ -333,7 +336,9 @@
         else { const p = productos.find(x => x.n === n); carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium }; }
         save(); renderCarrito();
         const q = carrito[n] ? carrito[n].c : 0;
-        document.querySelectorAll('.producto').forEach(p => { if(p.querySelector('.nombre').innerText === n) p.querySelector('input').value = q; });
+        // Solución: Usar data-name también aquí para consistencia
+        const safeName = n.replace(/"/g, '\\"');
+        document.querySelectorAll(`.producto[data-name="${safeName}"] input`).forEach(el => el.value = q);
     }
 
     function renderCarrito() {
@@ -387,11 +392,9 @@
         let sub = 0, tot = 0, msgItems = "";
         for(let k in carrito) {
             let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
-            // CORRECCION APLICADA: Uso \n en lugar de %0A
             msgItems += `• ${i.c} x ${k}\n`;
         }
         let ahr = sub - tot;
-        // CORRECCION APLICADA: Uso \n para saltos de linea y encodeURIComponent para la URL final
         let m = `Hola, te compartimos el resumen de tu pedido y algunos detalles para coordinar la entrega.\n\n`;
         m += `*Día ideal de entrega:* ${diaElegido}\n\n`;
         m += `*DETALLES DEL CLIENTE*\n`;
@@ -407,7 +410,6 @@
         m += `--------------------------------\n`;
         if(ahr > 0) m += `*¡Ahorro obtenido: $${ahr.toLocaleString()}!*\n`;
         
-        // Codificar todo el mensaje para que acepte emojis y tildes
         window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
         cerrarConfirmacion();
     }
