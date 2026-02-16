@@ -41,20 +41,15 @@
         .producto.premium {border: 2px solid #ffbc00; background: #fffdf2; box-shadow: 0 4px 12px rgba(255,188,0,0.2)}
         .premium-tag {position:absolute; top:5px; left:5px; background:#ffbc00; color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; z-index:5;}
         
-        /* BOTÓN INFO (CORREGIDO: Esquina inferior derecha de la imagen) */
+        /* BOTÓN INFO */
         .btn-info {
             position: absolute; 
-            bottom: 5px; /* Pegado abajo */
-            right: 5px;  /* Pegado a la derecha */
-            background: rgba(255,255,255,0.9); /* Un poco transparente para verse elegante */
-            color: #88003d; 
-            border-radius: 50%; 
-            width: 28px; height: 28px; 
+            bottom: 5px; right: 5px;  
+            background: rgba(255,255,255,0.9); color: #88003d; 
+            border-radius: 50%; width: 28px; height: 28px; 
             display: flex; align-items: center; justify-content: center; 
             font-size: 16px; cursor: pointer; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-            border: 1px solid #ddd; 
-            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #ddd; z-index: 10;
         }
 
         .badge-desc{position:absolute;top:5px;right:5px;background:#e74c3c;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold; z-index:5;}
@@ -257,11 +252,34 @@
 
     let productos = [];
     let marcas = [];
+    // Recupera el carrito guardado
     let carrito = JSON.parse(localStorage.getItem("carrito_distri") || "{}");
     let clientesDB = JSON.parse(localStorage.getItem("clientes_distri") || "[]");
     let marcaFiltro = "";
     let catFiltro = "";
     let diaElegido = "";
+
+    // LOGICA DE PERSISTENCIA DE SESIÓN: Cargar datos del cliente al iniciar
+    const sesionGuardada = JSON.parse(localStorage.getItem("distri_sesion") || "{}");
+    if(sesionGuardada.cliente) cliente.value = sesionGuardada.cliente;
+    if(sesionGuardada.negocio) negocio.value = sesionGuardada.negocio;
+    if(sesionGuardada.direccion) direccion.value = sesionGuardada.direccion;
+    if(sesionGuardada.tipo) tipo.value = sesionGuardada.tipo;
+
+    // Listener para guardar automáticamente lo que el cliente escriba
+    ["cliente", "negocio", "direccion", "tipo"].forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener("input", () => {
+            const data = {
+                cliente: cliente.value,
+                negocio: negocio.value,
+                direccion: direccion.value,
+                tipo: tipo.value
+            };
+            localStorage.setItem("distri_sesion", JSON.stringify(data));
+            renderCarrito(); // Actualiza el botón de envío
+        });
+    });
 
     fetch(SHEET).then(r => r.text()).then(csv => {
         csv.split(/\r?\n/).slice(1).forEach(f => {
@@ -417,6 +435,8 @@
         document.getElementById('ahorro').innerText = "- $" + (sub - tot).toLocaleString();
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
+        
+        // Verifica que todos los campos y el pedido mínimo estén ok
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
         document.getElementById('enviar').disabled = !ok; 
         document.getElementById('btn-imprimir').disabled = !ok;
@@ -427,7 +447,7 @@
     function abrirCarrito() { panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
     const historialArea = document.getElementById("historial-area");
-    ["cliente", "negocio", "direccion", "tipo"].forEach(x => window[x].oninput = renderCarrito);
+    // Eliminé el listener antiguo porque ahora se maneja en el bloque de persistencia
 
     function mostrarConfirmacion() {
         diaElegido = "";
@@ -506,6 +526,10 @@
                     save(); 
                 }
             }
+            // Guarda también en sesión para que no se pierda al recargar
+            const data = { cliente: c.nombre, negocio: c.negocio, direccion: c.dir, tipo: c.tipo };
+            localStorage.setItem("distri_sesion", JSON.stringify(data));
+            
             renderCarrito();
             renderProductos();
         }
