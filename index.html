@@ -52,6 +52,17 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #ddd; z-index: 10;
         }
 
+        /* BOTÓN COMPARTIR */
+        .btn-share {
+            position: absolute; 
+            bottom: 5px; left: 5px;  
+            background: rgba(255,255,255,0.9); 
+            border-radius: 50%; width: 28px; height: 28px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 15px; cursor: pointer; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #ddd; z-index: 10;
+        }
+
         .badge-desc{position:absolute;top:5px;right:5px;background:#e74c3c;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold; z-index:5;}
         .precio-old{text-decoration:line-through;color:#999;font-size:12px;margin-right:5px}
         .nombre{font-size:14px;margin:8px 0;height:34px;overflow:hidden;line-height:1.2}
@@ -350,20 +361,27 @@
         let g = document.createElement("div"); g.id = "productos";
         lista.forEach(p => {
             const cant = carrito[p.n]?.c || 0;
+            // Para evitar errores si el nombre tiene comillas, las escapamos:
+            const nombreSeguro = p.n.replace(/'/g, "\\'");
+            
             g.innerHTML += `
                 <div class="producto ${p.premium ? 'premium' : ''}" data-name="${p.n}">
                     <div style="position:relative; width:100%">
                         ${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}
                         ${p.descPorc > 0 ? `<span class="badge-desc">-${p.descPorc}%</span>` : ''}
-                        <div class="btn-info" onclick="verDetalles('${p.n}')">ℹ️</div>
+                        
+                        <!-- NUEVO BOTÓN COMPARTIR -->
+                        <div class="btn-share" onclick="compartirProducto('${nombreSeguro}')">📤</div>
+                        
+                        <div class="btn-info" onclick="verDetalles('${nombreSeguro}')">ℹ️</div>
                         <img src="${p.img}">
                     </div>
                     <div class="nombre">${p.n}</div>
                     <div class="precio">${p.descPorc > 0 ? `<span class="precio-old">$${p.pOrig.toLocaleString()}</span>` : ''} $${p.p.toLocaleString()}</div>
                     <div class="controles">
-                        <button onclick="chg('${p.n}', -1)">−</button>
-                        <input type="number" value="${cant}" oninput="validarCant(this)" onchange="set('${p.n}', this.value)" onfocus="this.select()">
-                        <button onclick="chg('${p.n}', 1)">+</button>
+                        <button onclick="chg('${nombreSeguro}', -1)">−</button>
+                        <input type="number" value="${cant}" oninput="validarCant(this)" onchange="set('${nombreSeguro}', this.value)" onfocus="this.select()">
+                        <button onclick="chg('${nombreSeguro}', 1)">+</button>
                     </div>
                 </div>`;
         });
@@ -447,7 +465,6 @@
     function abrirCarrito() { panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
     const historialArea = document.getElementById("historial-area");
-    // Eliminé el listener antiguo porque ahora se maneja en el bloque de persistencia
 
     function mostrarConfirmacion() {
         diaElegido = "";
@@ -555,6 +572,30 @@
         const ticketDiv = document.getElementById("ticket-impresion");
         ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size:16px">DISTRISNACKS</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hI}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top:10px">¡Gracias por su compra!</div>`;
         window.print();
+    }
+
+    function compartirProducto(nombreProd) {
+        const p = productos.find(x => x.n === nombreProd);
+        if(!p) return;
+
+        // Construir el mensaje codificándolo para que los links y caracteres especiales no fallen
+        let texto = `¡Hola! Mira este producto de *DISTRISNACKS* 🍿\n\n`;
+        texto += `*${p.n}*\n`;
+        
+        if(p.descPorc > 0) {
+            texto += `~Antes: $${p.pOrig.toLocaleString()}~\n`;
+        }
+        texto += `*Precio: $${p.p.toLocaleString()}*\n\n`;
+        
+        if (p.detalle) {
+            texto += `_${p.detalle}_\n\n`;
+        }
+        
+        texto += `Puedes ver la imagen aquí: \n${p.img}`;
+
+        // Al no poner un número telefónico después del "wa.me/", 
+        // WhatsApp te preguntará a qué contacto de tu agenda se lo quieres enviar.
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 </script>
 
