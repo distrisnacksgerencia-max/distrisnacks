@@ -309,7 +309,6 @@
         marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
         renderSidebar(); renderMarcas(); renderProductos(); renderCarrito(); actualizarSelectClientes();
 
-        // LÓGICA PARA ABRIR FICHA SI VIENE DE UN ENLACE COMPARTIDO
         const urlParams = new URLSearchParams(window.location.search);
         const prodId = urlParams.get('prod');
         if (prodId) {
@@ -399,7 +398,6 @@
         document.getElementById('info-renta').innerHTML = `Ganancia: $${dif.toLocaleString()} (${porc}% de rentabilidad)`;
         document.getElementById('info-desc').innerText = p.detalle || "Sin descripción disponible.";
         
-        // Asignar el evento al botón de compartir dentro de la ficha
         document.getElementById('btn-share-modal').onclick = () => compartirProducto(nombreProd);
 
         document.getElementById('modal-info').style.display = 'flex';
@@ -568,16 +566,13 @@
         window.print();
     }
 
-    function compartirProducto(nombreProd) {
+    async function compartirProducto(nombreProd) {
         const p = productos.find(x => x.n === nombreProd);
         if(!p) return;
 
-        // Construimos la URL agregando el parámetro ?prod=Nombre
-        // Aseguramos que tome la ruta correcta de tu sitio (donde sea que esté alojado)
         let enlaceBase = window.location.origin + window.location.pathname;
         let enlace = `${enlaceBase}?prod=${encodeURIComponent(p.n)}`;
 
-        // Construir la Ficha Técnica para WhatsApp
         let texto = `*DISTRISNACKS - FICHA TÉCNICA* 🍿\n`;
         texto += `━━━━━━━━━━━━━━━━━\n`;
         texto += `*📦 Producto:* ${p.n}\n`;
@@ -595,9 +590,25 @@
         }
         
         texto += `━━━━━━━━━━━━━━━━━\n`;
-        texto += `*📷 Ver foto:* \n${p.img}\n\n`;
-        texto += `*🛒 Agregar al carrito aquí:* \n${enlace}`;
+        texto += `*🛒 Agregar al carrito aquí:* \n${enlace}\n\n`;
+        
+        // Colocamos la imagen al final para ayudar a WhatsApp a generar la tarjeta de vista previa
+        texto += `*📷 Ver foto:* \n${p.img}`;
 
+        // Si el dispositivo soporta el menú de compartir nativo (como los celulares modernos)
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Distrisnacks - ${p.n}`,
+                    text: texto
+                });
+                return; // Si funciona, se detiene aquí.
+            } catch (err) {
+                console.log("Se canceló el menú nativo o hubo un error:", err);
+            }
+        }
+
+        // Plan B: Abrir WhatsApp Web directamente si está en PC o falla lo anterior
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 </script>
