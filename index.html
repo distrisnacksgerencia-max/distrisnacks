@@ -52,17 +52,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #ddd; z-index: 10;
         }
 
-        /* BOTÓN COMPARTIR */
-        .btn-share {
-            position: absolute; 
-            bottom: 5px; left: 5px;  
-            background: rgba(255,255,255,0.9); 
-            border-radius: 50%; width: 28px; height: 28px; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 15px; cursor: pointer; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #ddd; z-index: 10;
-        }
-
         .badge-desc{position:absolute;top:5px;right:5px;background:#e74c3c;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold; z-index:5;}
         .precio-old{text-decoration:line-through;color:#999;font-size:12px;margin-right:5px}
         .nombre{font-size:14px;margin:8px 0;height:34px;overflow:hidden;line-height:1.2}
@@ -99,20 +88,18 @@
             max-height: 90vh; overflow-y: auto; position: relative;
             display: flex; flex-direction: column;
         }
-        .close-modal { 
-            position: sticky; top: 0; float: right; align-self: flex-end;
-            margin-bottom: 10px;
-            background: #eee; border: none; border-radius: 50%; width: 30px; height: 30px; 
-            cursor: pointer; font-weight: bold; z-index: 10; font-size: 16px;
-            display: flex; align-items: center; justify-content: center;
-        }
 
         /* MODAL DETALLES PRODUCTO */
+        .modal-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 10; }
+        .btn-share-modal { background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .close-modal { background: #eee; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+        
         #modal-info .prod-img-grande { width: 100%; max-height: 250px; object-fit: contain; border-radius: 12px; margin-bottom: 15px; background: #fff; }
         .renta-badge { background: #e8f5e9; color: #2e7d32; padding: 8px; border-radius: 8px; font-weight: bold; margin: 10px 0; display: inline-block; border: 1px solid #2e7d32; }
         .info-desc { text-align: left; font-size: 14px; color: #555; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 10px; white-space: pre-wrap; }
 
         /* MODAL PREVENTA */
+        .close-modal-float { position: sticky; top: 0; float: right; align-self: flex-end; margin-bottom: 10px; background: #eee; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; z-index: 10; font-size: 16px; display: flex; align-items: center; justify-content: center; }
         .modal-logo { height: 40px; margin-bottom: 10px; object-fit: contain; }
         .modal-title { color: #88003d; font-weight: bold; font-size: 22px; margin-bottom: 15px; text-transform: uppercase; }
         .resumen-caja { background: #f9f9f9; padding: 15px; border-radius: 12px; text-align: left; margin-bottom: 20px; border: 1px solid #eee; }
@@ -213,9 +200,10 @@
     <button class="btn-vaciar" onclick="vaciarCarrito()">Reiniciar / Nuevo Pedido</button>
 </div>
 
+<!-- MODAL PREVENTA -->
 <div id="modal-confirmacion" class="modal-overlay">
     <div class="modal-content">
-        <span class="close-modal" onclick="cerrarConfirmacion()">✕</span>
+        <span class="close-modal-float" onclick="cerrarConfirmacion()">✕</span>
         <img src="https://lh3.googleusercontent.com/d/1A1pYLXrHLmGHdXDg0KIoX1mbhQz2CpzG" class="modal-logo">
         <div class="modal-title">PREVENTA</div>
         <div class="resumen-caja" id="modal-resumen-valores"></div>
@@ -234,9 +222,14 @@
     </div>
 </div>
 
+<!-- MODAL FICHA DEL PRODUCTO -->
 <div id="modal-info" class="modal-overlay">
     <div class="modal-content">
-        <button class="close-modal" onclick="cerrarModalInfo()">✕</button>
+        <div class="modal-header-actions">
+            <button id="btn-share-modal" class="btn-share-modal">📤 Compartir Producto</button>
+            <button class="close-modal" onclick="cerrarModalInfo()">✕</button>
+        </div>
+        
         <img id="info-img" class="prod-img-grande">
         <h3 id="info-nombre" style="color:#88003d; margin: 10px 0;"></h3>
         <div id="info-precios" style="font-size: 15px;"></div>
@@ -263,21 +256,18 @@
 
     let productos = [];
     let marcas = [];
-    // Recupera el carrito guardado
     let carrito = JSON.parse(localStorage.getItem("carrito_distri") || "{}");
     let clientesDB = JSON.parse(localStorage.getItem("clientes_distri") || "[]");
     let marcaFiltro = "";
     let catFiltro = "";
     let diaElegido = "";
 
-    // LOGICA DE PERSISTENCIA DE SESIÓN: Cargar datos del cliente al iniciar
     const sesionGuardada = JSON.parse(localStorage.getItem("distri_sesion") || "{}");
     if(sesionGuardada.cliente) cliente.value = sesionGuardada.cliente;
     if(sesionGuardada.negocio) negocio.value = sesionGuardada.negocio;
     if(sesionGuardada.direccion) direccion.value = sesionGuardada.direccion;
     if(sesionGuardada.tipo) tipo.value = sesionGuardada.tipo;
 
-    // Listener para guardar automáticamente lo que el cliente escriba
     ["cliente", "negocio", "direccion", "tipo"].forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener("input", () => {
@@ -288,7 +278,7 @@
                 tipo: tipo.value
             };
             localStorage.setItem("distri_sesion", JSON.stringify(data));
-            renderCarrito(); // Actualiza el botón de envío
+            renderCarrito();
         });
     });
 
@@ -318,6 +308,13 @@
         });
         marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
         renderSidebar(); renderMarcas(); renderProductos(); renderCarrito(); actualizarSelectClientes();
+
+        // LÓGICA PARA ABRIR FICHA SI VIENE DE UN ENLACE COMPARTIDO
+        const urlParams = new URLSearchParams(window.location.search);
+        const prodId = urlParams.get('prod');
+        if (prodId) {
+            setTimeout(() => verDetalles(prodId), 500); 
+        }
     });
 
     function toggleMenu() { sidebar.classList.toggle("activo"); }
@@ -361,7 +358,6 @@
         let g = document.createElement("div"); g.id = "productos";
         lista.forEach(p => {
             const cant = carrito[p.n]?.c || 0;
-            // Para evitar errores si el nombre tiene comillas, las escapamos:
             const nombreSeguro = p.n.replace(/'/g, "\\'");
             
             g.innerHTML += `
@@ -369,9 +365,6 @@
                     <div style="position:relative; width:100%">
                         ${p.premium ? '<span class="premium-tag">PREMIUM</span>' : ''}
                         ${p.descPorc > 0 ? `<span class="badge-desc">-${p.descPorc}%</span>` : ''}
-                        
-                        <!-- NUEVO BOTÓN COMPARTIR -->
-                        <div class="btn-share" onclick="compartirProducto('${nombreSeguro}')">📤</div>
                         
                         <div class="btn-info" onclick="verDetalles('${nombreSeguro}')">ℹ️</div>
                         <img src="${p.img}">
@@ -406,6 +399,9 @@
         document.getElementById('info-renta').innerHTML = `Ganancia: $${dif.toLocaleString()} (${porc}% de rentabilidad)`;
         document.getElementById('info-desc').innerText = p.detalle || "Sin descripción disponible.";
         
+        // Asignar el evento al botón de compartir dentro de la ficha
+        document.getElementById('btn-share-modal').onclick = () => compartirProducto(nombreProd);
+
         document.getElementById('modal-info').style.display = 'flex';
     }
 
@@ -454,7 +450,6 @@
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         
-        // Verifica que todos los campos y el pedido mínimo estén ok
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
         document.getElementById('enviar').disabled = !ok; 
         document.getElementById('btn-imprimir').disabled = !ok;
@@ -543,7 +538,6 @@
                     save(); 
                 }
             }
-            // Guarda también en sesión para que no se pierda al recargar
             const data = { cliente: c.nombre, negocio: c.negocio, direccion: c.dir, tipo: c.tipo };
             localStorage.setItem("distri_sesion", JSON.stringify(data));
             
@@ -578,26 +572,36 @@
         const p = productos.find(x => x.n === nombreProd);
         if(!p) return;
 
-        // Construir el mensaje codificándolo para que los links y caracteres especiales no fallen
-        let texto = `¡Hola! Mira este producto de *DISTRISNACKS* 🍿\n\n`;
-        texto += `*${p.n}*\n`;
+        // Construimos la URL agregando el parámetro ?prod=Nombre
+        // Aseguramos que tome la ruta correcta de tu sitio (donde sea que esté alojado)
+        let enlaceBase = window.location.origin + window.location.pathname;
+        let enlace = `${enlaceBase}?prod=${encodeURIComponent(p.n)}`;
+
+        // Construir la Ficha Técnica para WhatsApp
+        let texto = `*DISTRISNACKS - FICHA TÉCNICA* 🍿\n`;
+        texto += `━━━━━━━━━━━━━━━━━\n`;
+        texto += `*📦 Producto:* ${p.n}\n`;
+        
+        if (p.marca) texto += `*🏷️ Marca:* ${p.marca}\n`;
+        if (p.cat) texto += `*📂 Categoría:* ${p.cat}\n`;
         
         if(p.descPorc > 0) {
-            texto += `~Antes: $${p.pOrig.toLocaleString()}~\n`;
+            texto += `*❌ Antes:* ~$${p.pOrig.toLocaleString()}~\n`;
         }
-        texto += `*Precio: $${p.p.toLocaleString()}*\n\n`;
+        texto += `*💰 Precio:* $${p.p.toLocaleString()}\n`;
         
         if (p.detalle) {
-            texto += `_${p.detalle}_\n\n`;
+            texto += `\n*📝 Descripción:*\n_${p.detalle}_\n`;
         }
         
-        texto += `Puedes ver la imagen aquí: \n${p.img}`;
+        texto += `━━━━━━━━━━━━━━━━━\n`;
+        texto += `*📷 Ver foto:* \n${p.img}\n\n`;
+        texto += `*🛒 Agregar al carrito aquí:* \n${enlace}`;
 
-        // Al no poner un número telefónico después del "wa.me/", 
-        // WhatsApp te preguntará a qué contacto de tu agenda se lo quieres enviar.
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
     }
 </script>
 
 </body>
 </html>
+
