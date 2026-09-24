@@ -213,7 +213,7 @@ Distrisnacksgerencia@gmail.com<br><br>
 <span id="year"></span>
 </footer>
 <script>
-year.innerText = new Date().getFullYear();
+document.getElementById('year').innerText = new Date().getFullYear();
 const SHEET = "https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2IdYVeDLbzV15LMhl/export?format=csv&gid=1965298886";
 const MIN_PEDIDO = 25000;
 let productos = [];
@@ -223,103 +223,121 @@ let clientesDB = JSON.parse(localStorage.getItem("clientes_distri") || "[]");
 let marcaFiltro = "";
 let catFiltro = "";
 let diaElegido = "";
+
+// Referencias seguras al DOM
+const clienteEl = document.getElementById('cliente');
+const negocioEl = document.getElementById('negocio');
+const direccionEl = document.getElementById('direccion');
+const tipoEl = document.getElementById('tipo');
+const buscarEl = document.getElementById('buscar');
+const panelEl = document.getElementById('panel');
+const sidebarEl = document.getElementById('sidebar');
+
 const sesionGuardada = JSON.parse(localStorage.getItem("distri_sesion") || "{}");
+if(sesionGuardada.cliente) clienteEl.value = sesionGuardada.cliente;
+if(sesionGuardada.negocio) negocioEl.value = sesionGuardada.negocio;
+if(sesionGuardada.direccion) direccionEl.value = sesionGuardada.direccion;
+if(sesionGuardada.tipo) tipoEl.value = sesionGuardada.tipo;
 
-if(sesionGuardada.cliente) cliente.value = sesionGuardada.cliente;
-if(sesionGuardada.negocio) negocio.value = sesionGuardada.negocio;
-if(sesionGuardada.direccion) direccion.value = sesionGuardada.direccion;
-if(sesionGuardada.tipo) tipo.value = sesionGuardada.tipo;
-
-["cliente", "negocio", "direccion", "tipo"].forEach(id => {
-    const el = document.getElementById(id);
+[clienteEl, negocioEl, direccionEl, tipoEl].forEach(el => {
     el.addEventListener("input", () => {
-        const data = { cliente: cliente.value, negocio: negocio.value, direccion: direccion.value, tipo: tipo.value };
+        const data = { cliente: clienteEl.value, negocio: negocioEl.value, direccion: direccionEl.value, tipo: tipoEl.value };
         localStorage.setItem("distri_sesion", JSON.stringify(data));
         renderCarrito();
     });
 });
 
+// Lógica de carga ultra-segura (evita bloqueos si hay celdas vacías en Sheets)
 fetch(SHEET).then(r => r.text()).then(csv => {
-    csv.split(/\r?\n/).slice(1).forEach(f => {
+    let lineas = csv.split(/\r?\n/).slice(1);
+    lineas.forEach(f => {
         const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => (x || "").replace(/"/g,"").trim());
-        if(c[4] === "S1") {
-            // LECTURA DEL VALOR DEL DOMO (Columna Q - Índice 16)
-            let domoVal = parseInt((c[16] || "0").replace(/\D/g,"")) || 0;
-            let pBaseOrig = parseInt((c[2] || "0").replace(/\D/g,"")) || 0;
-            let dPorc = parseInt(c[8]) || 0;
+        
+        if(c.length >= 5 && c[4] === "S1") {
+            // Leemos valores de forma segura previniendo errores si la columna no existe
+            let domoVal = (c.length > 16 && c[16]) ? (parseInt(c[16].replace(/\D/g,"")) || 0) : 0;
+            let pBaseOrig = (c.length > 2 && c[2]) ? (parseInt(c[2].replace(/\D/g,"")) || 0) : 0;
+            let dPorc = (c.length > 8 && c[8]) ? (parseInt(c[8]) || 0) : 0;
+            let pvp = (c.length > 13 && c[13]) ? (parseInt(c[13].replace(/\D/g,"")) || 0) : 0;
             
-            // Sumamos el valor del domo directamente al precio en catálogo
+            // Calculamos el precio en catálogo incluyendo de una vez el valor del domo
             let pBaseConDomo = pBaseOrig + domoVal;
-            let pFinalConDomo = (dPorc > 0 ? Math.round(pBaseOrig * (1-dPorc/100)) : pBaseOrig) + domoVal;
-            let pvp = parseInt((c[13] || "0").replace(/\D/g,"")) || 0;
+            let pFinalConDomo = (dPorc > 0 ? Math.round(pBaseOrig * (1 - dPorc/100)) : pBaseOrig) + domoVal;
 
             productos.push({
-                n: c[1],
+                n: c[1] || "Sin nombre",
                 pOrig: pBaseConDomo,
                 p: pFinalConDomo,
-                img: c[3],
+                img: c[3] || "",
                 premium: c[5] === "S1",
-                marca: c[6],
-                cat: c[7],
+                marca: c[6] || "",
+                cat: c[7] || "",
                 descPorc: dPorc,
                 pvp: pvp,
-                detalle: c[15],
-                domo: domoVal // Guardamos el valor interno para saber si tiene o no
+                detalle: c.length > 15 ? c[15] : "",
+                domo: domoVal
             });
 
-            if(c[9] && c[11] === "S1" && c[10]) {
-                if(!marcas.find(m => m.nombre === c[9])) marcas.push({ nombre: c[9], logo: c[10] });
+            if(c.length > 11 && c[9] && c[11] === "S1" && c[10]) {
+                if(!marcas.find(m => m.nombre === c[9])) {
+                    marcas.push({ nombre: c[9], logo: c[10] });
+                }
             }
         }
     });
+    
     marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
-    renderSidebar(); renderMarcas(); renderProductos(); renderCarrito();
+    renderSidebar(); 
+    renderMarcas(); 
+    renderProductos(); 
+    renderCarrito();
     actualizarSelectClientes();
+    
     const urlParams = new URLSearchParams(window.location.search);
     const prodId = urlParams.get('prod');
-    if (prodId) {
-        setTimeout(() => verDetalles(prodId), 500);
-    }
+    if (prodId) setTimeout(() => verDetalles(prodId), 500);
+}).catch(err => {
+    console.error("Error al cargar los datos:", err);
+    alert("Hubo un problema al cargar el catálogo. Por favor recarga la página.");
 });
 
-function toggleMenu() { sidebar.classList.toggle("activo"); }
-function cerrarMenu() { sidebar.classList.remove("activo"); }
-function limpiarFiltros() { marcaFiltro = ""; catFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
+function toggleMenu() { sidebarEl.classList.toggle("activo"); }
+function cerrarMenu() { sidebarEl.classList.remove("activo"); }
+function limpiarFiltros() { marcaFiltro = ""; catFiltro = ""; buscarEl.value = ""; cerrarMenu(); renderProductos(); }
 
 function renderSidebar() {
     const cats = [...new Set(productos.map(p => p.cat).filter(Boolean))];
     let h = ""; cats.forEach(c => h += `<div class="cat" onclick="filtrarCat('${c}')">${c}</div>`);
-    menuCats.innerHTML = h;
+    document.getElementById("menuCats").innerHTML = h;
 }
 
-function filtrarCat(c) { catFiltro = c; marcaFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
+function filtrarCat(c) { catFiltro = c; marcaFiltro = ""; buscarEl.value = ""; cerrarMenu(); renderProductos(); }
 
 function renderMarcas() {
-    marcasDiv = document.getElementById("marcas");
+    const marcasDiv = document.getElementById("marcas");
     marcasDiv.innerHTML = "";
     marcas.forEach(m => {
         marcasDiv.innerHTML += `<div class="marca" onclick="filtrarMarca('${m.nombre}')"><img src="${m.logo}"><div>${m.nombre}</div></div>`;
     });
 }
 
-function filtrarMarca(m) { marcaFiltro = m; catFiltro = ""; buscar.value = ""; renderProductos(); }
+function filtrarMarca(m) { marcaFiltro = m; catFiltro = ""; buscarEl.value = ""; renderProductos(); }
 
-buscar.oninput = () => { if(buscar.value.trim() !== "") { catFiltro = ""; marcaFiltro = ""; } renderProductos(); };
-
-const prodContenedor = document.getElementById("contenedor-principal");
+buscarEl.oninput = () => { if(buscarEl.value.trim() !== "") { catFiltro = ""; marcaFiltro = ""; } renderProductos(); };
 
 function renderProductos() {
+    const prodContenedor = document.getElementById("contenedor-principal");
     prodContenedor.innerHTML = "";
-    let b = buscar.value.toLowerCase();
+    let b = buscarEl.value.toLowerCase();
     let f = productos.filter(p => (p.n.toLowerCase().includes(b) || p.marca.toLowerCase().includes(b)) && (!catFiltro || p.cat === catFiltro) && (!marcaFiltro || p.marca === marcaFiltro));
     let cats = [...new Set(f.map(p => p.cat))];
     let promos = f.filter(p => p.descPorc > 0);
     
-    if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("PROMOCIONES", promos);
-    cats.forEach(c => { let pc = f.filter(p => p.cat === c); if(pc.length > 0) renderSeccion(c, pc); });
+    if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("PROMOCIONES", promos, prodContenedor);
+    cats.forEach(c => { let pc = f.filter(p => p.cat === c); if(pc.length > 0) renderSeccion(c, pc, prodContenedor); });
 }
 
-function renderSeccion(titulo, lista) {
+function renderSeccion(titulo, lista, contenedor) {
     let s = document.createElement("div"); s.innerHTML = `<div class="seccion-titulo">${titulo}</div>`;
     let g = document.createElement("div"); g.id = "productos";
     lista.forEach(p => {
@@ -342,7 +360,7 @@ function renderSeccion(titulo, lista) {
             </div>
         </div>`;
     });
-    s.appendChild(g); prodContenedor.appendChild(s);
+    s.appendChild(g); contenedor.appendChild(s);
 }
 
 function verDetalles(nombreProd) {
@@ -364,13 +382,13 @@ function verDetalles(nombreProd) {
 
 function cerrarModalInfo() { document.getElementById('modal-info').style.display = 'none'; }
 
-function validarCant(el) {
-    if(el.value.length > 3) el.value = el.value.slice(0, 3);
-}
+function validarCant(el) { if(el.value.length > 3) el.value = el.value.slice(0, 3); }
 
-// LOGICA SEGURA DE BOTONES
+// LÓGICA SEGURA DEL CARRITO Y EL DOMO
 function chg(n, v) {
     const p = productos.find(x => x.n === n);
+    if(!p) return;
+    
     let currentC = carrito[n]?.c || 0;
     let c = currentC + v;
     if(c > 999) c = 999;
@@ -378,49 +396,59 @@ function chg(n, v) {
     if(c <= 0) {
         delete carrito[n];
     } else {
-        let descDomo = carrito[n]?.descDomo || 0;
-        // Solo pregunta la PRIMERA VEZ que se agrega un producto con domo
+        let estadoDomo = carrito[n]?.conDomo;
+        // Solo pregunta la primera vez que se agrega y si el producto tiene valor de domo
         if (currentC === 0 && p.domo > 0) {
-            let quiereDomo = confirm(`El producto "${n}" incluye empaque (domo).\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar Descuento Ambiental.`);
-            if (!quiereDomo) {
-                descDomo = p.domo; // Se guardará este valor para descontarlo al final
-            }
+            estadoDomo = confirm(`El producto "${n}" incluye empaque.\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar descuento ambiental.`);
+        } else if (currentC === 0) {
+            estadoDomo = true;
         }
-        carrito[n] = { c: c, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, descDomo: descDomo };
+        
+        carrito[n] = { 
+            c: c, 
+            pr: p.p, 
+            po: p.pOrig, 
+            prem: p.premium, 
+            domo: p.domo, 
+            conDomo: estadoDomo !== undefined ? estadoDomo : true 
+        };
     }
     
-    save(); renderCarrito();
-    const q = carrito[n] ? carrito[n].c : 0;
-    document.querySelectorAll('.producto').forEach(prod => {
-        if(prod.getAttribute('data-name') === n) {
-            let input = prod.querySelector('input');
-            if(input) input.value = q;
-        }
-    });
+    save(); renderCarrito(); actualizarInputs(n);
 }
 
-// LOGICA SEGURA DE INPUT
 function set(n, v) {
     let num = parseInt(v) || 0;
     if(num > 999) num = 999;
     const p = productos.find(x => x.n === n);
+    if(!p) return;
+    
     let currentC = carrito[n]?.c || 0;
 
     if(num <= 0) {
         delete carrito[n];
     } else {
-        let descDomo = carrito[n]?.descDomo || 0;
-        // Solo pregunta la PRIMERA VEZ que se agrega un producto con domo
+        let estadoDomo = carrito[n]?.conDomo;
         if (currentC === 0 && p.domo > 0) {
-            let quiereDomo = confirm(`El producto "${n}" incluye empaque (domo).\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar Descuento Ambiental.`);
-            if (!quiereDomo) {
-                descDomo = p.domo;
-            }
+            estadoDomo = confirm(`El producto "${n}" incluye empaque.\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar descuento ambiental.`);
+        } else if (currentC === 0) {
+            estadoDomo = true;
         }
-        carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, descDomo: descDomo };
+        
+        carrito[n] = { 
+            c: num, 
+            pr: p.p, 
+            po: p.pOrig, 
+            prem: p.premium, 
+            domo: p.domo, 
+            conDomo: estadoDomo !== undefined ? estadoDomo : true 
+        };
     }
     
-    save(); renderCarrito();
+    save(); renderCarrito(); actualizarInputs(n);
+}
+
+function actualizarInputs(n) {
     const q = carrito[n] ? carrito[n].c : 0;
     document.querySelectorAll('.producto').forEach(prod => {
         if(prod.getAttribute('data-name') === n) {
@@ -435,23 +463,23 @@ function renderCarrito() {
     
     for(let k in carrito) {
         let i = carrito[k];
-        
-        // Calculamos el descuento ambiental total para este item
-        let descuentoAmbientalTotal = (i.descDomo || 0) * i.c;
-        let realPr = (i.pr * i.c) - descuentoAmbientalTotal;
-        let realPo = (i.po * i.c);
+        if(!i || typeof i !== 'object') continue;
 
-        tot += realPr; 
-        sub += realPo; 
+        // Si el cliente rechazó el domo, se resta el valor de la unidad
+        let descuentoPorUnidad = (!i.conDomo && i.domo > 0) ? i.domo : 0;
+        let precioUnidadReal = i.pr - descuentoPorUnidad;
+        let descuentoTotalItem = descuentoPorUnidad * i.c;
+
+        tot += (precioUnidadReal * i.c);
+        sub += (i.po * i.c);
         itemC += i.c;
         
-        let extraHtml = descuentoAmbientalTotal > 0 ? `<div style="font-size:12px; color:#25D366; margin-top:4px">🌱 Cuidado Ambiental (Sin empaque): -$${descuentoAmbientalTotal.toLocaleString()}</div>` : "";
-        let precioUnidad = i.pr - (i.descDomo || 0);
+        let extraHtml = descuentoTotalItem > 0 ? `<div style="font-size:12px; color:#25D366; margin-top:4px">🌱 Cuidado Ambiental (Sin empaque): -$${descuentoTotalItem.toLocaleString()}</div>` : "";
 
-        h += `<div class="item ${i.prem ? 'premium' : ''}"><div class="item-info"><div><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${precioUnidad.toLocaleString()} c/u</div>${extraHtml}</div><div class="controles"><button onclick="chg('${k}',-1)">-</button><input type="number" value="${i.c}" oninput="validarCant(this)" onchange="set('${k}', this.value)"><button onclick="chg('${k}', 1)">+</button></div></div>`;
+        h += `<div class="item ${i.prem ? 'premium' : ''}"><div class="item-info"><div><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${precioUnidadReal.toLocaleString()} c/u</div>${extraHtml}</div><div class="controles"><button onclick="chg('${k}',-1)">-</button><input type="number" value="${i.c}" oninput="validarCant(this)" onchange="set('${k}', this.value)"><button onclick="chg('${k}', 1)">+</button></div></div>`;
     }
     
-    lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
+    document.getElementById('lista').innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
     document.getElementById('total').innerText = tot.toLocaleString();
     document.getElementById('totalBarra').innerText = tot.toLocaleString();
     document.getElementById('subtotal').innerText = "$" + sub.toLocaleString();
@@ -459,16 +487,14 @@ function renderCarrito() {
     document.getElementById('items').innerText = itemC;
     document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
     
-    const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
+    const ok = clienteEl.value && negocioEl.value && direccionEl.value && tipoEl.value && tot >= MIN_PEDIDO;
     document.getElementById('enviar').disabled = !ok;
     document.getElementById('btn-imprimir').disabled = !ok;
 }
 
 function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
 function vaciarCarrito() { if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; save(); renderCarrito(); renderProductos(); } }
-function abrirCarrito() { panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
-
-const historialArea = document.getElementById("historial-area");
+function abrirCarrito() { panelEl.classList.add('activo'); if(clientesDB.length > 0) document.getElementById("historial-area").classList.remove("hidden"); }
 
 function mostrarConfirmacion() {
     diaElegido = "";
@@ -497,11 +523,13 @@ function procesarEnvioFinal() {
     
     for(let k in carrito) {
         let i = carrito[k]; 
-        let descuentoAmbientalTotal = (i.descDomo || 0) * i.c;
-        sub += i.po * i.c; 
-        tot += (i.pr * i.c) - descuentoAmbientalTotal;
+        let descuentoPorUnidad = (!i.conDomo && i.domo > 0) ? i.domo : 0;
+        let descuentoTotalItem = descuentoPorUnidad * i.c;
         
-        let descText = descuentoAmbientalTotal > 0 ? `%0A  _🌱 Sin empaque (Desc. Ambiental): -$${descuentoAmbientalTotal.toLocaleString()}_` : ``;
+        sub += i.po * i.c; 
+        tot += (i.pr * i.c) - descuentoTotalItem;
+        
+        let descText = descuentoTotalItem > 0 ? `%0A  _🌱 Sin empaque (Desc. Ambiental): -$${descuentoTotalItem.toLocaleString()}_` : ``;
         msgItems += `*• ${i.c} x ${safe(k)}*${descText}%0A`;
     }
     
@@ -510,7 +538,7 @@ function procesarEnvioFinal() {
     m += `*Día ideal de entrega:* ${diaElegido}%0A%0A`;
     m += `*DETALLES DEL CLIENTE*%0A`;
     m += `---------------------------%0A`;
-    m += `*Cliente:* ${safe(cliente.value)}%0A*Negocio:* ${safe(negocio.value)}%0A*Dirección:* ${safe(direccion.value)}%0A*Tipo:* ${safe(tipo.value)}%0A%0A`;
+    m += `*Cliente:* ${safe(clienteEl.value)}%0A*Negocio:* ${safe(negocioEl.value)}%0A*Dirección:* ${safe(direccionEl.value)}%0A*Tipo:* ${safe(tipoEl.value)}%0A%0A`;
     m += `*RESUMEN DEL PEDIDO*%0A`;
     m += `${msgItems}%0A`;
     m += `---------------------------%0A`;
@@ -524,9 +552,9 @@ function procesarEnvioFinal() {
 }
 
 function guardarClienteLocal() {
-    if(!cliente.value) return;
-    let idx = clientesDB.findIndex(c => c.nombre === cliente.value);
-    let d = { nombre: cliente.value, negocio: negocio.value, dir: direccion.value, tipo: tipo.value, ultimoPedido: {...carrito} };
+    if(!clienteEl.value) return;
+    let idx = clientesDB.findIndex(c => c.nombre === clienteEl.value);
+    let d = { nombre: clienteEl.value, negocio: negocioEl.value, dir: direccionEl.value, tipo: tipoEl.value, ultimoPedido: {...carrito} };
     if(idx > -1) clientesDB[idx] = d; else clientesDB.push(d);
     localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
     actualizarSelectClientes();
@@ -536,14 +564,14 @@ function actualizarSelectClientes() {
     const s = document.getElementById("select-clientes");
     s.innerHTML = '<option value="">-- Seleccionar cliente guardado --</option>';
     clientesDB.forEach(c => s.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`);
-    if(clientesDB.length > 0) historialArea.classList.remove("hidden");
+    if(clientesDB.length > 0) document.getElementById("historial-area").classList.remove("hidden");
 }
 
 function cargarCliente(n) {
     if(!n) return;
     const c = clientesDB.find(x => x.nombre === n);
     if(c) {
-        cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo;
+        clienteEl.value = c.nombre; negocioEl.value = c.negocio; direccionEl.value = c.dir; tipoEl.value = c.tipo;
         if(c.ultimoPedido && Object.keys(c.ultimoPedido).length > 0) {
             if(confirm("¿Cargar último pedido guardado para este cliente?")) {
                 carrito = {...c.ultimoPedido};
@@ -571,18 +599,20 @@ function imprimirPedido() {
     let sub = 0, tot = 0, hl = "";
     for(let k in carrito) {
         let i = carrito[k]; 
-        let descuentoAmbientalTotal = (i.descDomo || 0) * i.c;
-        let itemTot = (i.pr * i.c) - descuentoAmbientalTotal;
+        let descuentoPorUnidad = (!i.conDomo && i.domo > 0) ? i.domo : 0;
+        let descuentoTotalItem = descuentoPorUnidad * i.c;
+        let itemTot = (i.pr * i.c) - descuentoTotalItem;
+        
         sub += i.po * i.c; 
         tot += itemTot;
         
         hl += `<div class="t-flex"><span style="width:15%">${i.c} x</span><span style="width:55%">${k}</span><span style="width:30%; text-align:right">$${itemTot.toLocaleString()}</span></div>`;
-        if(descuentoAmbientalTotal > 0) {
-            hl += `<div class="t-flex" style="font-size:10px; color:#555"><span style="width:15%"></span><span style="width:55%">🌱 Desc. Ambiental</span><span style="width:30%; text-align:right">-$${descuentoAmbientalTotal.toLocaleString()}</span></div>`;
+        if(descuentoTotalItem > 0) {
+            hl += `<div class="t-flex" style="font-size:10px; color:#555"><span style="width:15%"></span><span style="width:55%">🌱 Desc. Ambiental</span><span style="width:30%; text-align:right">-$${descuentoTotalItem.toLocaleString()}</span></div>`;
         }
     }
     const ticketDiv = document.getElementById("ticket-impresion");
-    ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size: 16px">DISTRISNACKS</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hl}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top: 10px">¡Gracias por su compra!</div>`;
+    ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size: 16px">DISTRISNACKS</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${clienteEl.value}</div><div><b>NEGOCIO:</b> ${negocioEl.value}</div><div class="t-line"></div>${hl}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top: 10px">¡Gracias por su compra!</div>`;
     window.print();
 }
 
