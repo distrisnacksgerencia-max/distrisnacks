@@ -224,7 +224,6 @@ let marcaFiltro = "";
 let catFiltro = "";
 let diaElegido = "";
 
-// Referencias seguras al DOM
 const clienteEl = document.getElementById('cliente');
 const negocioEl = document.getElementById('negocio');
 const direccionEl = document.getElementById('direccion');
@@ -232,6 +231,7 @@ const tipoEl = document.getElementById('tipo');
 const buscarEl = document.getElementById('buscar');
 const panelEl = document.getElementById('panel');
 const sidebarEl = document.getElementById('sidebar');
+const contenedorEl = document.getElementById("contenedor-principal");
 
 const sesionGuardada = JSON.parse(localStorage.getItem("distri_sesion") || "{}");
 if(sesionGuardada.cliente) clienteEl.value = sesionGuardada.cliente;
@@ -247,20 +247,45 @@ if(sesionGuardada.tipo) tipoEl.value = sesionGuardada.tipo;
     });
 });
 
-// Lógica de carga ultra-segura (evita bloqueos si hay celdas vacías en Sheets)
-fetch(SHEET).then(r => r.text()).then(csv => {
-    let lineas = csv.split(/\r?\n/).slice(1);
-    lineas.forEach(f => {
-        const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => (x || "").replace(/"/g,"").trim());
-        
-        if(c.length >= 5 && c[4] === "S1") {
-            // Leemos valores de forma segura previniendo errores si la columna no existe
+// ANALIZADOR AVANZADO DE DATOS: Inmune a "Enters" y comas dentro de las celdas de Excel
+function csvToArray(text) {
+    let p = '', row = [''], ret = [row], i = 0, r = 0, s = !0, l;
+    for (l of text) {
+        if ('"' === l) {
+            if (s && l === p) row[i] += l;
+            s = !s;
+        } else if (',' === l && s) l = row[++i] = '';
+        else if ('\n' === l && s) {
+            if ('\r' === p) row[i] = row[i].slice(0, -1);
+            row = ret[++r] = ['']; i = 0;
+        } else row[i] += l;
+        p = l;
+    }
+    return ret.map(r => r.map(c => c.trim()));
+}
+
+// CARGA DE DATOS BLINDADA
+fetch(SHEET).then(r => r.text()).then(csvText => {
+    // 1. Detección de permisos bloqueados (Si el Excel se puso privado)
+    if (csvText.trim().toLowerCase().startsWith("<!doctype html>")) {
+        contenedorEl.innerHTML = "<div style='padding:40px 20px; text-align:center; color:#88003d; background:white; margin:20px; border-radius:10px;'><h3>⚠️ Acceso Denegado a la Base de Datos</h3><p>Parece que tu archivo de Google Sheets está en privado.<br><br>Ve a tu Excel > Botón Compartir (arriba a la derecha) > Asegúrate de que diga <b>'Cualquier usuario con el enlace puede leer'</b>.</p></div>";
+        return;
+    }
+
+    let lineas = csvToArray(csvText);
+    lineas.shift(); // Quitamos la fila de los títulos de las columnas
+    
+    let productosValidos = 0;
+
+    lineas.forEach(c => {
+        // 2. Validación de Activación: Comprobamos que exista la columna E (índice 4) y que contenga S1
+        if(c.length >= 5 && c[4] && c[4].toUpperCase() === "S1") {
+            productosValidos++;
             let domoVal = (c.length > 16 && c[16]) ? (parseInt(c[16].replace(/\D/g,"")) || 0) : 0;
             let pBaseOrig = (c.length > 2 && c[2]) ? (parseInt(c[2].replace(/\D/g,"")) || 0) : 0;
             let dPorc = (c.length > 8 && c[8]) ? (parseInt(c[8]) || 0) : 0;
             let pvp = (c.length > 13 && c[13]) ? (parseInt(c[13].replace(/\D/g,"")) || 0) : 0;
             
-            // Calculamos el precio en catálogo incluyendo de una vez el valor del domo
             let pBaseConDomo = pBaseOrig + domoVal;
             let pFinalConDomo = (dPorc > 0 ? Math.round(pBaseOrig * (1 - dPorc/100)) : pBaseOrig) + domoVal;
 
@@ -269,7 +294,7 @@ fetch(SHEET).then(r => r.text()).then(csv => {
                 pOrig: pBaseConDomo,
                 p: pFinalConDomo,
                 img: c[3] || "",
-                premium: c[5] === "S1",
+                premium: c[5] && c[5].toUpperCase() === "S1",
                 marca: c[6] || "",
                 cat: c[7] || "",
                 descPorc: dPorc,
@@ -278,7 +303,7 @@ fetch(SHEET).then(r => r.text()).then(csv => {
                 domo: domoVal
             });
 
-            if(c.length > 11 && c[9] && c[11] === "S1" && c[10]) {
+            if(c.length > 11 && c[9] && c[11] && c[11].toUpperCase() === "S1" && c[10]) {
                 if(!marcas.find(m => m.nombre === c[9])) {
                     marcas.push({ nombre: c[9], logo: c[10] });
                 }
@@ -286,6 +311,12 @@ fetch(SHEET).then(r => r.text()).then(csv => {
         }
     });
     
+    // 3. Validación de inventario vacío
+    if (productosValidos === 0) {
+        contenedorEl.innerHTML = "<div style='padding:40px 20px; text-align:center; color:#88003d; background:white; margin:20px; border-radius:10px;'><h3>⚠️ No se encontraron productos activos</h3><p>El sistema logró leer el Excel, pero ningún producto está marcado como activo.<br><br>Asegúrate de escribir <b>S1</b> en la <b>Columna E</b> (Activo) de los productos que deseas mostrar.</p></div>";
+        return;
+    }
+
     marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
     renderSidebar(); 
     renderMarcas(); 
@@ -297,8 +328,8 @@ fetch(SHEET).then(r => r.text()).then(csv => {
     const prodId = urlParams.get('prod');
     if (prodId) setTimeout(() => verDetalles(prodId), 500);
 }).catch(err => {
-    console.error("Error al cargar los datos:", err);
-    alert("Hubo un problema al cargar el catálogo. Por favor recarga la página.");
+    console.error("Error crítico de carga:", err);
+    contenedorEl.innerHTML = "<div style='padding:40px 20px; text-align:center; color:red; background:white; margin:20px; border-radius:10px;'><h3>⚠️ Error de Conexión</h3><p>No se pudo establecer contacto con el inventario. Revisa tu conexión a internet o intenta recargar la página.</p></div>";
 });
 
 function toggleMenu() { sidebarEl.classList.toggle("activo"); }
@@ -326,15 +357,14 @@ function filtrarMarca(m) { marcaFiltro = m; catFiltro = ""; buscarEl.value = "";
 buscarEl.oninput = () => { if(buscarEl.value.trim() !== "") { catFiltro = ""; marcaFiltro = ""; } renderProductos(); };
 
 function renderProductos() {
-    const prodContenedor = document.getElementById("contenedor-principal");
-    prodContenedor.innerHTML = "";
+    contenedorEl.innerHTML = "";
     let b = buscarEl.value.toLowerCase();
     let f = productos.filter(p => (p.n.toLowerCase().includes(b) || p.marca.toLowerCase().includes(b)) && (!catFiltro || p.cat === catFiltro) && (!marcaFiltro || p.marca === marcaFiltro));
     let cats = [...new Set(f.map(p => p.cat))];
     let promos = f.filter(p => p.descPorc > 0);
     
-    if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("PROMOCIONES", promos, prodContenedor);
-    cats.forEach(c => { let pc = f.filter(p => p.cat === c); if(pc.length > 0) renderSeccion(c, pc, prodContenedor); });
+    if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("PROMOCIONES", promos, contenedorEl);
+    cats.forEach(c => { let pc = f.filter(p => p.cat === c); if(pc.length > 0) renderSeccion(c, pc, contenedorEl); });
 }
 
 function renderSeccion(titulo, lista, contenedor) {
@@ -384,7 +414,6 @@ function cerrarModalInfo() { document.getElementById('modal-info').style.display
 
 function validarCant(el) { if(el.value.length > 3) el.value = el.value.slice(0, 3); }
 
-// LÓGICA SEGURA DEL CARRITO Y EL DOMO
 function chg(n, v) {
     const p = productos.find(x => x.n === n);
     if(!p) return;
@@ -397,7 +426,6 @@ function chg(n, v) {
         delete carrito[n];
     } else {
         let estadoDomo = carrito[n]?.conDomo;
-        // Solo pregunta la primera vez que se agrega y si el producto tiene valor de domo
         if (currentC === 0 && p.domo > 0) {
             estadoDomo = confirm(`El producto "${n}" incluye empaque.\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar descuento ambiental.`);
         } else if (currentC === 0) {
@@ -405,11 +433,7 @@ function chg(n, v) {
         }
         
         carrito[n] = { 
-            c: c, 
-            pr: p.p, 
-            po: p.pOrig, 
-            prem: p.premium, 
-            domo: p.domo, 
+            c: c, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, 
             conDomo: estadoDomo !== undefined ? estadoDomo : true 
         };
     }
@@ -436,11 +460,7 @@ function set(n, v) {
         }
         
         carrito[n] = { 
-            c: num, 
-            pr: p.p, 
-            po: p.pOrig, 
-            prem: p.premium, 
-            domo: p.domo, 
+            c: num, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, 
             conDomo: estadoDomo !== undefined ? estadoDomo : true 
         };
     }
@@ -465,7 +485,6 @@ function renderCarrito() {
         let i = carrito[k];
         if(!i || typeof i !== 'object') continue;
 
-        // Si el cliente rechazó el domo, se resta el valor de la unidad
         let descuentoPorUnidad = (!i.conDomo && i.domo > 0) ? i.domo : 0;
         let precioUnidadReal = i.pr - descuentoPorUnidad;
         let descuentoTotalItem = descuentoPorUnidad * i.c;
