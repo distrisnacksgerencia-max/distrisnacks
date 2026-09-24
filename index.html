@@ -216,7 +216,6 @@ Distrisnacksgerencia@gmail.com<br><br>
 year.innerText = new Date().getFullYear();
 const SHEET = "https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2IdYVeDLbzV15LMhl/export?format=csv&gid=1965298886";
 const MIN_PEDIDO = 25000;
-const MAX_VALOR = 999;
 let productos = [];
 let marcas = [];
 let carrito = JSON.parse(localStorage.getItem("carrito_distri") || "{}");
@@ -244,15 +243,15 @@ fetch(SHEET).then(r => r.text()).then(csv => {
     csv.split(/\r?\n/).slice(1).forEach(f => {
         const c = f.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(x => (x || "").replace(/"/g,"").trim());
         if(c[4] === "S1") {
-            // INTEGRACIÓN LECTURA PRECIO DOMO (COLUMNA Q -> índice 16)
-            let domoVal = parseInt(c[16]?.replace(/\D/g,"")) || 0;
-            let pBaseOrig = parseInt(c[2].replace(/\D/g,"")) || 0;
+            // LECTURA DEL VALOR DEL DOMO (Columna Q - Índice 16)
+            let domoVal = parseInt((c[16] || "0").replace(/\D/g,"")) || 0;
+            let pBaseOrig = parseInt((c[2] || "0").replace(/\D/g,"")) || 0;
             let dPorc = parseInt(c[8]) || 0;
             
-            // Sumamos el valor del domo al precio base y precio final 
+            // Sumamos el valor del domo directamente al precio en catálogo
             let pBaseConDomo = pBaseOrig + domoVal;
             let pFinalConDomo = (dPorc > 0 ? Math.round(pBaseOrig * (1-dPorc/100)) : pBaseOrig) + domoVal;
-            let pvp = parseInt(c[13]?.replace(/\D/g,"")) || 0;
+            let pvp = parseInt((c[13] || "0").replace(/\D/g,"")) || 0;
 
             productos.push({
                 n: c[1],
@@ -265,7 +264,7 @@ fetch(SHEET).then(r => r.text()).then(csv => {
                 descPorc: dPorc,
                 pvp: pvp,
                 detalle: c[15],
-                domo: domoVal // Guardamos el valor interno para los descuentos
+                domo: domoVal // Guardamos el valor interno para saber si tiene o no
             });
 
             if(c[9] && c[11] === "S1" && c[10]) {
@@ -367,77 +366,67 @@ function cerrarModalInfo() { document.getElementById('modal-info').style.display
 
 function validarCant(el) {
     if(el.value.length > 3) el.value = el.value.slice(0, 3);
-    if(parseInt(el.value) > MAX_VALOR) el.value = MAX_VALOR;
 }
 
-// INTEGRACIÓN LÓGICA DE DOMOS (Botones +/-)
+// LOGICA SEGURA DE BOTONES
 function chg(n, v) {
     const p = productos.find(x => x.n === n);
     let currentC = carrito[n]?.c || 0;
     let c = currentC + v;
-    if(c > MAX_VALOR) c = MAX_VALOR;
+    if(c > 999) c = 999;
     
     if(c <= 0) {
         delete carrito[n];
     } else {
-        let dCant = carrito[n]?.d !== undefined ? carrito[n].d : 0;
-        if (p.domo > 0 && c > currentC) {
-            if (c === 1) {
-                let resp = confirm(`¿Deseas incluir el empaque/domo para este producto?\n\nSi cancelas, aplicaremos un "Descuento de cuidado al medio ambiente".`);
-                dCant = resp ? 1 : 0;
-            } else {
-                let resp = prompt(`¿Cuántos domos/empaques necesitas para tus ${c} unidades de ${n}?\n\n(Ingresa de 0 a${c}. Las unidades sin domo tendrán Descuento Ambiental)`, c);
-                if (resp !== null && resp !== "") {
-                    let parsed = parseInt(resp);
-                    if (!isNaN(parsed)) dCant = Math.min(c, Math.max(0, parsed));
-                    else dCant = c;
-                }
+        let descDomo = carrito[n]?.descDomo || 0;
+        // Solo pregunta la PRIMERA VEZ que se agrega un producto con domo
+        if (currentC === 0 && p.domo > 0) {
+            let quiereDomo = confirm(`El producto "${n}" incluye empaque (domo).\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar Descuento Ambiental.`);
+            if (!quiereDomo) {
+                descDomo = p.domo; // Se guardará este valor para descontarlo al final
             }
-        } else if (p.domo > 0 && c < currentC) {
-            dCant = Math.min(dCant, c);
-        } else if (!p.domo) {
-            dCant = 0;
         }
-        carrito[n] = { c, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, d: dCant };
+        carrito[n] = { c: c, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, descDomo: descDomo };
     }
     
     save(); renderCarrito();
     const q = carrito[n] ? carrito[n].c : 0;
     document.querySelectorAll('.producto').forEach(prod => {
-        if(prod.getAttribute('data-name') === n) prod.querySelector('input').value = q;
+        if(prod.getAttribute('data-name') === n) {
+            let input = prod.querySelector('input');
+            if(input) input.value = q;
+        }
     });
 }
 
-// INTEGRACIÓN LÓGICA DE DOMOS (Input manual)
+// LOGICA SEGURA DE INPUT
 function set(n, v) {
     let num = parseInt(v) || 0;
-    if(num > MAX_VALOR) num = MAX_VALOR;
+    if(num > 999) num = 999;
     const p = productos.find(x => x.n === n);
     let currentC = carrito[n]?.c || 0;
 
     if(num <= 0) {
         delete carrito[n];
     } else {
-        let dCant = carrito[n]?.d !== undefined ? carrito[n].d : 0;
-        if (p.domo > 0 && num > currentC) {
-            let resp = prompt(`¿Cuántos domos/empaques necesitas para tus ${num} unidades de ${n}?\n\n(Ingresa de 0 a${num}. Las unidades sin domo tendrán Descuento Ambiental)`, num);
-            if (resp !== null && resp !== "") {
-                let parsed = parseInt(resp);
-                if (!isNaN(parsed)) dCant = Math.min(num, Math.max(0, parsed));
-                else dCant = num;
+        let descDomo = carrito[n]?.descDomo || 0;
+        // Solo pregunta la PRIMERA VEZ que se agrega un producto con domo
+        if (currentC === 0 && p.domo > 0) {
+            let quiereDomo = confirm(`El producto "${n}" incluye empaque (domo).\n\n¿Deseas llevarlo CON empaque?\n\n[Aceptar] = Sí, cobrar empaque.\n[Cancelar] = No, aplicar Descuento Ambiental.`);
+            if (!quiereDomo) {
+                descDomo = p.domo;
             }
-        } else if (p.domo > 0 && num < currentC) {
-            dCant = Math.min(dCant, num);
-        } else if (!p.domo) {
-            dCant = 0;
         }
-        carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, d: dCant };
+        carrito[n] = { c: num, pr: p.p, po: p.pOrig, prem: p.premium, domo: p.domo, descDomo: descDomo };
     }
     
     save(); renderCarrito();
     const q = carrito[n] ? carrito[n].c : 0;
     document.querySelectorAll('.producto').forEach(prod => {
-        if(prod.getAttribute('data-name') === n) prod.querySelector('input').value = q;
+        if(prod.getAttribute('data-name') === n) {
+            let input = prod.querySelector('input');
+            if(input) input.value = q;
+        }
     });
 }
 
@@ -446,18 +435,20 @@ function renderCarrito() {
     
     for(let k in carrito) {
         let i = carrito[k];
-        // CÁLCULO DE DESCUENTO AMBIENTAL
-        let domoDesc = (i.domo && i.domo > 0 && i.d < i.c) ? (i.c - i.d) * i.domo : 0;
-        let realPr = (i.pr * i.c) - domoDesc;
+        
+        // Calculamos el descuento ambiental total para este item
+        let descuentoAmbientalTotal = (i.descDomo || 0) * i.c;
+        let realPr = (i.pr * i.c) - descuentoAmbientalTotal;
         let realPo = (i.po * i.c);
 
         tot += realPr; 
         sub += realPo; 
         itemC += i.c;
         
-        let extraHtml = domoDesc > 0 ? `<div style="font-size:12px; color:#25D366; margin-top:4px">🌱 Cuidado Ambiental (Sin domo x${i.c - i.d}): -$${domoDesc.toLocaleString()}</div>` : "";
+        let extraHtml = descuentoAmbientalTotal > 0 ? `<div style="font-size:12px; color:#25D366; margin-top:4px">🌱 Cuidado Ambiental (Sin empaque): -$${descuentoAmbientalTotal.toLocaleString()}</div>` : "";
+        let precioUnidad = i.pr - (i.descDomo || 0);
 
-        h += `<div class="item ${i.prem ? 'premium' : ''}"><div class="item-info"><div><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${i.pr.toLocaleString()} c/u</div>${extraHtml}</div><div class="controles"><button onclick="chg('${k}',-1)">-</button><input type="number" value="${i.c}" oninput="validarCant(this)" onchange="set('${k}', this.value)"><button onclick="chg('${k}', 1)">+</button></div></div>`;
+        h += `<div class="item ${i.prem ? 'premium' : ''}"><div class="item-info"><div><b>${k}</b></div><div style="font-size:12px; color:#88003d">$${precioUnidad.toLocaleString()} c/u</div>${extraHtml}</div><div class="controles"><button onclick="chg('${k}',-1)">-</button><input type="number" value="${i.c}" oninput="validarCant(this)" onchange="set('${k}', this.value)"><button onclick="chg('${k}', 1)">+</button></div></div>`;
     }
     
     lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
@@ -506,11 +497,11 @@ function procesarEnvioFinal() {
     
     for(let k in carrito) {
         let i = carrito[k]; 
-        let domoDesc = (i.domo && i.domo > 0 && i.d < i.c) ? (i.c - i.d) * i.domo : 0;
+        let descuentoAmbientalTotal = (i.descDomo || 0) * i.c;
         sub += i.po * i.c; 
-        tot += (i.pr * i.c) - domoDesc;
+        tot += (i.pr * i.c) - descuentoAmbientalTotal;
         
-        let descText = domoDesc > 0 ? `%0A  _🌱 -${i.c - i.d} sin domo (Desc. Ambiental)_` : ``;
+        let descText = descuentoAmbientalTotal > 0 ? `%0A  _🌱 Sin empaque (Desc. Ambiental): -$${descuentoAmbientalTotal.toLocaleString()}_` : ``;
         msgItems += `*• ${i.c} x ${safe(k)}*${descText}%0A`;
     }
     
@@ -580,14 +571,14 @@ function imprimirPedido() {
     let sub = 0, tot = 0, hl = "";
     for(let k in carrito) {
         let i = carrito[k]; 
-        let domoDesc = (i.domo && i.domo > 0 && i.d < i.c) ? (i.c - i.d) * i.domo : 0;
-        let itemTot = (i.pr * i.c) - domoDesc;
+        let descuentoAmbientalTotal = (i.descDomo || 0) * i.c;
+        let itemTot = (i.pr * i.c) - descuentoAmbientalTotal;
         sub += i.po * i.c; 
         tot += itemTot;
         
         hl += `<div class="t-flex"><span style="width:15%">${i.c} x</span><span style="width:55%">${k}</span><span style="width:30%; text-align:right">$${itemTot.toLocaleString()}</span></div>`;
-        if(domoDesc > 0) {
-            hl += `<div class="t-flex" style="font-size:10px; color:#555"><span style="width:15%"></span><span style="width:55%">🌱 Desc. Ambiental</span><span style="width:30%; text-align:right">-$${domoDesc.toLocaleString()}</span></div>`;
+        if(descuentoAmbientalTotal > 0) {
+            hl += `<div class="t-flex" style="font-size:10px; color:#555"><span style="width:15%"></span><span style="width:55%">🌱 Desc. Ambiental</span><span style="width:30%; text-align:right">-$${descuentoAmbientalTotal.toLocaleString()}</span></div>`;
         }
     }
     const ticketDiv = document.getElementById("ticket-impresion");
