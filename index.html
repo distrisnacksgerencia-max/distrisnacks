@@ -19,6 +19,25 @@
         #menuBtn{font-size:26px;cursor:pointer;color:white}
         #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
 
+        /* [BLOQUE: BOTÓN DE ACTIVAR MAGIA SENSORIAL] */
+        #btn-magia {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #d4af37;
+            color: #000;
+            border: 2px solid #fff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        #btn-magia:hover { transform: scale(1.05); }
+
         /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL COLGANTE NAVIDEÑO] */
         #marcas{
             display:flex;
@@ -186,7 +205,7 @@
             100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.04); opacity: 0; }
         }
         .volando-png {
-            animation: vueloGiganteExtendido 22s ease-in-out forwards; /* 22 segundos de recorrido amplio y muy pausado */
+            animation: vueloGiganteExtendido 22s ease-in-out forwards;
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -279,6 +298,9 @@
     </style>
 </head>
 <body>
+
+<!-- [BOTÓN FLOTANTE PARA ACTIVAR MAGIA DE SENSORES] -->
+<button id="btn-magia" onclick="activarMagiaSensores()">Activar Magia 🎄</button>
 
 <!-- [SANTA CLAUS CON PNG PERSONALIZADO - GIGANTE] -->
 <div id="santa-trineo">
@@ -407,7 +429,7 @@
     © <span id="year"></span>
 </footer>
 
-<!-- [BLOQUE: EFECTO DE AUDIO, SANTA PNG Y NIEVE] -->
+<!-- [BLOQUE: EFECTO DE AUDIO, NIEVE FÍSICA E INCLINACIÓN/SACUDIDA] -->
 <script>
     function playBellSound() {
         try {
@@ -428,7 +450,6 @@
         } catch(e) {}
     }
 
-    // Lista de 20 mensajes rotativos: Motivación, tips de venta, promos y festividades navideñas
     const lista20Mensajes = [
         "Aprovecha las promociones en productos seleccionados",
         "Surtir bien tu mostrador atrae más clientes en diciembre",
@@ -477,6 +498,7 @@
         }, 22000);
     }
 
+    /* [BLOQUE: NIEVE CON FÍSICA DE INCLINACIÓN Y EFECTO ESFERA AL SACUDIR] */
     const snowCanvas = document.createElement('canvas');
     snowCanvas.style.position = 'fixed';
     snowCanvas.style.top = '0';
@@ -498,6 +520,7 @@
 
     let snowflakes = [];
     let maxSnowflakes = 140;
+    let vientoX = 0; // Inclinación suave del celular
 
     for (let i = 0; i < maxSnowflakes; i++) {
         snowflakes.push({
@@ -533,16 +556,80 @@
         for (let i = 0; i < snowflakes.length; i++) {
             let sf = snowflakes[i];
             sf.y += sf.speed + Math.cos(angle + sf.density) * 0.3;
-            sf.x += Math.sin(angle) * 0.5;
+            // Se suma la inclinación suave del celular (vientoX)
+            sf.x += Math.sin(angle) * 0.5 + vientoX;
 
             if (sf.y > sHeight) {
                 sf.y = 0;
                 sf.x = Math.random() * sWidth;
             }
+            if (sf.x > sWidth) sf.x = 0;
+            if (sf.x < 0) sf.x = sWidth;
         }
     }
 
     setInterval(drawSnow, 25);
+
+    /* [CONTROL DE SENSORES Y PERMISOS] */
+    function activarMagiaSensores() {
+        playBellSound();
+        const btnMagia = document.getElementById('btn-magia');
+
+        // Solicitar permisos en iOS / Android si es requerido
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission().then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('deviceorientation', manejarInclinacion);
+                }
+            }).catch(console.error);
+        } else {
+            window.addEventListener('deviceorientation', manejarInclinacion);
+        }
+
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission().then(response => {
+                if (response === 'granted') {
+                    window.addEventListener('devicemotion', manejarSacudida);
+                }
+            }).catch(console.error);
+        } else {
+            window.addEventListener('devicemotion', manejarSacudida);
+        }
+
+        btnMagia.innerText = "✨ ¡Magia Activa!";
+        setTimeout(() => { btnMagia.style.display = 'none'; }, 2000);
+    }
+
+    function manejarInclinacion(e) {
+        // e.gamma representa la inclinación izquierda/derecha (-90 a 90)
+        if (e.gamma !== null) {
+            vientoX = (e.gamma / 90) * 2.5; // Ajuste suave para no exagerar
+        }
+    }
+
+    let ultimoShake = 0;
+    function manejarSacudida(e) {
+        let acc = e.accelerationIncludingGravity;
+        if (!acc) return;
+        let curTime = new Date().getTime();
+        if ((curTime - ultimoShake) > 1200) {
+            let deltaX = Math.abs(acc.x);
+            let deltaY = Math.abs(acc.y);
+            // Si el usuario sacude el celular rápido (efecto esfera de nieve)
+            if (deltaX > 14 || deltaY > 14) {
+                ultimoShake = curTime;
+                playBellSound();
+                // Impulso fuerte temporal en la nieve simulando la esfera al ser agitada
+                snowflakes.forEach(sf => {
+                    sf.speed += Math.random() * 4 + 2;
+                    sf.x += (Math.random() - 0.5) * 50;
+                });
+                setTimeout(() => {
+                    snowflakes.forEach(sf => { sf.speed = Math.random() * 1.5 + 0.8; });
+                }, 1000);
+            }
+        }
+    }
 </script>
 
 <!-- [BLOQUE: LÓGICA / JAVASCRIPT PRINCIPAL] -->
@@ -749,7 +836,6 @@
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         
-        // Control exacto de múltiplos de 5 sin bug al sumar rápidamente
         if (itemC > 0 && itemC % 5 === 0) {
             if (itemC !== ultimoNivelMultiplo5) {
                 ultimoNivelMultiplo5 = itemC;
