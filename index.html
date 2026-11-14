@@ -670,27 +670,28 @@
     function procesarEnvioFinal() {
         guardarClienteLocal();
         let sub = 0, tot = 0, msgItems = "";
-        const safe = (txt) => encodeURIComponent(txt);
-
+        
         for(let k in carrito) {
             let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
-            msgItems += `• ${i.c} x ${safe(k)}%0A`;
+            msgItems += `• ${i.c} x ${k}%0A`;
         }
         let ahr = sub - tot;
         
-        // Mensaje de WhatsApp resumido y navideño
-        let m = `¡Hola, Distrisnacks! 🎄✨ Aquí va mi pedido navideño para el negocio:%0A%0A`;
-        m += `🗓️ *Día ideal:* ${diaElegido}%0A`;
-        m += `👤 *Cliente:* ${safe(cliente.value)}%0A`;
-        m += `📍 *Negocio/Dir:* ${safe(negocio.value)} / ${safe(direccion.value)}%0A%0A`;
-        m += `*📦 PRODUCTOS:*%0A${msgItems}%0A`;
-        m += `--------------------------------%0A`;
-        m += `💰 *TOTAL A PAGAR:* $${tot.toLocaleString()}%0A`;
-        if(ahr > 0) m += `🎁 *Ahorro obtenido:* $${ahr.toLocaleString()}%0A`;
-        m += `--------------------------------%0A`;
-        m += `¡Muchas gracias y felices fiestas! 🎅`;
+        // Mensaje con emojis codificados en Unicode seguro para la versión web
+        let m = "¡Hola, Distrisnacks! \ud83c\udf84\u2728 Aquí va mi pedido navideño para el negocio:%0A%0A";
+        m += "\ud83d\udcc5 *Día ideal:* " + diaElegido + "%0A";
+        m += "\ud83d\udc64 *Cliente:* " + cliente.value + "%0A";
+        m += "\ud83d\udccd *Negocio/Dir:* " + negocio.value + " / " + direccion.value + "%0A%0A";
+        m += "\ud83d\udce6 *PRODUCTOS:*%0A" + msgItems + "%0A";
+        m += "--------------------------------%0A";
+        m += "\ud83d\udcb0 *TOTAL A PAGAR:* $" + tot.toLocaleString() + "%0A";
+        if(ahr > 0) {
+            m += "\ud83c\udf81 *Ahorro obtenido:* $" + ahr.toLocaleString() + "%0A";
+        }
+        m += "--------------------------------%0A";
+        m += "¡Muchas gracias y felices fiestas! \ud83c\udf85";
         
-        window.open("https://wa.me/573222643534?text=" + m);
+        window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
         cerrarConfirmacion();
     }
 
