@@ -142,7 +142,7 @@
 
 <!-- [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] -->
 <div class="header-container">
-    <img src="https://lh3.googleusercontent.com/d/1I0pEeU4MOuhjvA28dvKe2gn-rQlt-Gtn" alt="DISTRISNACKS" class="logo-main">
+    <img src="https://lh3.googleusercontent.com/d/13SvSDq6s5hS1jfe7HhBuKy4qHoGO1NEB" alt="DISTRISNACKS" class="logo-main">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca..." autocomplete="off">
@@ -263,9 +263,8 @@
     © <span id="year"></span>
 </footer>
 
-<!-- [BLOQUE: EFECTO NIEVE NAVIDEÑA] -->
+<!-- [BLOQUE: EFECTO NIEVE NAVIDEÑA (CON SOMBRA CONTRASTANTE)] -->
 <script>
-    // Generador de nieve en canvas con reducción progresiva de intensidad
     const snowCanvas = document.createElement('canvas');
     snowCanvas.style.position = 'fixed';
     snowCanvas.style.top = '0';
@@ -286,9 +285,9 @@
     });
 
     let snowflakes = [];
-    let maxSnowflakes = 90; // Cantidad inicial alta de copos
+    let maxSnowflakes = 90; // Cantidad inicial alta
 
-    // Cada 1.5 segundos disminuye la cantidad de copos de nieve para que caiga menos
+    // Disminución progresiva para que cada vez caiga menos
     let decreaseTimer = setInterval(() => {
         if (maxSnowflakes > 5) {
             maxSnowflakes -= 8; 
@@ -301,7 +300,7 @@
         snowflakes.push({
             x: Math.random() * sWidth,
             y: Math.random() * sHeight,
-            radius: Math.random() * 3 + 1,
+            radius: Math.random() * 3.5 + 1.2,
             density: Math.random() * 20,
             speed: Math.random() * 1.2 + 0.5
         });
@@ -309,7 +308,14 @@
 
     function drawSnow() {
         sCtx.clearRect(0, 0, sWidth, sHeight);
-        sCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        
+        // Sombra suave para que los copos resalten sobre fondos claros
+        sCtx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+        sCtx.shadowBlur = 4;
+        sCtx.shadowOffsetX = 1;
+        sCtx.shadowOffsetY = 1;
+
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
         sCtx.beginPath();
         
         while(snowflakes.length > maxSnowflakes) {
