@@ -12,9 +12,9 @@
         *{box-sizing:border-box}
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4}
         
-        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] Estilos de cabecera y barra de búsqueda */
-        .header-container{background:#88003d;padding:12px 15px;position:sticky;top:0;z-index:100;box-shadow: 0 2px 5px rgba(0,0,0,0.2)}
-       .logo-main{display:block;margin:0 auto 12px;height:75px;max-width:320px;width:100%;object-fit:contain}
+        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] Estilos de cabecera y logotipo ampliado */
+        .header-container{background:#88003d;padding:15px;position:sticky;top:0;z-index:100;box-shadow: 0 2px 5px rgba(0,0,0,0.2)}
+        .logo-main{display:block;margin:0 auto 12px;height:75px;max-width:320px;width:100%;object-fit:contain}
         header{display:flex;gap:10px;align-items:center}
         #menuBtn{font-size:26px;cursor:pointer;color:white}
         #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
@@ -142,7 +142,7 @@
 
 <!-- [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] -->
 <div class="header-container">
-    <img src="https://lh3.googleusercontent.com/d/11AvQST4EQtvx2U7zqJbaKJFChQvJ20tC" alt="DISTRISNACKS" class="logo-main">
+    <img src="https://lh3.googleusercontent.com/d/13SvSDq6s5hS1jfe7HhBuKy4qHoGO1NEB" alt="DISTRISNACKS" class="logo-main">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca..." autocomplete="off">
@@ -263,7 +263,87 @@
     © <span id="year"></span>
 </footer>
 
-<!-- [BLOQUE: LÓGICA / JAVASCRIPT] -->
+<!-- [BLOQUE: EFECTO NIEVE NAVIDEÑA] -->
+<script>
+    // Generador de nieve en canvas con reducción progresiva de intensidad
+    const snowCanvas = document.createElement('canvas');
+    snowCanvas.style.position = 'fixed';
+    snowCanvas.style.top = '0';
+    snowCanvas.style.left = '0';
+    snowCanvas.style.width = '100%';
+    snowCanvas.style.height = '100%';
+    snowCanvas.style.pointerEvents = 'none';
+    snowCanvas.style.zIndex = '9999';
+    document.body.appendChild(snowCanvas);
+
+    const sCtx = snowCanvas.getContext('2d');
+    let sWidth = snowCanvas.width = window.innerWidth;
+    let sHeight = snowCanvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        sWidth = snowCanvas.width = window.innerWidth;
+        sHeight = snowCanvas.height = window.innerHeight;
+    });
+
+    let snowflakes = [];
+    let maxSnowflakes = 90; // Cantidad inicial alta de copos
+
+    // Cada 1.5 segundos disminuye la cantidad de copos de nieve para que caiga menos
+    let decreaseTimer = setInterval(() => {
+        if (maxSnowflakes > 5) {
+            maxSnowflakes -= 8; 
+        } else {
+            clearInterval(decreaseTimer);
+        }
+    }, 1500);
+
+    for (let i = 0; i < maxSnowflakes; i++) {
+        snowflakes.push({
+            x: Math.random() * sWidth,
+            y: Math.random() * sHeight,
+            radius: Math.random() * 3 + 1,
+            density: Math.random() * 20,
+            speed: Math.random() * 1.2 + 0.5
+        });
+    }
+
+    function drawSnow() {
+        sCtx.clearRect(0, 0, sWidth, sHeight);
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        sCtx.beginPath();
+        
+        while(snowflakes.length > maxSnowflakes) {
+            snowflakes.pop();
+        }
+
+        for (let i = 0; i < snowflakes.length; i++) {
+            let sf = snowflakes[i];
+            sCtx.moveTo(sf.x, sf.y);
+            sCtx.arc(sf.x, sf.y, sf.radius, 0, Math.PI * 2, true);
+        }
+        sCtx.fill();
+        updateSnow();
+    }
+
+    let angle = 0;
+    function updateSnow() {
+        angle += 0.01;
+        for (let i = 0; i < snowflakes.length; i++) {
+            let sf = snowflakes[i];
+            sf.y += sf.speed + Math.cos(angle + sf.density) * 0.3;
+            sf.x += Math.sin(angle) * 0.5;
+
+            if (sf.y > sHeight) {
+                sf.y = 0;
+                sf.x = Math.random() * sWidth;
+            }
+        }
+    }
+
+    setInterval(drawSnow, 30);
+</script>
+
+<!-- [BLOQUE: LÓGICA / JAVASCRIPT PRINCIPAL] -->
 <script>
     year.innerText = new Date().getFullYear();
     const SHEET = "https://docs.google.com/spreadsheets/d/1ICjjEbQBt2Ce9vGj6M3iOMPT9P2ldYVeDLbzV15LMhI/export?format=csv&gid=1965298886";
