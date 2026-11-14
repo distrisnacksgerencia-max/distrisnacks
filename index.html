@@ -6,18 +6,25 @@
     <title>DISTRISNACKS - Especial Navideño</title>
     
     <!-- [BLOQUE: LOGOTIPOS E ICONO] Icono de pestaña (Favicon) -->
-    <link rel="icon" href="https://lh3.googleusercontent.com/d/12Kopjp5gMI1qYBY3l6UPzIa8HQ7Bd8Zr">
+    <link rel="icon" href="https://lh3.googleusercontent.com/d/1tU1CKKmO8-r1qUJlZ8Z2lj1snn-06KSg">
 
     <style>
         *{box-sizing:border-box}
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4}
         
-        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] Estilos de cabecera y logotipo festivo */
-        .header-container{background:#88003d;padding:15px;position:sticky;top:0;z-index:100;box-shadow: 0 4px 10px rgba(0,0,0,0.3);border-bottom: 3px solid #144522;}
+        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL - FIJO / STICKY] */
+        .header-container{background:#88003d;padding:15px;position:sticky;top:0;z-index:100;box-shadow: 0 4px 15px rgba(0,0,0,0.3);border-bottom: 3px solid #d4af37;}
         .logo-main{display:block;margin:0 auto 12px;height:75px;max-width:320px;width:100%;object-fit:contain}
-        header{display:flex;gap:10px;align-items:center}
+        header{display:flex;gap:10px;align-items:center;margin-bottom:12px}
         #menuBtn{font-size:26px;cursor:pointer;color:white}
         #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
+
+        /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL NAVIDEÑO FIJO] */
+        #marcas{display:flex;gap:15px;overflow-x:auto;padding:8px 4px;background:rgba(255,255,255,0.95);border-radius:10px;margin-top:5px;scrollbar-width:thin}
+        .marca{text-align:center;font-size:12px;min-width:80px;cursor:pointer;transition:transform 0.2s}
+        .marca:hover{transform:scale(1.05)}
+        .marca img{width:65px;height:65px;border-radius:50%;border:3px solid #d4af37;object-fit:cover;background:#fff;box-shadow:0 0 8px rgba(212,175,55,0.6)}
+        .marca div{color:#144522;font-weight:bold;margin-top:4px}
 
         /* [BLOQUE: MENÚ LATERAL / SIDEBAR] Navegación por categorías */
         #sidebar{position:fixed;top:0;left:-280px;width:280px;height:100%;background:white;box-shadow:4px 0 15px rgba(0,0,0,0.3);transition:.3s;padding:20px;z-index:1000;overflow-y:auto}
@@ -26,11 +33,6 @@
         .cat:hover{background:#f9f9f9}
         #verTodos{background:#88003d;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;cursor:pointer}
         .btn-cerrar-menu{width:100%;padding:10px;background:#eee;border:none;border-radius:8px;margin-bottom:15px;cursor:pointer;font-weight:bold}
-
-        /* [BLOQUE: FILTRO DE MARCAS] Carrusel horizontal de marcas con acento navideño */
-        #marcas{display:flex;gap:15px;overflow-x:auto;padding:15px;background:white;border-bottom: 2px dashed #144522}
-        .marca{text-align:center;font-size:12px;min-width:80px;cursor:pointer}
-        .marca img{width:65px;height:65px;border-radius:50%;border:2px solid #144522;object-fit:cover;background:#f9f9f9}
 
         /* [BLOQUE: LISTADO Y GRILLA DE PRODUCTOS] Tarjetas de artículos, precios y controles */
         .seccion-titulo{padding:15px 10px 5px;font-size:18px;color:#88003d;font-weight:bold;text-transform:uppercase}
@@ -64,7 +66,7 @@
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:6px}
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE] Gestión de compras y datos de cliente */
-        #burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 20px;border-radius:30px;z-index:90;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;font-weight:bold;border: 2px solid #d4af37;}
+        #burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 20px;border-radius:30px;z-index:90;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;font-weight:bold;border:2px solid #d4af37}
         #panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:90%;transition:.4s;border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;z-index:2000;box-shadow:0 -5px 20px rgba(0,0,0,0.2)}
         #panel.activo{bottom:0}
 
@@ -77,7 +79,7 @@
         
         #btn-imprimir{width:100%;padding:15px;background:#444;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
         .btn-vaciar{background:#eee;color:#666;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer}
-        .btn-soporte{position:fixed;bottom:85px;right:20px;background:#144522;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px;border: 2px solid #d4af37;}
+        .btn-soporte{position:fixed;bottom:85px;right:20px;background:#144522;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px;border:2px solid #d4af37}
 
         /* [BLOQUE: MODALES GENERALES] Ventanas superpuestas */
         .modal-overlay {
@@ -140,13 +142,15 @@
 </head>
 <body>
 
-<!-- [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL NAVIDEÑO] -->
+<!-- [BLOQUE: HEADER, LOGOTIPO PRINCIPAL Y CARRUSEL DE MARCAS FIJO / STICKY] -->
 <div class="header-container">
     <img src="https://lh3.googleusercontent.com/d/1I0pEeU4MOuhjvA28dvKe2gn-rQlt-Gtn" alt="DISTRISNACKS Navideño" class="logo-main">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca navideña..." autocomplete="off">
     </header>
+    <!-- Carrusel de marcas fijo junto al header -->
+    <div id="marcas"></div>
 </div>
 
 <!-- [BLOQUE: MENÚ LATERAL / SIDEBAR] -->
@@ -155,9 +159,6 @@
     <div id="verTodos" onclick="limpiarFiltros()">🏠 Ver todo el catálogo</div>
     <div id="menuCats"></div>
 </div>
-
-<!-- [BLOQUE: FILTRO DE MARCAS] -->
-<div id="marcas"></div>
 
 <!-- [BLOQUE: LISTADO Y GRILLA DE PRODUCTOS] -->
 <div id="contenedor-principal"></div>
