@@ -147,12 +147,12 @@
         .controles button:hover{background:#66002e}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:8px;font-size:14px;outline:none}
 
-        /* [BLOQUE: ANIMACIÓN SANTA CLAUS MUY LENTO Y PAUSADO HACIA EL HORIZONTE] */
+        /* [BLOQUE: ANIMACIÓN SANTA CLAUS EXTRA GRANDE Y MUY LENTO HACIA EL HORIZONTE] */
         #santa-trineo {
             position: fixed;
-            top: 15px;
-            right: -350px;
-            width: 250px;
+            top: 10px;
+            right: -420px;
+            width: 330px; /* ¡Santa Claus mucho más grande! */
             z-index: 9998;
             pointer-events: none;
             opacity: 0;
@@ -161,32 +161,32 @@
         #santa-trineo img {
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 8px 20px rgba(212,175,55,0.8));
+            filter: drop-shadow(0 10px 25px rgba(212,175,55,0.9));
         }
         #santa-speech {
             position: absolute;
-            top: -45px;
-            left: 5px;
+            top: -55px;
+            left: 10px;
             background: #fff;
             color: #88003d;
-            padding: 6px 12px;
-            border-radius: 14px;
+            padding: 10px 16px;
+            border-radius: 16px;
             font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            border: 2px solid #d4af37;
+            font-size: 16px; /* ¡Texto de Santa mucho más grande y legible! */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.35);
+            border: 3px solid #d4af37;
             white-space: nowrap;
             display: none;
         }
-        @keyframes vueloMuyLentoHorizonte {
-            0% { right: -350px; top: 40px; transform: scaleX(1) scale(1); opacity: 1; }
-            46% { right: calc(100vw + 350px); top: 160px; transform: scaleX(1) scale(0.9); opacity: 1; }
-            49% { right: calc(100vw + 350px); top: 90px; transform: scaleX(-1) scale(0.9); opacity: 1; }
-            90% { right: -60px; top: 40px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
+        @keyframes vueloGiganteLento {
+            0% { right: -420px; top: 30px; transform: scaleX(1) scale(1); opacity: 1; }
+            46% { right: calc(100vw + 420px); top: 180px; transform: scaleX(1) scale(0.9); opacity: 1; }
+            49% { right: calc(100vw + 420px); top: 80px; transform: scaleX(-1) scale(0.9); opacity: 1; }
+            90% { right: -80px; top: 30px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
             100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.04); opacity: 0; }
         }
         .volando-png {
-            animation: vueloMuyLentoHorizonte 18s ease-in-out forwards; /* 18 segundos para que pase bien despacio */
+            animation: vueloGiganteLento 18s ease-in-out forwards;
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -280,9 +280,9 @@
 </head>
 <body>
 
-<!-- [SANTA CLAUS CON PNG PERSONALIZADO] -->
+<!-- [SANTA CLAUS CON PNG PERSONALIZADO - GIGANTE] -->
 <div id="santa-trineo">
-    <div id="santa-speech">¡Jo, jo, jo!</div>
+    <div id="santa-speech">¡Surtido navideño especial!</div>
     <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
 </div>
 
@@ -428,25 +428,25 @@
         } catch(e) {}
     }
 
-    // Mensajes cortos, directos y motivadores
-    const mensajesCortos = [
+    // Mensajes cortos intercalando motivación comercial y promociones navideñas
+    const mensajesCombinados = [
+        "¡Surtido navideño especial!",
         "¡Más snacks, más ganancia!",
-        "¡Felices fiestas, tendero!",
-        "¡Suma más y gana más!",
-        "¡Excelente pedido estrella!",
-        "¡Tu negocio vuela alto!",
-        "¡A romper récords hoy!",
-        "¡Feliz Navidad y éxito!",
-        "¡Más variedad, más ventas!",
-        "¡Grandes ganancias vienen!",
-        "¡A sumar más productos!"
+        "¡Promociones exclusivas de fin de año!",
+        "¡Felices fiestas, tendero estrella!",
+        "¡Aprovecha descuentos en marcas líder!",
+        "¡Suma más y gana más hoy!",
+        "¡Tu negocio vuela alto con ofertas!",
+        "¡Grandes promociones navideñas!",
+        "¡A romper récords de ventas!",
+        "¡Más variedad, más clientes felices!"
     ];
 
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
         
-        const msgAleatorio = mensajesCortos[Math.floor(Math.random() * mensajesCortos.length)];
+        const msgAleatorio = mensajesCombinados[Math.floor(Math.random() * mensajesCombinados.length)];
         speech.innerText = msgAleatorio;
 
         playBellSound();
