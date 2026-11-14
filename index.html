@@ -147,12 +147,12 @@
         .controles button:hover{background:#66002e}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:8px;font-size:14px;outline:none}
 
-        /* [BLOQUE: ANIMACIÓN SANTA CLAUS EXTRA GRANDE Y MUY LENTO HACIA EL HORIZONTE] */
+        /* [BLOQUE: ANIMACIÓN SANTA CLAUS GIGANTE Y MUY PAUSADO] */
         #santa-trineo {
             position: fixed;
             top: 10px;
-            right: -420px;
-            width: 330px; /* ¡Santa Claus mucho más grande! */
+            right: -450px;
+            width: 340px;
             z-index: 9998;
             pointer-events: none;
             opacity: 0;
@@ -165,28 +165,28 @@
         }
         #santa-speech {
             position: absolute;
-            top: -55px;
+            top: -60px;
             left: 10px;
             background: #fff;
             color: #88003d;
             padding: 10px 16px;
             border-radius: 16px;
             font-weight: bold;
-            font-size: 16px; /* ¡Texto de Santa mucho más grande y legible! */
+            font-size: 16px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.35);
             border: 3px solid #d4af37;
             white-space: nowrap;
             display: none;
         }
-        @keyframes vueloGiganteLento {
-            0% { right: -420px; top: 30px; transform: scaleX(1) scale(1); opacity: 1; }
-            46% { right: calc(100vw + 420px); top: 180px; transform: scaleX(1) scale(0.9); opacity: 1; }
-            49% { right: calc(100vw + 420px); top: 80px; transform: scaleX(-1) scale(0.9); opacity: 1; }
-            90% { right: -80px; top: 30px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
+        @keyframes vueloGiganteExtendido {
+            0% { right: -450px; top: 30px; transform: scaleX(1) scale(1); opacity: 1; }
+            46% { right: calc(100vw + 450px); top: 190px; transform: scaleX(1) scale(0.9); opacity: 1; }
+            49% { right: calc(100vw + 450px); top: 80px; transform: scaleX(-1) scale(0.9); opacity: 1; }
+            90% { right: -90px; top: 30px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
             100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.04); opacity: 0; }
         }
         .volando-png {
-            animation: vueloGiganteLento 18s ease-in-out forwards;
+            animation: vueloGiganteExtendido 22s ease-in-out forwards; /* 22 segundos de recorrido amplio y muy pausado */
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -282,7 +282,7 @@
 
 <!-- [SANTA CLAUS CON PNG PERSONALIZADO - GIGANTE] -->
 <div id="santa-trineo">
-    <div id="santa-speech">¡Surtido navideño especial!</div>
+    <div id="santa-speech">Surtido navideño especial!</div>
     <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
 </div>
 
@@ -428,25 +428,35 @@
         } catch(e) {}
     }
 
-    // Mensajes cortos intercalando motivación comercial y promociones navideñas
-    const mensajesCombinados = [
-        "¡Surtido navideño especial!",
-        "¡Más snacks, más ganancia!",
-        "¡Promociones exclusivas de fin de año!",
-        "¡Felices fiestas, tendero estrella!",
-        "¡Aprovecha descuentos en marcas líder!",
-        "¡Suma más y gana más hoy!",
-        "¡Tu negocio vuela alto con ofertas!",
-        "¡Grandes promociones navideñas!",
-        "¡A romper récords de ventas!",
-        "¡Más variedad, más clientes felices!"
+    // Lista de 20 mensajes rotativos: Motivación, tips de venta, promos y festividades navideñas
+    const lista20Mensajes = [
+        "Aprovecha las promociones en productos seleccionados",
+        "Surtir bien tu mostrador atrae más clientes en diciembre",
+        "Mayor variedad de snacks aumenta tus ventas diarias",
+        "Felices fiestas, que tu negocio brille esta Navidad",
+        "Aprovecha los descuentos especiales para maximizar tu ganancia",
+        "Coloca los snacks en la entrada para impulsar la venta por impulso",
+        "Un inventario completo garantiza un fin de año exitoso",
+        "La magia navideña llega con las mejores promociones de Distrisnacks",
+        "Mantén tu exhibición ordenada y limpia para vender más rápido",
+        "Suma más productos y asegura el mejor margen de temporada",
+        "Comparte la alegría navideña ofreciendo queso siete cueros y snacks",
+        "Invierte en tu negocio hoy para ver grandes frutos mañana",
+        "Los precios especiales de temporada son tu mejor aliado comercial",
+        "Un tendero preparado es un tendero con más ganancias",
+        "Que la abundancia y la paz inunden tu establecimiento",
+        "Ofrece siempre la novedad navideña a tus clientes frecuentes",
+        "Cada múltiplo de 5 productos acerca tu negocio al éxito total",
+        "Disfruta las festividades con un mostrador lleno de sabor",
+        "Optimiza tus pedidos y ahorra tiempo con la preventa navideña",
+        "Gracias por confiar en Distrisnacks, ¡vamos por un gran año nuevo!"
     ];
 
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
         
-        const msgAleatorio = mensajesCombinados[Math.floor(Math.random() * mensajesCombinados.length)];
+        const msgAleatorio = lista20Mensajes[Math.floor(Math.random() * lista20Mensajes.length)];
         speech.innerText = msgAleatorio;
 
         playBellSound();
@@ -459,12 +469,12 @@
 
         setTimeout(() => {
             speech.style.display = 'none';
-        }, 8000);
+        }, 10000);
 
         setTimeout(() => {
             santa.classList.remove('volando-png');
             santa.style.opacity = '0';
-        }, 18000);
+        }, 22000);
     }
 
     const snowCanvas = document.createElement('canvas');
@@ -739,13 +749,16 @@
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         
+        // Control exacto de múltiplos de 5 sin bug al sumar rápidamente
         if (itemC > 0 && itemC % 5 === 0) {
             if (itemC !== ultimoNivelMultiplo5) {
                 ultimoNivelMultiplo5 = itemC;
                 dispararSantaVolador();
             }
         } else {
-            ultimoNivelMultiplo5 = 0;
+            if (itemC % 5 !== 0) {
+                ultimoNivelMultiplo5 = Math.floor(itemC / 5) * 5;
+            }
         }
         
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
