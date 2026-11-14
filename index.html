@@ -6,7 +6,7 @@
     <title>DISTRISNACKS - Especial Navideño</title>
     
     <!-- [BLOQUE: LOGOTIPOS E ICONO] Icono de pestaña (Favicon) -->
-    <link rel="icon" href="https://lh3.googleusercontent.com/d/1tU1CKKmO8-r1qUJlZ8Z2lj1snn-06KSg">
+    <link rel="icon" href="https://lh3.googleusercontent.com/d/12Kopjp5gMI1qYBY3l6UPzIa8HQ7Bd8Zr">
 
     <style>
         *{box-sizing:border-box}
@@ -19,11 +19,38 @@
         #menuBtn{font-size:26px;cursor:pointer;color:white}
         #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
 
-        /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL NAVIDEÑO FIJO] */
-        #marcas{display:flex;gap:15px;overflow-x:auto;padding:8px 4px;background:rgba(255,255,255,0.95);border-radius:10px;margin-top:5px;scrollbar-width:thin}
+        /* [BLOQUE: FILTRO DE MARCAS - GUIRNALDA NAVIDEÑA COLGANTE] */
+        #marcas-contenedor {
+            position: relative;
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 15px 10px 10px 10px;
+            margin-top: 8px;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        /* Línea de la guirnalda que cruza por detrás */
+        #marcas-contenedor::before {
+            content: '';
+            position: absolute;
+            top: 22px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #144522, #144522 10px, #d4af37 10px, #d4af37 20px);
+            z-index: 1;
+        }
+        #marcas{display:flex;gap:20px;justify-content:center;align-items:flex-start;position: relative; z-index: 2; min-width: max-content; margin: 0 auto;}
+        
         .marca{text-align:center;font-size:12px;min-width:80px;cursor:pointer;transition:transform 0.2s}
-        .marca:hover{transform:scale(1.05)}
-        .marca img{width:65px;height:65px;border-radius:50%;border:3px solid #d4af37;object-fit:cover;background:#fff;box-shadow:0 0 8px rgba(212,175,55,0.6)}
+        .marca:hover{transform:scale(1.08)}
+        
+        /* Diferentes alturas (efecto colgante de esferas) */
+        .marca:nth-child(odd) { margin-top: 0px; }
+        .marca:nth-child(even) { margin-top: 15px; }
+        .marca:nth-child(3n) { margin-top: 8px; }
+
+        .marca img{width:65px;height:65px;border-radius:50%;border:3px solid #d4af37;object-fit:cover;background:#fff;box-shadow:0 4px 8px rgba(0,0,0,0.2)}
         .marca div{color:#144522;font-weight:bold;margin-top:4px}
 
         /* [BLOQUE: MENÚ LATERAL / SIDEBAR] Navegación por categorías */
@@ -142,15 +169,17 @@
 </head>
 <body>
 
-<!-- [BLOQUE: HEADER, LOGOTIPO PRINCIPAL Y CARRUSEL DE MARCAS FIJO / STICKY] -->
+<!-- [BLOQUE: HEADER, LOGOTIPO PRINCIPAL Y GUIRNALDA DE MARCAS FIJA] -->
 <div class="header-container">
     <img src="https://lh3.googleusercontent.com/d/1I0pEeU4MOuhjvA28dvKe2gn-rQlt-Gtn" alt="DISTRISNACKS Navideño" class="logo-main">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca navideña..." autocomplete="off">
     </header>
-    <!-- Carrusel de marcas fijo junto al header -->
-    <div id="marcas"></div>
+    <!-- Contenedor con la guirnalda y las marcas colgantes -->
+    <div id="marcas-contenedor">
+        <div id="marcas"></div>
+    </div>
 </div>
 
 <!-- [BLOQUE: MENÚ LATERAL / SIDEBAR] -->
