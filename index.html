@@ -151,8 +151,8 @@
         #santa-trineo {
             position: fixed;
             top: 15px;
-            right: -300px;
-            width: 240px; /* Más grandecito */
+            right: -320px;
+            width: 250px;
             z-index: 9998;
             pointer-events: none;
             opacity: 0;
@@ -165,28 +165,28 @@
         }
         #santa-speech {
             position: absolute;
-            top: -42px;
-            left: 10px;
+            top: -45px;
+            left: 5px;
             background: #fff;
             color: #88003d;
             padding: 6px 12px;
             border-radius: 14px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3);
             border: 2px solid #d4af37;
             white-space: nowrap;
             display: none;
         }
         @keyframes vueloPausadoHorizonte {
-            0% { right: -300px; top: 40px; transform: scaleX(1) scale(1); opacity: 1; }
-            46% { right: calc(100vw + 300px); top: 150px; transform: scaleX(1) scale(0.9); opacity: 1; }
-            49% { right: calc(100vw + 300px); top: 80px; transform: scaleX(-1) scale(0.9); opacity: 1; } /* Gira en espejo */
-            90% { right: -50px; top: 40px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
-            100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.05); opacity: 0; } /* Se pierde y desvanece exactamente en la esquina superior derecha */
+            0% { right: -320px; top: 40px; transform: scaleX(1) scale(1); opacity: 1; }
+            46% { right: calc(100vw + 320px); top: 160px; transform: scaleX(1) scale(0.9); opacity: 1; }
+            49% { right: calc(100vw + 320px); top: 90px; transform: scaleX(-1) scale(0.9); opacity: 1; }
+            90% { right: -60px; top: 40px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
+            100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.04); opacity: 0; }
         }
         .volando-png {
-            animation: vueloPausadoHorizonte 11s ease-in-out forwards; /* Más pausado para disfrutarlo */
+            animation: vueloPausadoHorizonte 14s ease-in-out forwards;
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -428,51 +428,44 @@
         } catch(e) {}
     }
 
-    const mensajesNavidenos = [
-        "¡Felices Fiestas, tendero estrella! 🎄",
-        "¡Surted tu negocio con alegría! 🎁",
-        "¡Gracias por confiar en Distrisnacks! ⭐",
-        "¡Que tu caja sonría esta Navidad! 🎅",
-        "¡Mucho éxito en tus ventas de fin de año! 🌟"
+    const mensajesVariados = [
+        "¡Cada snack extra es más ganancia para tu negocio!",
+        "¡Que la magia de la Navidad llene tu mostrador de alegría!",
+        "¡Sútele unos productos más y asegura el mejor margen de fin de año!",
+        "¡Gracias por tu esfuerzo diario, eres el motor de tu comunidad!",
+        "¡Tu vitrina va a volar con estos Distrisnacks!",
+        "¡Un negocio bien surtido es sinónimo de un diciembre próspero!",
+        "¡Estás construyendo un pedido histórico, tendero estrella!",
+        "¡Que esta temporada de fiestas traiga abundancia y paz a tu hogar!",
+        "¡Más variedad en tu mostrador, más clientes felices!",
+        "¡Valoramos tu confianza en Distrisnacks, vamos por todo!",
+        "¡Ho, ho, ho! ¡A romper récords de ventas este fin de año!",
+        "¡Tus clientes amarán estas novedades navideñas!"
     ];
 
-    function decirMensajeSanta() {
-        try {
-            const msgAleatorio = mensajesNavidenos[Math.floor(Math.random() * mensajesNavidenos.length)];
-            document.getElementById('santa-speech').innerText = msgAleatorio;
-
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance("¡Jo, jo, jo! Felices fiestas");
-                utterance.lang = 'es-ES';
-                utterance.pitch = 0.7;
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-            }
-        } catch(e) {}
-    }
-
-    let ultimoNivelMultiplo5 = 0;
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
         
+        const msgAleatorio = mensajesVariados[Math.floor(Math.random() * mensajesVariados.length)];
+        speech.innerText = msgAleatorio;
+
         playBellSound();
-        decirMensajeSanta();
         
         santa.style.opacity = '1';
         santa.classList.remove('volando-png');
-        void santa.offsetWidth; // Reiniciar animación
+        void santa.offsetWidth;
         santa.classList.add('volando-png');
         speech.style.display = 'block';
 
         setTimeout(() => {
             speech.style.display = 'none';
-        }, 5000);
+        }, 6500);
 
         setTimeout(() => {
             santa.classList.remove('volando-png');
             santa.style.opacity = '0';
-        }, 11000);
+        }, 14000);
     }
 
     const snowCanvas = document.createElement('canvas');
@@ -731,6 +724,8 @@
         });
     }
 
+    let ultimoNivelMultiplo5 = 0;
+
     function renderCarrito() {
         let tot = 0, sub = 0, itemC = 0, h = "";
         for(let k in carrito) {
@@ -745,14 +740,13 @@
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         
-        // Disparar Santa Claus en cada múltiplo de 5 productos (5, 10, 15, 20...)
         if (itemC > 0 && itemC % 5 === 0) {
             if (itemC !== ultimoNivelMultiplo5) {
                 ultimoNivelMultiplo5 = itemC;
                 dispararSantaVolador();
             }
         } else {
-            ultimoNivelMultiplo5 = 0; // Permite que vuelva a salir al alcanzar el siguiente múltiplo de 5
+            ultimoNivelMultiplo5 = 0;
         }
         
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
@@ -794,22 +788,24 @@
         
         for(let k in carrito) {
             let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
-            msgItems += `• ${i.c} x ${k}\n`;
+            msgItems += `- ${i.c} x ${k}\n`;
         }
         let ahr = sub - tot;
         
-        let m = `¡Hola, Distrisnacks! 🎄✨ Aquí va mi pedido navideño para el negocio:
-
-🗓️ *Día ideal:* ${diaElegido}
-👤 *Cliente:* ${cliente.value}
-📍 *Negocio/Dir:* ${negocio.value} / ${direccion.value}
-
-📦 *PRODUCTOS:*
-${msgItems}
---------------------------------
-💰 *TOTAL A PAGAR:* $${tot.toLocaleString()}
-${ahr > 0 ? `🎁 *Ahorro obtenido:* $${ahr.toLocaleString()}\n` : ''}--------------------------------
-¡Muchas gracias y felices fiestas! 🎅`;
+        // Mensaje de WhatsApp sin emojis, con subtotal y condición de descuento
+        let m = `Hola, Distrisnacks! Aquí va mi pedido navideño para el negocio:\n\n`;
+        m += `Dia ideal: ${diaElegido}\n`;
+        m += `Cliente: ${cliente.value}\n`;
+        m += `Negocio/Dir: ${negocio.value} / ${direccion.value}\n\n`;
+        m += `PRODUCTOS:\n${msgItems}\n`;
+        m += `--------------------------------\n`;
+        m += `Subtotal: $${sub.toLocaleString()}\n`;
+        if(ahr > 0) {
+            m += `Ahorro obtenido: $${ahr.toLocaleString()}\n`;
+        }
+        m += `TOTAL A PAGAR: $${tot.toLocaleString()}\n`;
+        m += `--------------------------------\n`;
+        m += `¡Muchas gracias y felices fiestas!`;
         
         window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
         cerrarConfirmacion();
@@ -882,25 +878,25 @@ ${ahr > 0 ? `🎁 *Ahorro obtenido:* $${ahr.toLocaleString()}\n` : ''}----------
         let enlaceBase = window.location.origin + window.location.pathname;
         let enlace = `${enlaceBase}?prod=${encodeURIComponent(p.n)}`;
 
-        let texto = `*DISTRISNACKS - ESPECIAL NAVIDEÑO* 🎄🍿\n`;
-        texto += `━━━━━━━━━━━━━━━━━\n`;
-        texto += `*📦 Producto:* ${p.n}\n`;
+        let texto = `DISTRISNACKS - ESPECIAL NAVIDEÑO\n`;
+        texto += `--------------------------------\n`;
+        texto += `Producto: ${p.n}\n`;
         
-        if (p.marca) texto += `*🏷️ Marca:* ${p.marca}\n`;
-        if (p.cat) texto += `*📂 Categoría:* ${p.cat}\n`;
+        if (p.marca) texto += `Marca: ${p.marca}\n`;
+        if (p.cat) texto += `Categoría: ${p.cat}\n`;
         
         if(p.descPorc > 0) {
-            texto += `*❌ Antes:* ~$${p.pOrig.toLocaleString()}~\n`;
+            texto += `Antes: $${p.pOrig.toLocaleString()}\n`;
         }
-        texto += `*💰 Precio:* $${p.p.toLocaleString()}\n`;
+        texto += `Precio: $${p.p.toLocaleString()}\n`;
         
         if (p.detalle) {
-            texto += `\n*📝 Descripción:*\n_${p.detalle}_\n`;
+            texto += `\nDescripción:\n${p.detalle}\n`;
         }
         
-        texto += `━━━━━━━━━━━━━━━━━\n`;
-        texto += `*🛒 Agregar al carrito aquí:* \n${enlace}\n\n`;
-        texto += `*📷 Ver foto:* \n${p.img}`;
+        texto += `--------------------------------\n`;
+        texto += `Agregar al carrito aquí:\n${enlace}\n\n`;
+        texto += `Ver foto:\n${p.img}`;
 
         if (navigator.share) {
             try {
