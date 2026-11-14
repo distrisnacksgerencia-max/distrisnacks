@@ -46,24 +46,30 @@
         .btn-cerrar-menu{width:100%;padding:10px;background:#eee;border:none;border-radius:8px;margin-bottom:15px;cursor:pointer;font-weight:bold}
 
         .seccion-titulo{padding:15px 10px 5px;font-size:18px;color:#88003d;font-weight:bold;text-transform:uppercase}
-        #productos{padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:110px}
+        #productos{padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:110px}
         @media(min-width:700px){#productos{grid-template-columns:repeat(3,1fr);max-width:1000px;margin-left:auto;margin-right:auto}}
 
-        .producto{background:white;border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1);position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:260px}
+        .producto{
+            background:white;border-radius:14px;padding:12px;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,0.08);
+            position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:260px;
+            border-top:4px solid #88003d;transition:transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .producto:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(136,0,61,0.15)}
         .producto img{width:100%;border-radius:8px;aspect-ratio:1/1;object-fit:cover}
-        .producto.premium{border:2px solid #d4af37;background:#fffdf9;box-shadow:0 4px 12px rgba(212,175,55,0.25)}
-        .premium-tag{position:absolute;top:5px;left:5px;background:#d4af37;color:#000;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:bold;z-index:5}
+        .producto.premium{border-top:4px solid #d4af37;background:#fffdf7;box-shadow:0 4px 14px rgba(212,175,55,0.2)}
+        .premium-tag{position:absolute;top:8px;left:8px;background:#d4af37;color:#000;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:bold;z-index:5;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
 
-        .btn-info{position:absolute;bottom:5px;right:5px;background:rgba(255,255,255,0.9);color:#88003d;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,0.2);border:1px solid #ddd;z-index:10;padding:0}
-        .badge-desc{position:absolute;top:5px;right:5px;background:#144522;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold;z-index:5}
+        .btn-info{position:absolute;bottom:8px;right:8px;background:rgba(255,255,255,0.95);color:#88003d;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,0.2);border:1px solid #ddd;z-index:10;padding:0}
+        .badge-desc{position:absolute;top:8px;right:8px;background:#144522;color:white;font-size:11px;padding:4px 8px;border-radius:6px;font-weight:bold;z-index:5;box-shadow:0 2px 4px rgba(0,0,0,0.2)}
         .precio-old{text-decoration:line-through;color:#999;font-size:12px;margin-right:5px}
-        .nombre{font-size:14px;margin:8px 0;height:34px;overflow:hidden;line-height:1.2}
+        .nombre{font-size:14px;margin:10px 0;height:36px;overflow:hidden;line-height:1.2;color:#333;font-weight:600}
         .precio{color:#88003d;font-weight:bold;font-size:16px}
         .controles{display:flex;justify-content:center;gap:6px;margin-top:10px}
-        .controles button{width:32px;height:32px;background:#88003d;color:white;border:none;border-radius:6px;cursor:pointer}
-        .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:6px;padding:6px 0}
+        .controles button{width:34px;height:34px;background:#88003d;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:bold;transition:background 0.2s}
+        .controles button:hover{background:#66002e}
+        .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:8px;font-size:14px;outline:none;padding:6px 0}
 
-        #burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 20px;border-radius:30px;z-index:90;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;font-weight:bold;display:flex;gap:6px;align-items:center}
+        #burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 20px;border-radius:30px;z-index:90;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;font-weight:bold;display:flex;gap:6px;align-items:center;border:2px solid #d4af37}
         #panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:90%;transition:0.4s;border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;z-index:2000;box-shadow:0 -5px 20px rgba(0,0,0,0.3)}
         #panel.activo{bottom:0}
 
@@ -75,7 +81,7 @@
         #enviar:disabled, #btn-imprimir:disabled{background:#ccc;cursor:not-allowed}
         #btn-imprimir{width:100%;padding:15px;background:#444;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
         .btn-vaciar{background:#eee;color:#666;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer}
-        .btn-soporte{position:fixed;bottom:85px;right:20px;background:#144522;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:80}
+        .btn-soporte{position:fixed;bottom:85px;right:20px;background:#144522;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.25);z-index:80;border:2px solid #d4af37}
 
         .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:3000;align-items:center;justify-content:center;padding:20px}
         .modal-content{background:white;border-radius:20px;width:100%;max-width:400px;padding:25px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.2);max-height:90vh;overflow-y:auto;position:relative;display:flex;flex-direction:column}
@@ -822,6 +828,15 @@
     }
 
     function setupEventDelegation() {
+        buscar.addEventListener('input', (e) => {
+            state.busqueda = e.target.value;
+            if (state.busqueda.trim() !== '') {
+                catFiltro = '';
+                marcaFiltro = '';
+            }
+            renderProductos();
+        });
+
         document.addEventListener('click', (event) => {
             const menuBtn = event.target.closest('#menuBtn');
             if (menuBtn) {
