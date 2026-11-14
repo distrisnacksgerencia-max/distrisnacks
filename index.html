@@ -12,31 +12,87 @@
         *{box-sizing:border-box}
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4;color:#222}
 
-        .header-container{background:#88003d;padding:15px 15px 5px 15px;position:sticky;top:0;z-index:100;box-shadow:0 4px 15px rgba(0,0,0,0.3);border-bottom:3px solid #d4af37;}
+        .header-container{background:#88003d;padding:15px 15px 10px 15px;position:sticky;top:0;z-index:100;box-shadow:0 4px 15px rgba(0,0,0,0.3);border-bottom:3px solid #d4af37;}
         .logo-main{display:block;margin:0 auto 10px;height:75px;max-width:320px;width:100%;object-fit:contain}
         header{display:flex;gap:10px;align-items:center;margin-bottom:8px}
         #menuBtn{font-size:26px;cursor:pointer;color:white;user-select:none}
         #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
 
+        /* [BLOQUE CORREGIDO: CARRUSEL DE MARCAS] */
         #marcas{
-            display:flex;justify-content:flex-start;gap:25px;overflow-x:auto;padding:12px 10px 8px 10px;
-            background:rgba(255,255,255,0.95);border-radius:8px;margin-top:5px;scrollbar-width:thin;
+            display:flex;
+            flex-wrap:nowrap;
+            justify-content:flex-start;
+            gap:20px;
+            overflow-x:auto;
+            overflow-y:hidden;
+            padding:15px 10px 10px 10px;
+            background:rgba(255,255,255,0.95);
+            border-radius:8px;
+            margin-top:5px;
+            scrollbar-width:thin;
             -webkit-overflow-scrolling:touch;
+            width:100%;
         }
         @media(min-width:768px){#marcas{justify-content:center}}
 
-        .marca{text-align:center;font-size:12px;min-width:85px;cursor:pointer;position:relative;transition:transform 0.2s ease;flex-shrink:0;border:none;background:transparent;padding:0}
+        .marca{
+            text-align:center;
+            font-size:12px;
+            min-width:75px;
+            max-width:75px;
+            cursor:pointer;
+            position:relative;
+            transition:transform 0.2s ease;
+            flex:0 0 auto;
+            border:none;
+            background:transparent;
+            padding:12px 0 0 0; /* Espacio superior para la cuerda colgante */
+        }
         .marca:hover{transform:scale(1.08)}
-        .marca::before{content:'';position:absolute;top:-12px;left:50%;width:2px;transform:translateX(-50%);background:linear-gradient(to bottom,#d4af37,#aa8c2c);z-index:1}
-        .marca:nth-child(1){margin-top:15px}.marca:nth-child(1)::before{height:15px}
-        .marca:nth-child(2){margin-top:4px}.marca:nth-child(2)::before{height:26px}
-        .marca:nth-child(3){margin-top:20px}.marca:nth-child(3)::before{height:10px}
-        .marca:nth-child(4){margin-top:8px}.marca:nth-child(4)::before{height:22px}
-        .marca:nth-child(5){margin-top:16px}.marca:nth-child(5)::before{height:14px}
-        .marca:nth-child(6){margin-top:2px}.marca:nth-child(6)::before{height:28px}
-        .marca:nth-child(n+7){margin-top:10px}.marca:nth-child(n+7)::before{height:20px}
-        .marca img{width:60px;height:60px;border-radius:50%;border:3px solid #d4af37;object-fit:cover;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,0.2);position:relative;z-index:2}
-        .marca div{color:#144522;font-weight:bold;margin-top:4px}
+        
+        /* Cuerda dorada colgante */
+        .marca::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:50%;
+            width:2px;
+            transform:translateX(-50%);
+            background:linear-gradient(to bottom,#d4af37,#aa8c2c);
+            z-index:1;
+            pointer-events:none;
+        }
+        
+        .marca:nth-child(1){margin-top:4px}.marca:nth-child(1)::before{height:12px}
+        .marca:nth-child(2){margin-top:12px}.marca:nth-child(2)::before{height:20px}
+        .marca:nth-child(3){margin-top:2px}.marca:nth-child(3)::before{height:10px}
+        .marca:nth-child(4){margin-top:8px}.marca:nth-child(4)::before{height:16px}
+        .marca:nth-child(5){margin-top:14px}.marca:nth-child(5)::before{height:22px}
+        .marca:nth-child(6){margin-top:5px}.marca:nth-child(6)::before{height:13px}
+        .marca:nth-child(n+7){margin-top:10px}.marca:nth-child(n+7)::before{height:18px}
+
+        .marca img{
+            width:55px;
+            height:55px;
+            border-radius:50%;
+            border:3px solid #d4af37;
+            object-fit:cover;
+            background:#fff;
+            box-shadow:0 3px 8px rgba(0,0,0,0.2);
+            position:relative;
+            z-index:2;
+            display:block;
+            margin:0 auto;
+        }
+        .marca div{
+            color:#144522;
+            font-weight:bold;
+            margin-top:4px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
 
         #sidebar{position:fixed;top:0;left:-280px;width:280px;height:100%;background:white;box-shadow:4px 0 15px rgba(0,0,0,0.3);transition:0.3s;padding:20px;z-index:1000;overflow-y:auto}
         #sidebar.activo{left:0}
