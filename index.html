@@ -109,7 +109,6 @@
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             overflow: hidden;
         }
-        /* Efecto Brillo Estelar al pasar el cursor (Hover Luminoso) */
         .producto::after {
             content: '';
             position: absolute;
@@ -148,24 +147,46 @@
         .controles button:hover{background:#66002e}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:8px;font-size:14px;outline:none}
 
-        /* [BLOQUE: ANIMACIÓN SANTA CLAUS VOLADOR 🎅] */
+        /* [BLOQUE: ANIMACIÓN SANTA CLAUS CON PNG PERSONALIZADO] */
         #santa-trineo {
             position: fixed;
-            top: 15%;
-            left: -200px;
-            font-size: 45px;
+            top: 25px;
+            right: -220px;
+            width: 150px;
             z-index: 9998;
             pointer-events: none;
-            transition: none;
-            filter: drop-shadow(0 5px 10px rgba(212,175,55,0.6));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
-        @keyframes volarSanta {
-            0% { left: -200px; top: 15%; transform: scaleX(1) rotate(0deg); }
-            50% { top: 10%; transform: scaleX(1) rotate(-5deg); }
-            100% { left: 105vw; top: 20%; transform: scaleX(1) rotate(5deg); }
+        #santa-trineo img {
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(212,175,55,0.7));
         }
-        .volando {
-            animation: volarSanta 4s linear forwards;
+        #santa-speech {
+            position: absolute;
+            top: -32px;
+            left: 5px;
+            background: #fff;
+            color: #88003d;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            border: 2px solid #d4af37;
+            white-space: nowrap;
+            display: none;
+        }
+        @keyframes vueloDobleSanta {
+            0% { right: -220px; top: 30px; transform: scaleX(1) scale(1); opacity: 1; }
+            46% { right: calc(100vw + 220px); top: 120px; transform: scaleX(1) scale(0.95); opacity: 1; }
+            49% { right: calc(100vw + 220px); top: 70px; transform: scaleX(-1) scale(0.95); opacity: 1; } /* Gira en espejo para volver */
+            92% { right: -220px; top: 90px; transform: scaleX(-1) scale(0.85); opacity: 1; }
+            100% { right: 10px; top: 10px; transform: scaleX(-1) scale(0.1); opacity: 0; } /* Se pierde y desvanece en la esquina superior derecha */
+        }
+        .volando-png {
+            animation: vueloDobleSanta 7.5s ease-in-out forwards;
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -259,8 +280,11 @@
 </head>
 <body>
 
-<!-- [SANTA CLAUS VOLADOR EN EL CATÁLOGO] -->
-<div id="santa-trineo">🛷🎅✨🦌🦌</div>
+<!-- [SANTA CLAUS CON PNG PERSONALIZADO] -->
+<div id="santa-trineo">
+    <div id="santa-speech">¡Jo, jo, jo! 🎅</div>
+    <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
+</div>
 
 <!-- [BLOQUE: HEADER, LOGOTIPO PRINCIPAL Y CARRUSEL COLGANTE FIJO / STICKY] -->
 <div class="header-container">
@@ -383,7 +407,7 @@
     © <span id="year"></span>
 </footer>
 
-<!-- [BLOQUE: EFECTO DE AUDIO, SANTA VOLADOR Y NIEVE] -->
+<!-- [BLOQUE: EFECTO DE AUDIO, SANTA PNG Y NIEVE] -->
 <script>
     function playBellSound() {
         try {
@@ -404,16 +428,39 @@
         } catch(e) {}
     }
 
+    function decirHoHoHo() {
+        try {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("¡Jo, jo, jo!");
+                utterance.lang = 'es-ES';
+                utterance.pitch = 0.7;
+                utterance.rate = 0.9;
+                window.speechSynthesis.speak(utterance);
+            }
+        } catch(e) {}
+    }
+
     let santaYaVolo = false;
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
+        const speech = document.getElementById('santa-speech');
         if(!santaYaVolo) {
             santaYaVolo = true;
             playBellSound();
-            santa.classList.add('volando');
+            decirHoHoHo();
+            
+            santa.style.opacity = '1';
+            santa.classList.add('volando-png');
+            speech.style.display = 'block';
+
             setTimeout(() => {
-                santa.classList.remove('volando');
-            }, 4000);
+                speech.style.display = 'none';
+            }, 3500);
+
+            setTimeout(() => {
+                santa.classList.remove('volando-png');
+                santa.style.opacity = '0';
+            }, 7500);
         }
     }
 
@@ -687,11 +734,11 @@
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         
-        // Disparar Santa Claus volador si el total supera los $30,000
-        if(tot >= 30000) {
+        // Activar Santa Claus PNG a partir de $25,000
+        if(tot >= 25000) {
             dispararSantaVolador();
         } else {
-            santaYaVolo = false; // Permite que vuelva a volar si bajan y vuelven a subir el monto
+            santaYaVolo = false;
         }
         
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
@@ -733,22 +780,22 @@
         
         for(let k in carrito) {
             let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
-            msgItems += `• ${i.c} x ${k}%0A`;
+            msgItems += `• ${i.c} x ${k}\n`;
         }
         let ahr = sub - tot;
         
-        let m = "¡Hola, Distrisnacks! \ud83c\udf84\u2728 Aquí va mi pedido navideño para el negocio:%0A%0A";
-        m += "\ud83d\udcc5 *Día ideal:* " + diaElegido + "%0A";
-        m += "\ud83d\udc64 *Cliente:* " + cliente.value + "%0A";
-        m += "\ud83d\udccd *Negocio/Dir:* " + negocio.value + " / " + direccion.value + "%0A%0A";
-        m += "\ud83d\udce6 *PRODUCTOS:*%0A" + msgItems + "%0A";
-        m += "--------------------------------%0A";
-        m += "\ud83d\udcb0 *TOTAL A PAGAR:* $" + tot.toLocaleString() + "%0A";
-        if(ahr > 0) {
-            m += "\ud83c\udf81 *Ahorro obtenido:* $" + ahr.toLocaleString() + "%0A";
-        }
-        m += "--------------------------------%0A";
-        m += "¡Muchas gracias y felices fiestas! \ud83c\udf85";
+        let m = `¡Hola, Distrisnacks! 🎄✨ Aquí va mi pedido navideño para el negocio:
+
+🗓️ *Día ideal:* ${diaElegido}
+👤 *Cliente:* ${cliente.value}
+📍 *Negocio/Dir:* ${negocio.value} / ${direccion.value}
+
+📦 *PRODUCTOS:*
+${msgItems}
+--------------------------------
+💰 *TOTAL A PAGAR:* $${tot.toLocaleString()}
+${ahr > 0 ? `🎁 *Ahorro obtenido:* $${ahr.toLocaleString()}\n` : ''}--------------------------------
+¡Muchas gracias y felices fiestas! 🎅`;
         
         window.open("https://wa.me/573222643534?text=" + encodeURIComponent(m));
         cerrarConfirmacion();
