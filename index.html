@@ -147,11 +147,11 @@
         .controles button:hover{background:#66002e}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:8px;font-size:14px;outline:none}
 
-        /* [BLOQUE: ANIMACIÓN SANTA CLAUS GRANDE Y PAUSADO HACIA EL HORIZONTE] */
+        /* [BLOQUE: ANIMACIÓN SANTA CLAUS MUY LENTO Y PAUSADO HACIA EL HORIZONTE] */
         #santa-trineo {
             position: fixed;
             top: 15px;
-            right: -320px;
+            right: -350px;
             width: 250px;
             z-index: 9998;
             pointer-events: none;
@@ -178,15 +178,15 @@
             white-space: nowrap;
             display: none;
         }
-        @keyframes vueloPausadoHorizonte {
-            0% { right: -320px; top: 40px; transform: scaleX(1) scale(1); opacity: 1; }
-            46% { right: calc(100vw + 320px); top: 160px; transform: scaleX(1) scale(0.9); opacity: 1; }
-            49% { right: calc(100vw + 320px); top: 90px; transform: scaleX(-1) scale(0.9); opacity: 1; }
+        @keyframes vueloMuyLentoHorizonte {
+            0% { right: -350px; top: 40px; transform: scaleX(1) scale(1); opacity: 1; }
+            46% { right: calc(100vw + 350px); top: 160px; transform: scaleX(1) scale(0.9); opacity: 1; }
+            49% { right: calc(100vw + 350px); top: 90px; transform: scaleX(-1) scale(0.9); opacity: 1; }
             90% { right: -60px; top: 40px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
             100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.04); opacity: 0; }
         }
         .volando-png {
-            animation: vueloPausadoHorizonte 14s ease-in-out forwards;
+            animation: vueloMuyLentoHorizonte 18s ease-in-out forwards; /* 18 segundos para que pase bien despacio */
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -282,7 +282,7 @@
 
 <!-- [SANTA CLAUS CON PNG PERSONALIZADO] -->
 <div id="santa-trineo">
-    <div id="santa-speech">¡Jo, jo, jo! 🎅</div>
+    <div id="santa-speech">¡Jo, jo, jo!</div>
     <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
 </div>
 
@@ -428,26 +428,25 @@
         } catch(e) {}
     }
 
-    const mensajesVariados = [
-        "¡Cada snack extra es más ganancia para tu negocio!",
-        "¡Que la magia de la Navidad llene tu mostrador de alegría!",
-        "¡Sútele unos productos más y asegura el mejor margen de fin de año!",
-        "¡Gracias por tu esfuerzo diario, eres el motor de tu comunidad!",
-        "¡Tu vitrina va a volar con estos Distrisnacks!",
-        "¡Un negocio bien surtido es sinónimo de un diciembre próspero!",
-        "¡Estás construyendo un pedido histórico, tendero estrella!",
-        "¡Que esta temporada de fiestas traiga abundancia y paz a tu hogar!",
-        "¡Más variedad en tu mostrador, más clientes felices!",
-        "¡Valoramos tu confianza en Distrisnacks, vamos por todo!",
-        "¡Ho, ho, ho! ¡A romper récords de ventas este fin de año!",
-        "¡Tus clientes amarán estas novedades navideñas!"
+    // Mensajes cortos, directos y motivadores
+    const mensajesCortos = [
+        "¡Más snacks, más ganancia!",
+        "¡Felices fiestas, tendero!",
+        "¡Suma más y gana más!",
+        "¡Excelente pedido estrella!",
+        "¡Tu negocio vuela alto!",
+        "¡A romper récords hoy!",
+        "¡Feliz Navidad y éxito!",
+        "¡Más variedad, más ventas!",
+        "¡Grandes ganancias vienen!",
+        "¡A sumar más productos!"
     ];
 
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
         
-        const msgAleatorio = mensajesVariados[Math.floor(Math.random() * mensajesVariados.length)];
+        const msgAleatorio = mensajesCortos[Math.floor(Math.random() * mensajesCortos.length)];
         speech.innerText = msgAleatorio;
 
         playBellSound();
@@ -460,12 +459,12 @@
 
         setTimeout(() => {
             speech.style.display = 'none';
-        }, 6500);
+        }, 8000);
 
         setTimeout(() => {
             santa.classList.remove('volando-png');
             santa.style.opacity = '0';
-        }, 14000);
+        }, 18000);
     }
 
     const snowCanvas = document.createElement('canvas');
@@ -792,7 +791,6 @@
         }
         let ahr = sub - tot;
         
-        // Mensaje de WhatsApp sin emojis, con subtotal y condición de descuento
         let m = `Hola, Distrisnacks! Aquí va mi pedido navideño para el negocio:\n\n`;
         m += `Dia ideal: ${diaElegido}\n`;
         m += `Cliente: ${cliente.value}\n`;
