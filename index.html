@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DISTRISNACKS</title>
+    <title>DISTRISNACKS - Especial Navideño</title>
     
     <!-- [BLOQUE: LOGOTIPOS E ICONO] Icono de pestaña (Favicon) -->
     <link rel="icon" href="https://lh3.googleusercontent.com/d/12Kopjp5gMI1qYBY3l6UPzIa8HQ7Bd8Zr">
@@ -12,8 +12,8 @@
         *{box-sizing:border-box}
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4}
         
-        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] Estilos de cabecera y logotipo ampliado */
-        .header-container{background:#88003d;padding:15px;position:sticky;top:0;z-index:100;box-shadow: 0 2px 5px rgba(0,0,0,0.2)}
+        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] Estilos de cabecera y logotipo festivo */
+        .header-container{background:#88003d;padding:15px;position:sticky;top:0;z-index:100;box-shadow: 0 4px 10px rgba(0,0,0,0.3);border-bottom: 3px solid #144522;}
         .logo-main{display:block;margin:0 auto 12px;height:75px;max-width:320px;width:100%;object-fit:contain}
         header{display:flex;gap:10px;align-items:center}
         #menuBtn{font-size:26px;cursor:pointer;color:white}
@@ -27,10 +27,10 @@
         #verTodos{background:#88003d;color:white;padding:10px;border-radius:8px;text-align:center;margin-bottom:15px;cursor:pointer}
         .btn-cerrar-menu{width:100%;padding:10px;background:#eee;border:none;border-radius:8px;margin-bottom:15px;cursor:pointer;font-weight:bold}
 
-        /* [BLOQUE: FILTRO DE MARCAS] Carrusel horizontal de marcas */
-        #marcas{display:flex;gap:15px;overflow-x:auto;padding:15px;background:white}
+        /* [BLOQUE: FILTRO DE MARCAS] Carrusel horizontal de marcas con acento navideño */
+        #marcas{display:flex;gap:15px;overflow-x:auto;padding:15px;background:white;border-bottom: 2px dashed #144522}
         .marca{text-align:center;font-size:12px;min-width:80px;cursor:pointer}
-        .marca img{width:65px;height:65px;border-radius:50%;border:2px solid #88003d;object-fit:cover;background:#f9f9f9}
+        .marca img{width:65px;height:65px;border-radius:50%;border:2px solid #144522;object-fit:cover;background:#f9f9f9}
 
         /* [BLOQUE: LISTADO Y GRILLA DE PRODUCTOS] Tarjetas de artículos, precios y controles */
         .seccion-titulo{padding:15px 10px 5px;font-size:18px;color:#88003d;font-weight:bold;text-transform:uppercase}
@@ -40,8 +40,8 @@
         .producto{background:white;border-radius:12px;padding:10px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.1);position:relative;display:flex;flex-direction:column;justify-content:space-between}
         .producto img{width:100%;border-radius:8px;aspect-ratio:1/1;object-fit:cover}
         
-        .producto.premium {border: 2px solid #ffbc00; background: #fffdf2; box-shadow: 0 4px 12px rgba(255,188,0,0.2)}
-        .premium-tag {position:absolute; top:5px; left:5px; background:#ffbc00; color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; z-index:5;}
+        .producto.premium {border: 2px solid #d4af37; background: #fffdf9; box-shadow: 0 4px 12px rgba(212,175,55,0.25)}
+        .premium-tag {position:absolute; top:5px; left:5px; background:#d4af37; color:#000; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold; z-index:5;}
         
         /* [BLOQUE: BOTÓN DE INFORMACIÓN] Acceso rápido a fichas técnicas */
         .btn-info {
@@ -54,7 +54,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid #ddd; z-index: 10;
         }
 
-        .badge-desc{position:absolute;top:5px;right:5px;background:#e74c3c;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold; z-index:5;}
+        .badge-desc{position:absolute;top:5px;right:5px;background:#144522;color:white;font-size:12px;padding:4px 8px;border-radius:8px;font-weight:bold; z-index:5;}
         .precio-old{text-decoration:line-through;color:#999;font-size:12px;margin-right:5px}
         .nombre{font-size:14px;margin:8px 0;height:34px;overflow:hidden;line-height:1.2}
         .precio{color:#88003d;font-weight:bold;font-size:16px}
@@ -64,7 +64,7 @@
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:6px}
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE] Gestión de compras y datos de cliente */
-        #burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 20px;border-radius:30px;z-index:90;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;font-weight:bold}
+        #burbuja{position:fixed;bottom:20px;right:20px;background:#88003d;color:white;padding:12px 20px;border-radius:30px;z-index:90;box-shadow:0 4px 15px rgba(0,0,0,0.3);cursor:pointer;font-weight:bold;border: 2px solid #d4af37;}
         #panel{position:fixed;left:0;right:0;bottom:-100%;background:white;height:90%;transition:.4s;border-radius:20px 20px 0 0;padding:20px;overflow-y:auto;z-index:2000;box-shadow:0 -5px 20px rgba(0,0,0,0.2)}
         #panel.activo{bottom:0}
 
@@ -72,12 +72,12 @@
         .cliente-selector input, .cliente-selector select{width:100%; padding:10px; margin:5px 0; border-radius:6px; border:1px solid #ccc}
         .item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee}
         
-        #enviar{width:100%;padding:15px;background:#25D366;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
+        #enviar{width:100%;padding:15px;background:#144522;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
         #enviar:disabled, #btn-imprimir:disabled{background:#ccc;cursor:not-allowed}
         
         #btn-imprimir{width:100%;padding:15px;background:#444;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
         .btn-vaciar{background:#eee;color:#666;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer}
-        .btn-soporte{position:fixed;bottom:85px;right:20px;background:#00a884;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px}
+        .btn-soporte{position:fixed;bottom:85px;right:20px;background:#144522;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px;border: 2px solid #d4af37;}
 
         /* [BLOQUE: MODALES GENERALES] Ventanas superpuestas */
         .modal-overlay {
@@ -93,11 +93,11 @@
 
         /* [BLOQUE: MODAL DETALLES PRODUCTO] Ficha detallada y botón compartir */
         .modal-header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: sticky; top: 0; z-index: 10; }
-        .btn-share-modal { background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .btn-share-modal { background: #144522; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .close-modal { background: #eee; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center; }
         
         #modal-info .prod-img-grande { width: 100%; max-height: 250px; object-fit: contain; border-radius: 12px; margin-bottom: 15px; background: #fff; }
-        .renta-badge { background: #e8f5e9; color: #2e7d32; padding: 8px; border-radius: 8px; font-weight: bold; margin: 10px 0; display: inline-block; border: 1px solid #2e7d32; }
+        .renta-badge { background: #e8f5e9; color: #144522; padding: 8px; border-radius: 8px; font-weight: bold; margin: 10px 0; display: inline-block; border: 1px solid #144522; }
         .info-desc { text-align: left; font-size: 14px; color: #555; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 10px; white-space: pre-wrap; }
 
         /* [BLOQUE: MODAL PREVENTA] Selección de día de entrega y confirmación */
@@ -112,15 +112,15 @@
         .btn-dia.selected { background: #88003d; color: white; border-color: #88003d; font-weight: bold; }
         .modal-footer { display: flex; gap: 10px; margin-top: auto; }
         .btn-final { flex: 2; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-final.confirmar { background: #25D366; }
+        .btn-final.confirmar { background: #144522; }
         .btn-final.confirmar:disabled { background: #ccc; cursor: not-allowed; }
         .btn-final.cancelar { flex: 1; background: #eee; color: #666; }
 
         .hidden{display:none}
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
         
-        /* [BLOQUE: FOOTER] Pie de página institucional */
-        footer{background:#111;color:white;padding:30px 20px 120px;text-align:center;font-size:13px}
+        /* [BLOQUE: FOOTER] Pie de página institucional festivo */
+        footer{background:#111;color:white;padding:30px 20px 120px;text-align:center;font-size:13px;border-top: 3px solid #d4af37;}
 
         /* [BLOQUE: TICKET DE IMPRESIÓN] Formato para impresoras térmicas */
         @media print {
@@ -140,12 +140,12 @@
 </head>
 <body>
 
-<!-- [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL] -->
+<!-- [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL NAVIDEÑO] -->
 <div class="header-container">
-    <img src="https://lh3.googleusercontent.com/d/13SvSDq6s5hS1jfe7HhBuKy4qHoGO1NEB" alt="DISTRISNACKS" class="logo-main">
+    <img src="https://lh3.googleusercontent.com/d/1I0pEeU4MOuhjvA28dvKe2gn-rQlt-Gtn" alt="DISTRISNACKS Navideño" class="logo-main">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
-        <input id="buscar" placeholder="Buscar producto o marca..." autocomplete="off">
+        <input id="buscar" placeholder="Buscar producto o marca navideña..." autocomplete="off">
     </header>
 </div>
 
@@ -199,7 +199,7 @@
     
     <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-top:15px">
         <div style="display:flex; justify-content:space-between"><span>Subtotal:</span> <span id="subtotal">0</span></div>
-        <div style="display:flex; justify-content:space-between; color:green"><span>Ahorro total:</span> <span id="ahorro">0</span></div>
+        <div style="display:flex; justify-content:space-between; color:#144522"><span>Ahorro total:</span> <span id="ahorro">0</span></div>
         <hr>
         <div style="display:flex; justify-content:space-between; font-size:20px; font-weight:bold; color:#88003d">
             <span>TOTAL:</span> $<span id="total">0</span>
@@ -217,8 +217,8 @@
 <div id="modal-confirmacion" class="modal-overlay">
     <div class="modal-content">
         <span class="close-modal-float" onclick="cerrarConfirmacion()">✕</span>
-        <img src="https://lh3.googleusercontent.com/d/1A1pYLXrHLmGHdXDg0KIoX1mbhQz2CpzG" class="modal-logo">
-        <div class="modal-title">PREVENTA</div>
+        <img src="https://lh3.googleusercontent.com/d/1I0pEeU4MOuhjvA28dvKe2gn-rQlt-Gtn" class="modal-logo">
+        <div class="modal-title">PREVENTA NAVIDEÑA</div>
         <div class="resumen-caja" id="modal-resumen-valores"></div>
         <span class="pregunta-dia">¿Cuál sería el día ideal para llevar tu pedido?</span>
         <div class="grid-dias">
@@ -256,7 +256,7 @@
 
 <!-- [BLOQUE: FOOTER] -->
 <footer>
-    <b>DISTRISNACKS</b><br>
+    <b>DISTRISNACKS</b> - Edición Navideña<br>
     Bogotá<br>
     📱 <a href="https://wa.me/573222643534" style="color:white">3222643534</a><br>
     ✉ Distrisnacksgerencia@gmail.com<br><br>
@@ -285,9 +285,8 @@
     });
 
     let snowflakes = [];
-    let maxSnowflakes = 90; // Cantidad inicial alta
+    let maxSnowflakes = 90;
 
-    // Disminución progresiva para que cada vez caiga menos
     let decreaseTimer = setInterval(() => {
         if (maxSnowflakes > 5) {
             maxSnowflakes -= 8; 
@@ -309,7 +308,6 @@
     function drawSnow() {
         sCtx.clearRect(0, 0, sWidth, sHeight);
         
-        // Sombra suave para que los copos resalten sobre fondos claros
         sCtx.shadowColor = 'rgba(0, 0, 0, 0.35)';
         sCtx.shadowBlur = 4;
         sCtx.shadowOffsetX = 1;
@@ -450,7 +448,7 @@
         let f = productos.filter(p => (p.n.toLowerCase().includes(b) || p.marca.toLowerCase().includes(b)) && (!catFiltro || p.cat === catFiltro) && (!marcaFiltro || p.marca === marcaFiltro));
         let cats = [...new Set(f.map(p => p.cat))];
         let promos = f.filter(p => p.descPorc > 0);
-        if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("🔥 PROMOCIONES", promos);
+        if (promos.length > 0 && !catFiltro && !marcaFiltro) renderSeccion("🔥 PROMOCIONES NAVIDEÑAS", promos);
         cats.forEach(c => { let pc = f.filter(p => p.cat === c); if(pc.length > 0) renderSeccion(c, pc); });
     }
 
@@ -567,7 +565,7 @@
         document.getElementById('btn-confirmar-wa').disabled = true;
         document.getElementById('modal-resumen-valores').innerHTML = `
             <div class="resumen-linea"><span>Subtotal:</span> <span>${document.getElementById('subtotal').innerText}</span></div>
-            <div class="resumen-linea" style="color:green"><span>Descuento:</span> <span>${document.getElementById('ahorro').innerText}</span></div>
+            <div class="resumen-linea" style="color:#144522"><span>Descuento:</span> <span>${document.getElementById('ahorro').innerText}</span></div>
             <div class="resumen-linea" style="font-weight:bold; font-size:16px; margin-top:10px; color:#88003d"><span>Total a pagar:</span> <span>$${document.getElementById('total').innerText}</span></div>
         `;
         document.getElementById('modal-confirmacion').style.display = 'flex';
@@ -592,7 +590,7 @@
             msgItems += `• ${i.c} x ${safe(k)}%0A`;
         }
         let ahr = sub - tot;
-        let m = `Hola, te compartimos el resumen de tu pedido y algunos detalles para coordinar la entrega.%0A%0A`;
+        let m = `Hola, te compartimos el resumen de tu pedido navideño y algunos detalles para coordinar la entrega.%0A%0A`;
         m += `*Día ideal de entrega:* ${diaElegido}%0A%0A`;
         m += `*DETALLES DEL CLIENTE*%0A`;
         m += `--------------------------------%0A`;
@@ -664,7 +662,7 @@
             hI += `<div class="t-flex"><span style="width:15%">${i.c} x</span><span style="width:55%">${k}</span><span style="width:30%; text-align:right">$${(i.pr * i.c).toLocaleString()}</span></div>`;
         }
         const ticketDiv = document.getElementById("ticket-impresion");
-        ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size:16px">DISTRISNACKS</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hI}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top:10px">¡Gracias por su compra!</div>`;
+        ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size:16px">DISTRISNACKS (Navidad)</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hI}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top:10px">¡Feliz Navidad y gracias por su compra!</div>`;
         window.print();
     }
 
@@ -675,7 +673,7 @@
         let enlaceBase = window.location.origin + window.location.pathname;
         let enlace = `${enlaceBase}?prod=${encodeURIComponent(p.n)}`;
 
-        let texto = `*DISTRISNACKS - FICHA TÉCNICA* 🍿\n`;
+        let texto = `*DISTRISNACKS - ESPECIAL NAVIDEÑO* 🎄🍿\n`;
         texto += `━━━━━━━━━━━━━━━━━\n`;
         texto += `*📦 Producto:* ${p.n}\n`;
         
