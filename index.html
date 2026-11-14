@@ -147,12 +147,12 @@
         .controles button:hover{background:#66002e}
         .controles input{width:50px;text-align:center;border:1px solid #ccc;border-radius:8px;font-size:14px;outline:none}
 
-        /* [BLOQUE: ANIMACIÓN SANTA CLAUS CON PNG PERSONALIZADO] */
+        /* [BLOQUE: ANIMACIÓN SANTA CLAUS GRANDE Y PAUSADO HACIA EL HORIZONTE] */
         #santa-trineo {
             position: fixed;
-            top: 25px;
-            right: -220px;
-            width: 150px;
+            top: 15px;
+            right: -300px;
+            width: 240px; /* Más grandecito */
             z-index: 9998;
             pointer-events: none;
             opacity: 0;
@@ -161,32 +161,32 @@
         #santa-trineo img {
             width: 100%;
             height: auto;
-            filter: drop-shadow(0 5px 15px rgba(212,175,55,0.7));
+            filter: drop-shadow(0 8px 20px rgba(212,175,55,0.8));
         }
         #santa-speech {
             position: absolute;
-            top: -32px;
-            left: 5px;
+            top: -42px;
+            left: 10px;
             background: #fff;
             color: #88003d;
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 6px 12px;
+            border-radius: 14px;
             font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            font-size: 14px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
             border: 2px solid #d4af37;
             white-space: nowrap;
             display: none;
         }
-        @keyframes vueloDobleSanta {
-            0% { right: -220px; top: 30px; transform: scaleX(1) scale(1); opacity: 1; }
-            46% { right: calc(100vw + 220px); top: 120px; transform: scaleX(1) scale(0.95); opacity: 1; }
-            49% { right: calc(100vw + 220px); top: 70px; transform: scaleX(-1) scale(0.95); opacity: 1; } /* Gira en espejo para volver */
-            92% { right: -220px; top: 90px; transform: scaleX(-1) scale(0.85); opacity: 1; }
-            100% { right: 10px; top: 10px; transform: scaleX(-1) scale(0.1); opacity: 0; } /* Se pierde y desvanece en la esquina superior derecha */
+        @keyframes vueloPausadoHorizonte {
+            0% { right: -300px; top: 40px; transform: scaleX(1) scale(1); opacity: 1; }
+            46% { right: calc(100vw + 300px); top: 150px; transform: scaleX(1) scale(0.9); opacity: 1; }
+            49% { right: calc(100vw + 300px); top: 80px; transform: scaleX(-1) scale(0.9); opacity: 1; } /* Gira en espejo */
+            90% { right: -50px; top: 40px; transform: scaleX(-1) scale(0.3); opacity: 0.8; }
+            100% { right: 5px; top: 5px; transform: scaleX(-1) scale(0.05); opacity: 0; } /* Se pierde y desvanece exactamente en la esquina superior derecha */
         }
         .volando-png {
-            animation: vueloDobleSanta 7.5s ease-in-out forwards;
+            animation: vueloPausadoHorizonte 11s ease-in-out forwards; /* Más pausado para disfrutarlo */
         }
 
         /* [BLOQUE: CARRITO Y PANEL FLOTANTE - ESTILO NAVIDEÑO] */
@@ -428,10 +428,21 @@
         } catch(e) {}
     }
 
-    function decirHoHoHo() {
+    const mensajesNavidenos = [
+        "¡Felices Fiestas, tendero estrella! 🎄",
+        "¡Surted tu negocio con alegría! 🎁",
+        "¡Gracias por confiar en Distrisnacks! ⭐",
+        "¡Que tu caja sonría esta Navidad! 🎅",
+        "¡Mucho éxito en tus ventas de fin de año! 🌟"
+    ];
+
+    function decirMensajeSanta() {
         try {
+            const msgAleatorio = mensajesNavidenos[Math.floor(Math.random() * mensajesNavidenos.length)];
+            document.getElementById('santa-speech').innerText = msgAleatorio;
+
             if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance("¡Jo, jo, jo!");
+                const utterance = new SpeechSynthesisUtterance("¡Jo, jo, jo! Felices fiestas");
                 utterance.lang = 'es-ES';
                 utterance.pitch = 0.7;
                 utterance.rate = 0.9;
@@ -440,28 +451,28 @@
         } catch(e) {}
     }
 
-    let santaYaVolo = false;
+    let ultimoNivelMultiplo5 = 0;
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
-        if(!santaYaVolo) {
-            santaYaVolo = true;
-            playBellSound();
-            decirHoHoHo();
-            
-            santa.style.opacity = '1';
-            santa.classList.add('volando-png');
-            speech.style.display = 'block';
+        
+        playBellSound();
+        decirMensajeSanta();
+        
+        santa.style.opacity = '1';
+        santa.classList.remove('volando-png');
+        void santa.offsetWidth; // Reiniciar animación
+        santa.classList.add('volando-png');
+        speech.style.display = 'block';
 
-            setTimeout(() => {
-                speech.style.display = 'none';
-            }, 3500);
+        setTimeout(() => {
+            speech.style.display = 'none';
+        }, 5000);
 
-            setTimeout(() => {
-                santa.classList.remove('volando-png');
-                santa.style.opacity = '0';
-            }, 7500);
-        }
+        setTimeout(() => {
+            santa.classList.remove('volando-png');
+            santa.style.opacity = '0';
+        }, 11000);
     }
 
     const snowCanvas = document.createElement('canvas');
@@ -734,11 +745,14 @@
         document.getElementById('items').innerText = itemC;
         document.getElementById('mensaje').innerText = tot < MIN_PEDIDO ? `Pedido mínimo: $${MIN_PEDIDO.toLocaleString()}` : "";
         
-        // Activar Santa Claus PNG a partir de $25,000
-        if(tot >= 25000) {
-            dispararSantaVolador();
+        // Disparar Santa Claus en cada múltiplo de 5 productos (5, 10, 15, 20...)
+        if (itemC > 0 && itemC % 5 === 0) {
+            if (itemC !== ultimoNivelMultiplo5) {
+                ultimoNivelMultiplo5 = itemC;
+                dispararSantaVolador();
+            }
         } else {
-            santaYaVolo = false;
+            ultimoNivelMultiplo5 = 0; // Permite que vuelva a salir al alcanzar el siguiente múltiplo de 5
         }
         
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= MIN_PEDIDO;
@@ -747,7 +761,7 @@
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
-    function vaciarCarrito() { playBellSound(); if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; santaYaVolo = false; save(); renderCarrito(); renderProductos(); } }
+    function vaciarCarrito() { playBellSound(); if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; ultimoNivelMultiplo5 = 0; save(); renderCarrito(); renderProductos(); } }
     function abrirCarrito() { playBellSound(); panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
     const historialArea = document.getElementById("historial-area");
