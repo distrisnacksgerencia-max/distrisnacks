@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DISTRISNACKS - Especial Navideño</title>
     
-    <!-- [BLOQUE: LOGOTIPOS E ICONO] Icono de pestaña (Favicon) actualizado -->
+    <!-- [BLOQUE: LOGOTIPOS E ICONO] Icono de pestaña (Favicon) -->
     <link rel="icon" href="https://lh3.googleusercontent.com/d/1tU1CKKmO8-r1qUJlZ8Z2lj1snn-06KSg">
 
     <style>
@@ -13,18 +13,33 @@
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4}
         
         /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL - FIJO / STICKY] */
-        .header-container{background:#88003d;padding:15px;position:sticky;top:0;z-index:100;box-shadow: 0 4px 15px rgba(0,0,0,0.3);border-bottom: 3px solid #d4af37;}
-        .logo-main{display:block;margin:0 auto 12px;height:75px;max-width:320px;width:100%;object-fit:contain}
-        header{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+        .header-container{background:#88003d;padding:15px 15px 5px 15px;position:sticky;top:0;z-index:100;box-shadow: 0 4px 15px rgba(0,0,0,0.3);border-bottom: 3px solid #d4af37;}
+        .logo-main{display:block;margin:0 auto 10px;height:75px;max-width:320px;width:100%;object-fit:contain}
+        header{display:flex;gap:10px;align-items:center;margin-bottom:8px}
         #menuBtn{font-size:26px;cursor:pointer;color:white}
         #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
 
-        /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL COLGANTE NAVIDEÑO] */
-        #marcas{display:flex;justify-content:center;gap:20px;overflow-x:auto;padding:10px 10px 5px;background:rgba(255,255,255,0.95);border-radius:10px;margin-top:5px;scrollbar-width:thin}
-        .marca{text-align:center;font-size:12px;min-width:80px;cursor:pointer;position:relative;transition:transform 0.2s}
+        /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL COLGANTE NAVIDEÑO CORREGIDO] */
+        #marcas{
+            display:flex;
+            justify-content:flex-start;
+            gap:25px;
+            overflow-x:auto;
+            padding:12px 10px 8px 10px;
+            background:rgba(255,255,255,0.95);
+            border-radius:8px;
+            margin-top:5px;
+            scrollbar-width:thin;
+            -webkit-overflow-scrolling: touch;
+        }
+        @media(min-width: 768px) {
+            #marcas { justify-content: center; } /* Centrado en pantallas grandes/tablets si hay espacio */
+        }
+
+        .marca{text-align:center;font-size:12px;min-width:85px;cursor:pointer;position:relative;transition:transform 0.2px;flex-shrink:0}
         .marca:hover{transform:scale(1.08)}
         
-        /* Cuerda dorada independiente para cada esfera */
+        /* Cuerda dorada naciendo desde la parte superior absoluta del contenedor de marcas */
         .marca::before {
             content: '';
             position: absolute;
@@ -36,27 +51,27 @@
             z-index: 1;
         }
         
-        /* Alturas independientes y escalonadas para simular el colgatedero natural */
-        .marca:nth-child(1) { margin-top: 12px; }
-        .marca:nth-child(1)::before { height: 12px; }
+        /* Alturas independientes y escalonadas de las esferas */
+        .marca:nth-child(1) { margin-top: 15px; }
+        .marca:nth-child(1)::before { height: 15px; }
 
-        .marca:nth-child(2) { margin-top: 2px; }
-        .marca:nth-child(2)::before { height: 22px; }
+        .marca:nth-child(2) { margin-top: 4px; }
+        .marca:nth-child(2)::before { height: 26px; }
 
-        .marca:nth-child(3) { margin-top: 18px; }
-        .marca:nth-child(3)::before { height: 6px; }
+        .marca:nth-child(3) { margin-top: 20px; }
+        .marca:nth-child(3)::before { height: 10px; }
 
-        .marca:nth-child(4) { margin-top: 6px; }
-        .marca:nth-child(4)::before { height: 18px; }
+        .marca:nth-child(4) { margin-top: 8px; }
+        .marca:nth-child(4)::before { height: 22px; }
 
-        .marca:nth-child(5) { margin-top: 15px; }
-        .marca:nth-child(5)::before { height: 9px; }
+        .marca:nth-child(5) { margin-top: 16px; }
+        .marca:nth-child(5)::before { height: 14px; }
 
-        .marca:nth-child(6) { margin-top: 0px; }
-        .marca:nth-child(6)::before { height: 24px; }
+        .marca:nth-child(6) { margin-top: 2px; }
+        .marca:nth-child(6)::before { height: 28px; }
 
         .marca:nth-child(n+7) { margin-top: 10px; }
-        .marca:nth-child(n+7)::before { height: 14px; }
+        .marca:nth-child(n+7)::before { height: 20px; }
 
         .marca img{width:60px;height:60px;border-radius:50%;border:3px solid #d4af37;object-fit:cover;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,0.2);position:relative;z-index:2}
         .marca div{color:#144522;font-weight:bold;margin-top:4px}
@@ -184,7 +199,7 @@
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca navideña..." autocomplete="off">
     </header>
-    <!-- Carrusel de marcas colgantes fijas -->
+    <!-- Carrusel de marcas colgantes fijas con scroll habilitado -->
     <div id="marcas"></div>
 </div>
 
@@ -299,7 +314,7 @@
     © <span id="year"></span>
 </footer>
 
-<!-- [BLOQUE: EFECTO NIEVE NAVIDEÑA (CON SOMBRA CONTRASTANTE)] -->
+<!-- [BLOQUE: EFECTO NIEVE NAVIDEÑA (MÁS SEGUIDA Y ABUNDANTE)] -->
 <script>
     const snowCanvas = document.createElement('canvas');
     snowCanvas.style.position = 'fixed';
@@ -321,15 +336,7 @@
     });
 
     let snowflakes = [];
-    let maxSnowflakes = 90;
-
-    let decreaseTimer = setInterval(() => {
-        if (maxSnowflakes > 5) {
-            maxSnowflakes -= 8; 
-        } else {
-            clearInterval(decreaseTimer);
-        }
-    }, 1500);
+    let maxSnowflakes = 140; // Mayor cantidad inicial para que sea más seguida
 
     for (let i = 0; i < maxSnowflakes; i++) {
         snowflakes.push({
@@ -337,7 +344,7 @@
             y: Math.random() * sHeight,
             radius: Math.random() * 3.5 + 1.2,
             density: Math.random() * 20,
-            speed: Math.random() * 1.2 + 0.5
+            speed: Math.random() * 1.5 + 0.8 // Caída un poco más constante y fluida
         });
     }
 
@@ -351,10 +358,6 @@
 
         sCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
         sCtx.beginPath();
-        
-        while(snowflakes.length > maxSnowflakes) {
-            snowflakes.pop();
-        }
 
         for (let i = 0; i < snowflakes.length; i++) {
             let sf = snowflakes[i];
@@ -380,7 +383,7 @@
         }
     }
 
-    setInterval(drawSnow, 30);
+    setInterval(drawSnow, 25);
 </script>
 
 <!-- [BLOQUE: LÓGICA / JAVASCRIPT PRINCIPAL] -->
