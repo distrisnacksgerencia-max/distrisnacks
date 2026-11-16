@@ -201,7 +201,6 @@
             height: auto;
             filter: drop-shadow(0 10px 25px rgba(212,175,55,0.9));
         }
-        /* Burbuja compacta y con salto de línea automático para móviles */
         #santa-speech {
             position: absolute;
             top: -48px;
@@ -371,7 +370,7 @@
 
 <!-- [SANTA CLAUS CON PNG PERSONALIZADO - SALIDA DESDE ABAJO] -->
 <div id="santa-trineo">
-    <div id="santa-speech">¡Surtido navideño!</div>
+    <div id="santa-speech">¡Iniciaste tu pedido!</div>
     <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
 </div>
 
@@ -523,31 +522,43 @@
         } catch(e) {}
     }
 
-    // Mensajes cortos y compactos adaptados para móviles
     const lista20Mensajes = [
-        "¡Aprovecha promos!",
-        "¡Surtir bien atrae clientes!",
-        "¡Más snacks, más ventas!",
+        "¡Iniciaste tu pedido!",
+        "¡Excelente elección!",
         "¡Felices fiestas, tendero!",
-        "¡Descuentos de fin de año!",
-        "¡Exhibe en la entrada!",
-        "¡Inventario listo y completo!",
-        "¡Magia y ofertas en Distrisnacks!",
-        "¡Mostrador ordenado vende más!",
-        "¡Suma más y gana más hoy!",
-        "¡Ofrece el queso siete cueros!",
-        "¡Invierte en tu negocio hoy!",
-        "¡Precios especiales activos!",
-        "¡Tendero preparado, más ganancias!",
-        "¡Abundancia en tu local!",
-        "¡Novedades para tus clientes!",
-        "¡Cada 5 productos, gran emoción!",
-        "¡Sabor navideño en cada estante!",
-        "¡Optimiza tu preventa hoy!",
-        "¡Gracias por tu gran confianza!"
+        "¡A surtir con toda!",
+        "¡El mejor diciembre!",
+        "¡Vamos por más ventas!",
+        "¡Inventario listo!",
+        "¡Ofertas en Distrisnacks!",
+        "¡Éxito total en tu local!",
+        "¡Gracias por tu compra!"
     ];
 
-    function dispararSantaVolador() {
+    function dispararSantaInicioPedido() {
+        const santa = document.getElementById('santa-trineo');
+        const speech = document.getElementById('santa-speech');
+        
+        speech.innerText = "¡Iniciaste tu pedido!";
+        playBellSound();
+        
+        santa.style.opacity = '1';
+        santa.classList.remove('volando-png');
+        void santa.offsetWidth;
+        santa.classList.add('volando-png');
+        speech.style.display = 'block';
+
+        setTimeout(() => {
+            speech.style.display = 'none';
+        }, 4500);
+
+        setTimeout(() => {
+            santa.classList.remove('volando-png');
+            santa.style.opacity = '0';
+        }, 6000);
+    }
+
+    function dispararSantaVoladorShake() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
         
@@ -698,7 +709,7 @@
                     snowflakes.forEach(sf => { sf.speed = Math.random() * 1.5 + 0.8; });
                 }, 1500);
 
-                dispararSantaVolador();
+                dispararSantaVoladorShake();
                 setTimeout(() => {
                     verificarYMostrarRuleta();
                 }, 1500);
@@ -711,7 +722,6 @@
     let tiempoRestantesTimer = null;
 
     function verificarYMostrarRuleta() {
-        // Validar estrictamente si hay premios o descuentos reales definidos en la columna Q
         if (!premiosDisponiblesRuleta || premiosDisponiblesRuleta.length === 0) {
             alert("¡Aún no hay premios o descuentos definidos en la tabla maestra (columna Q)! Vuelve a intentarlo más tarde.");
             return;
@@ -793,7 +803,7 @@
 
     let productos = [];
     let marcas = [];
-    let premiosDisponiblesRuleta = []; // Se llena estrictamente desde la columna Q de la tabla maestra
+    let premiosDisponiblesRuleta = []; 
     let carrito = JSON.parse(localStorage.getItem("carrito_distri") || "{}");
     let clientesDB = JSON.parse(localStorage.getItem("clientes_distri") || "[]");
     let marcaFiltro = "";
@@ -828,9 +838,8 @@
                 let pBase = parseInt(c[2].replace(/\D/g,"")) || 0;
                 let dPorc = parseInt(c[8]) || 0;
                 let pvp = parseInt(c[13]?.replace(/\D/g,"")) || 0;
-                let colQ = c[16] || ""; // Columna Q (índice 16)
+                let colQ = c[16] || ""; 
                 
-                // Validación estricta: solo si hay datos reales en la celda Q
                 if (colQ.trim() !== "") {
                     let premioTexto = !isNaN(colQ) ? `${colQ}% Descuento` : colQ;
                     if (!premiosDisponiblesRuleta.includes(premioTexto)) {
@@ -982,7 +991,7 @@
         });
     }
 
-    let ultimoNivelMultiplo5 = 0;
+    let santaYaSalioAlIniciar = false;
 
     function renderCarrito() {
         let tot = 0, sub = 0, itemC = 0, h = "";
@@ -992,6 +1001,14 @@
         }
         lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
         
+        // Control: Aparece 1 sola vez exactamente al iniciar el pedido (cuando pasa de 0 a 1 o más ítems)
+        if (itemC > 0 && !santaYaSalioAlIniciar) {
+            santaYaSalioAlIniciar = true;
+            dispararSantaInicioPedido();
+        } else if (itemC === 0) {
+            santaYaSalioAlIniciar = false; // Se reinicia si vacían el carrito
+        }
+
         let totalFinal = tot;
         let descuentoAplicadoMonto = 0;
         if (premioGanadoActual && totalFinal >= MIN_PEDIDO_PREMIO && premioGanadoActual.includes("Descuento")) {
@@ -1009,24 +1026,13 @@
         let minReq = premioGanadoActual ? MIN_PEDIDO_PREMIO : MIN_PEDIDO_BASE;
         document.getElementById('mensaje').innerText = tot < minReq ? `Pedido mínimo requerido: $${minReq.toLocaleString()}` : "";
         
-        if (itemC > 0 && itemC % 5 === 0) {
-            if (itemC !== ultimoNivelMultiplo5) {
-                ultimoNivelMultiplo5 = itemC;
-                dispararSantaVolador();
-            }
-        } else {
-            if (itemC % 5 !== 0) {
-                ultimoNivelMultiplo5 = Math.floor(itemC / 5) * 5;
-            }
-        }
-        
         const ok = cliente.value && negocio.value && direccion.value && tipo.value && tot >= minReq;
         document.getElementById('enviar').disabled = !ok; 
         document.getElementById('btn-imprimir').disabled = !ok;
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
-    function vaciarCarrito() { playBellSound(); if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; ultimoNivelMultiplo5 = 0; save(); renderCarrito(); renderProductos(); } }
+    function vaciarCarrito() { playBellSound(); if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; santaYaSalioAlIniciar = false; save(); renderCarrito(); renderProductos(); } }
     function abrirCarrito() { playBellSound(); panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
     const historialArea = document.getElementById("historial-area");
@@ -1110,95 +1116,4 @@
     function actualizarSelectClientes() {
         const s = document.getElementById("select-clientes");
         s.innerHTML = '<option value="">-- Seleccionar cliente guardado --</option>';
-        clientesDB.forEach(c => s.innerHTML += `<option value="${c.nombre}">${c.nombre} (${c.negocio})</option>`);
-        if(clientesDB.length > 0) historialArea.classList.remove("hidden");
-    }
-
-    function cargarCliente(n) {
-        if(!n) return;
-        playBellSound();
-        const c = clientesDB.find(x => x.nombre === n);
-        if(c) {
-            cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo;
-            if(c.ultimoPedido && Object.keys(c.ultimoPedido).length > 0) {
-                if(confirm("¿Cargar último pedido guardado para este cliente?")) { 
-                    carrito = {...c.ultimoPedido}; 
-                    save(); 
-                }
-            }
-            const data = { cliente: c.nombre, negocio: c.negocio, direccion: c.dir, tipo: c.tipo };
-            localStorage.setItem("distri_sesion", JSON.stringify(data));
-            
-            renderCarrito();
-            renderProductos();
-        }
-    }
-
-    function eliminarClienteActual() {
-        playBellSound();
-        const n = document.getElementById("select-clientes").value;
-        if(n && confirm("¿Eliminar cliente?")) {
-            clientesDB = clientesDB.filter(c => c.nombre !== n);
-            localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
-            actualizarSelectClientes();
-        }
-    }
-
-    function imprimirPedido() {
-        playBellSound();
-        guardarClienteLocal();
-        const f = new Date().toLocaleString();
-        let sub = 0, tot = 0, hI = "";
-        for(let k in carrito) {
-            let i = carrito[k]; sub += i.po * i.c; tot += i.pr * i.c;
-            hI += `<div class="t-flex"><span style="width:15%">${i.c} x</span><span style="width:55%">${k}</span><span style="width:30%; text-align:right">$${(i.pr * i.c).toLocaleString()}</span></div>`;
-        }
-        const ticketDiv = document.getElementById("ticket-impresion");
-        ticketDiv.innerHTML = `<div class="t-center t-bold" style="font-size:16px">DISTRISNACKS (Navidad)</div><div class="t-center">NO RESPONSABLE DE IVA</div><div class="t-line"></div><div><b>FECHA:</b> ${f}</div><div><b>CLIENTE:</b> ${cliente.value}</div><div><b>NEGOCIO:</b> ${negocio.value}</div><div class="t-line"></div>${hI}<div class="t-line"></div><div class="t-flex"><span>TOTAL A PAGAR:</span> <b>$${tot.toLocaleString()}</b></div><div class="t-center" style="margin-top:10px">¡Feliz Navidad y gracias por su compra!</div>`;
-        window.print();
-    }
-
-    async function compartirProducto(nombreProd) {
-        const p = productos.find(x => x.n === nombreProd);
-        if(!p) return;
-
-        let enlaceBase = window.location.origin + window.location.pathname;
-        let enlace = `${enlaceBase}?prod=${encodeURIComponent(p.n)}`;
-
-        let texto = `DISTRISNACKS - ESPECIAL NAVIDEÑO\n`;
-        texto += `--------------------------------\n`;
-        texto += `Producto: ${p.n}\n`;
-        
-        if (p.marca) texto += `Marca: ${p.marca}\n`;
-        if (p.cat) texto += `Categoría: ${p.cat}\n`;
-        
-        if(p.descPorc > 0) {
-            texto += `Antes: $${p.pOrig.toLocaleString()}\n`;
-        }
-        texto += `Precio: $${p.p.toLocaleString()}\n`;
-        
-        if (p.detalle) {
-            texto += `\nDescripción:\n${p.detalle}\n`;
-        }
-        
-        texto += `--------------------------------\n`;
-        texto += `Agregar al carrito aquí:\n${enlace}\n\n`;
-        texto += `Ver foto:\n${p.img}`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: `Distrisnacks - ${p.n}`,
-                    text: texto
-                });
-                return; 
-            } catch (err) {
-                console.log("Se canceló el menú nativo o hubo un error:", err);
-            }
-        }
-
-        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
-    }
-</script>
-</body>
-</html>
+        clientesDB.forEach
