@@ -190,7 +190,7 @@
             bottom: -350px;
             left: 50%;
             transform: translateX(-50%);
-            width: 320px;
+            width: 280px;
             z-index: 9998;
             pointer-events: none;
             opacity: 0;
@@ -201,25 +201,29 @@
             height: auto;
             filter: drop-shadow(0 10px 25px rgba(212,175,55,0.9));
         }
+        /* Burbuja compacta y con salto de línea automático para móviles */
         #santa-speech {
             position: absolute;
-            top: -55px;
+            top: -48px;
             left: 50%;
             transform: translateX(-50%);
             background: #fff;
             color: #88003d;
-            padding: 10px 16px;
-            border-radius: 16px;
+            padding: 6px 10px;
+            border-radius: 12px;
             font-weight: bold;
-            font-size: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.35);
-            border: 3px solid #d4af37;
-            white-space: nowrap;
+            font-size: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 2px solid #d4af37;
+            width: 190px;
+            text-align: center;
+            line-height: 1.2;
             display: none;
+            word-wrap: break-word;
         }
         @keyframes salidaDesdeAbajo {
             0% { bottom: -350px; opacity: 0; transform: translateX(-50%) scale(0.7); }
-            20% { bottom: 35vh; opacity: 1; transform: translateX(-50%) scale(1.1); }
+            20% { bottom: 35vh; opacity: 1; transform: translateX(-50%) scale(1.05); }
             80% { bottom: 40vh; opacity: 1; transform: translateX(-50%) scale(1); }
             100% { bottom: 110vh; opacity: 0; transform: translateX(-50%) scale(0.8); }
         }
@@ -246,7 +250,7 @@
             width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 20px solid #88003d; z-index: 10;
         }
         #resultado-premio {
-            font-size: 16px; font-weight: bold; color: #144522; margin: 15px 0; min-height: 45px;
+            font-size: 15px; font-weight: bold; color: #144522; margin: 15px 0; min-height: 45px;
         }
         .btn-girar {
             background: #144522; color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(20,69,34,0.4);
@@ -353,11 +357,11 @@
     <div class="ruleta-box">
         <button onclick="cerrarRuleta()" style="position:absolute; top:10px; right:12px; border:none; background:none; font-size:18px; cursor:pointer;">✕</button>
         <h3 style="color:#88003d; margin-top:5px;">🎰 Ruleta Navideña</h3>
-        <p style="font-size:12px; color:#555;">¡Gira y gana un descuento o regalo exclusivo para tu pedido mayor a $80.000!</p>
+        <p style="font-size:12px; color:#555;">¡Gira y gana para tu pedido mayor a $80.000!</p>
         
         <div class="ruleta-circulo">
             <div class="flecha-ruleta"></div>
-            <div id="ruleta-texto-centro" style="font-weight:bold; font-size:14px; text-align:center; padding:10px; color:#88003d;">¡Listo para girar!</div>
+            <div id="ruleta-texto-centro" style="font-weight:bold; font-size:13px; text-align:center; padding:10px; color:#88003d;">¡Listo para girar!</div>
         </div>
         
         <div id="resultado-premio"></div>
@@ -367,7 +371,7 @@
 
 <!-- [SANTA CLAUS CON PNG PERSONALIZADO - SALIDA DESDE ABAJO] -->
 <div id="santa-trineo">
-    <div id="santa-speech">Surtido navideño especial!</div>
+    <div id="santa-speech">¡Surtido navideño!</div>
     <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
 </div>
 
@@ -519,27 +523,28 @@
         } catch(e) {}
     }
 
+    // Mensajes cortos y compactos adaptados para móviles
     const lista20Mensajes = [
-        "Aprovecha las promociones en productos seleccionados",
-        "Surtir bien tu mostrador atrae más clientes en diciembre",
-        "Mayor variedad de snacks aumenta tus ventas diarias",
-        "Felices fiestas, que tu negocio brille esta Navidad",
-        "Aprovecha los descuentos especiales para maximizar tu ganancia",
-        "Coloca los snacks en la entrada para impulsar la venta por impulso",
-        "Un inventario completo garantiza un fin de año exitoso",
-        "La magia navideña llega con las mejores promociones de Distrisnacks",
-        "Mantén tu exhibición ordenada y limpia para vender más rápido",
-        "Suma más productos y asegura el mejor margen de temporada",
-        "Comparte la alegría navideña ofreciendo queso siete cueros y snacks",
-        "Invierte en tu negocio hoy para ver grandes frutos mañana",
-        "Los precios especiales de temporada son tu mejor aliado comercial",
-        "Un tendero preparado es un tendero con más ganancias",
-        "Que la abundancia y la paz inunden tu establecimiento",
-        "Ofrece siempre la novedad navideña a tus clientes frecuentes",
-        "Cada múltiplo de 5 productos acerca tu negocio al éxito total",
-        "Disfruta las festividades con un mostrador lleno de sabor",
-        "Optimiza tus pedidos y ahorra tiempo con la preventa navideña",
-        "Gracias por confiar en Distrisnacks, ¡vamos por un gran año nuevo!"
+        "¡Aprovecha promos!",
+        "¡Surtir bien atrae clientes!",
+        "¡Más snacks, más ventas!",
+        "¡Felices fiestas, tendero!",
+        "¡Descuentos de fin de año!",
+        "¡Exhibe en la entrada!",
+        "¡Inventario listo y completo!",
+        "¡Magia y ofertas en Distrisnacks!",
+        "¡Mostrador ordenado vende más!",
+        "¡Suma más y gana más hoy!",
+        "¡Ofrece el queso siete cueros!",
+        "¡Invierte en tu negocio hoy!",
+        "¡Precios especiales activos!",
+        "¡Tendero preparado, más ganancias!",
+        "¡Abundancia en tu local!",
+        "¡Novedades para tus clientes!",
+        "¡Cada 5 productos, gran emoción!",
+        "¡Sabor navideño en cada estante!",
+        "¡Optimiza tu preventa hoy!",
+        "¡Gracias por tu gran confianza!"
     ];
 
     function dispararSantaVolador() {
@@ -559,7 +564,7 @@
 
         setTimeout(() => {
             speech.style.display = 'none';
-        }, 5000);
+        }, 4500);
 
         setTimeout(() => {
             santa.classList.remove('volando-png');
@@ -685,7 +690,6 @@
                 ultimoShake = curTime;
                 playBellSound();
                 
-                // Tormenta de nieve temporal
                 snowflakes.forEach(sf => {
                     sf.speed += Math.random() * 6 + 3;
                     sf.x += (Math.random() - 0.5) * 80;
@@ -694,7 +698,6 @@
                     snowflakes.forEach(sf => { sf.speed = Math.random() * 1.5 + 0.8; });
                 }, 1500);
 
-                // Disparar salida de Santa y abrir Ruleta
                 dispararSantaVolador();
                 setTimeout(() => {
                     verificarYMostrarRuleta();
@@ -703,14 +706,19 @@
         }
     }
 
-    /* LÓGICA DE RULETA Y CONTROL DE 24 HORAS / 10 MINUTOS */
+    /* LÓGICA DE RULETA CON VALIDACIÓN ESTRICTA DE COLUMNA Q */
     let premioGanadoActual = null;
     let tiempoRestantesTimer = null;
 
     function verificarYMostrarRuleta() {
+        // Validar estrictamente si hay premios o descuentos reales definidos en la columna Q
+        if (!premiosDisponiblesRuleta || premiosDisponiblesRuleta.length === 0) {
+            alert("¡Aún no hay premios o descuentos definidos en la tabla maestra (columna Q)! Vuelve a intentarlo más tarde.");
+            return;
+        }
+
         let ultimaVez = localStorage.getItem("distri_ruleta_tiempo");
         let ahora = new Date().getTime();
-        // Control 1 vez cada 24 horas (86400000 ms)
         if (ultimaVez && (ahora - ultimaVez < 86400000)) {
             alert("¡Ya giraste la ruleta hoy! Vuelve mañana para un nuevo intento.");
             return;
@@ -725,6 +733,7 @@
     }
 
     function girarRuleta() {
+        if (!premiosDisponiblesRuleta || premiosDisponiblesRuleta.length === 0) return;
         playBellSound();
         document.getElementById('btn-girar-ahora').disabled = true;
         let txtCentro = document.getElementById('ruleta-texto-centro');
@@ -736,14 +745,12 @@
             contador++;
             if (contador > 15) {
                 clearInterval(intervalo);
-                // Seleccionar premio definitivo de la tabla
                 premioGanadoActual = premiosDisponiblesRuleta[Math.floor(Math.random() * premiosDisponiblesRuleta.length)];
                 txtCentro.innerText = "🎉 " + premioGanadoActual;
                 document.getElementById('resultado-premio').innerHTML = `<span style="color:#144522;">¡Felicitaciones! Has ganado: <b>${premioGanadoActual}</b><br><small>Recuerda: Tu pedido debe ser de mínimo $80.000 para reclamarlo (Oferta válida por 10 minutos).</small></span>`;
                 
                 localStorage.setItem("distri_ruleta_tiempo", new Date().getTime());
                 
-                // Activar banner en carrito y temporizador de 10 minutos
                 activarOfertaFlash(premioGanadoActual);
                 
                 setTimeout(() => { cerrarRuleta(); }, 4000);
@@ -757,7 +764,6 @@
         banner.style.display = 'block';
         txtPremio.innerText = `🎁 Premio Ruleta Activado: ${premio} (Condición: Pedido mínimo $80.000)`;
         
-        // 10 minutos = 600 segundos
         let segundos = 600;
         if (tiempoRestantesTimer) clearInterval(tiempoRestantesTimer);
         
@@ -787,7 +793,7 @@
 
     let productos = [];
     let marcas = [];
-    let premiosDisponiblesRuleta = ["10% Descuento", "15% Descuento"]; // Valores por defecto extraídos de columna Q
+    let premiosDisponiblesRuleta = []; // Se llena estrictamente desde la columna Q de la tabla maestra
     let carrito = JSON.parse(localStorage.getItem("carrito_distri") || "{}");
     let clientesDB = JSON.parse(localStorage.getItem("clientes_distri") || "[]");
     let marcaFiltro = "";
@@ -822,10 +828,10 @@
                 let pBase = parseInt(c[2].replace(/\D/g,"")) || 0;
                 let dPorc = parseInt(c[8]) || 0;
                 let pvp = parseInt(c[13]?.replace(/\D/g,"")) || 0;
-                let colQ = c[16] || ""; // Columna Q (índice 16) para premios o números de descuento
+                let colQ = c[16] || ""; // Columna Q (índice 16)
                 
+                // Validación estricta: solo si hay datos reales en la celda Q
                 if (colQ.trim() !== "") {
-                    // Si es número se interpreta como porcentaje, si es texto como regalo
                     let premioTexto = !isNaN(colQ) ? `${colQ}% Descuento` : colQ;
                     if (!premiosDisponiblesRuleta.includes(premioTexto)) {
                         premiosDisponiblesRuleta.push(premioTexto);
@@ -986,7 +992,6 @@
         }
         lista.innerHTML = h || "<p style='text-align:center; color:#999'>El carrito está vacío</p>";
         
-        // Validar si aplica descuento flash de ruleta
         let totalFinal = tot;
         let descuentoAplicadoMonto = 0;
         if (premioGanadoActual && totalFinal >= MIN_PEDIDO_PREMIO && premioGanadoActual.includes("Descuento")) {
