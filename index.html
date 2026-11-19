@@ -34,13 +34,13 @@
             cursor: pointer;
             z-index: 10000;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-            transition: transform 0.2s;
+            transition: transform 0.2s, opacity 0.3s;
         }
         #btn-magia:hover { transform: scale(1.05); }
 
         #aviso-magia {
             position: fixed;
-            top: 65px;
+            top: 62px;
             right: 15px;
             background: white;
             color: #88003d;
@@ -52,7 +52,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.25);
             z-index: 10000;
             display: none;
-            max-width: 220px;
+            max-width: 210px;
             text-align: center;
         }
 
@@ -501,7 +501,7 @@
     © <span id="year"></span>
 </footer>
 
-<!-- [BLOQUE: EFECTO DE AUDIO, NIEVE FÍSICA Y CONTROL DE SENSORES/RULETA] -->
+<!-- [BLOQUE: EFECTO DE AUDIO, NIEVE CON DISIPACIÓN GRADUAL Y CONTROL DE SENSORES/RULETA] -->
 <script>
     function playBellSound() {
         try {
@@ -544,7 +544,6 @@
         "¡Gracias por tu gran confianza!"
     ];
 
-    // Función para mostrar a Santa automáticamente solo la primera vez al abrir la app
     function mostrarSantaInicial() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
@@ -568,7 +567,6 @@
         }, 6000);
     }
 
-    // Función para la aparición de Santa al sacudir (para la ruleta)
     function dispararSantaVolador() {
         const santa = document.getElementById('santa-trineo');
         const speech = document.getElementById('santa-speech');
@@ -594,7 +592,7 @@
         }, 6000);
     }
 
-    /* [BLOQUE: NIEVE FÍSICA Y TORMENTA AL SACUDIR] */
+    /* [BLOQUE: NIEVE CON DISIPACIÓN GRADUAL PARA CONFORT VISUAL] */
     const snowCanvas = document.createElement('canvas');
     snowCanvas.style.position = 'fixed';
     snowCanvas.style.top = '0';
@@ -614,30 +612,60 @@
         sHeight = snowCanvas.height = window.innerHeight;
     });
 
-    let snowflakes = [];
-    let maxSnowflakes = 160;
+    const MAX_FLAKES = 120;
+    const MIN_FLAKES_REPOSO = 12; // Nivel muy sutil en reposo para no marear
+    let coposActivos = 70;
     let vientoX = 0;
+    let snowflakes = [];
 
-    for (let i = 0; i < maxSnowflakes; i++) {
+    for (let i = 0; i < MAX_FLAKES; i++) {
         snowflakes.push({
             x: Math.random() * sWidth,
             y: Math.random() * sHeight,
-            radius: Math.random() * 3.5 + 1.2,
+            radius: Math.random() * 3 + 1.2,
             density: Math.random() * 20,
-            speed: Math.random() * 1.5 + 0.8
+            speed: Math.random() * 1.2 + 0.6
         });
+    }
+
+    // Disipación gradual cada 2 segundos hasta llegar a un nivel mínimo muy suave
+    let disipacionTimer = setInterval(() => {
+        if (coposActivos > MIN_FLAKES_REPOSO) {
+            coposActivos = Math.max(MIN_FLAKES_REPOSO, coposActivos - 10);
+        }
+        snowflakes.forEach(sf => {
+            if (sf.speed > 0.9) {
+                sf.speed = Math.max(0.7, sf.speed * 0.92);
+            }
+        });
+    }, 2000);
+
+    function activarRafagaNieve(cantidad, duracionMs) {
+        coposActivos = Math.min(MAX_FLAKES, cantidad);
+        snowflakes.forEach(sf => {
+            sf.speed = Math.random() * 3.5 + 1.5;
+            sf.x += (Math.random() - 0.5) * 40;
+        });
+
+        setTimeout(() => {
+            snowflakes.forEach(sf => {
+                sf.speed = Math.random() * 1.1 + 0.6;
+            });
+        }, duracionMs);
     }
 
     function drawSnow() {
         sCtx.clearRect(0, 0, sWidth, sHeight);
-        sCtx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-        sCtx.shadowBlur = 4;
+        if (coposActivos <= 0) return;
+
+        sCtx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+        sCtx.shadowBlur = 3;
         sCtx.shadowOffsetX = 1;
         sCtx.shadowOffsetY = 1;
-        sCtx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        sCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
         sCtx.beginPath();
 
-        for (let i = 0; i < snowflakes.length; i++) {
+        for (let i = 0; i < coposActivos; i++) {
             let sf = snowflakes[i];
             sCtx.moveTo(sf.x, sf.y);
             sCtx.arc(sf.x, sf.y, sf.radius, 0, Math.PI * 2, true);
@@ -649,10 +677,10 @@
     let angle = 0;
     function updateSnow() {
         angle += 0.01;
-        for (let i = 0; i < snowflakes.length; i++) {
+        for (let i = 0; i < coposActivos; i++) {
             let sf = snowflakes[i];
-            sf.y += sf.speed + Math.cos(angle + sf.density) * 0.3;
-            sf.x += Math.sin(angle) * 0.5 + vientoX;
+            sf.y += sf.speed + Math.cos(angle + sf.density) * 0.25;
+            sf.x += Math.sin(angle) * 0.4 + vientoX;
 
             if (sf.y > sHeight) {
                 sf.y = 0;
@@ -690,13 +718,13 @@
         }
 
         magiaActiva = true;
-        btnMagia.innerText = "✨ ¡Magia Activa!";
+        btnMagia.innerText = "✨ Magia Activa";
         avisoMagia.style.display = 'block';
-        setTimeout(() => { avisoMagia.style.display = 'none'; }, 6000);
+        setTimeout(() => { avisoMagia.style.display = 'none'; }, 4500);
     }
 
     function manejarInclinacion(e) {
-        if (e.gamma !== null) vientoX = (e.gamma / 90) * 2.5;
+        if (e.gamma !== null) vientoX = (e.gamma / 90) * 2.2;
     }
 
     let ultimoShake = 0;
@@ -712,13 +740,8 @@
                 ultimoShake = curTime;
                 playBellSound();
                 
-                snowflakes.forEach(sf => {
-                    sf.speed += Math.random() * 6 + 3;
-                    sf.x += (Math.random() - 0.5) * 80;
-                });
-                setTimeout(() => {
-                    snowflakes.forEach(sf => { sf.speed = Math.random() * 1.5 + 0.8; });
-                }, 1500);
+                // Ráfaga controlada que luego se disipa gradualmente
+                activarRafagaNieve(110, 1500);
 
                 dispararSantaVolador();
                 setTimeout(() => {
@@ -876,7 +899,6 @@
         marcas = marcas.filter(m => productos.some(p => p.marca === m.nombre));
         renderSidebar(); renderMarcas(); renderProductos(); renderCarrito(); actualizarSelectClientes();
 
-        // Disparar Santa exactamente 1 sola vez al abrir y cargar la app
         setTimeout(() => {
             mostrarSantaInicial();
         }, 1000);
