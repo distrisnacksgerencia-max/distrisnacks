@@ -12,25 +12,65 @@
         *{box-sizing:border-box}
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4; overflow-x: hidden;}
         
-        /* [BLOQUE: HEADER Y LOGOTIPO PRINCIPAL - FIJO / STICKY] */
-        .header-container{background:#88003d;padding:15px 15px 5px 15px;position:sticky;top:0;z-index:100;box-shadow: 0 4px 15px rgba(0,0,0,0.3);border-bottom: 3px solid #d4af37;}
-        .logo-main{display:block;margin:0 auto 10px;height:75px;max-width:320px;width:100%;object-fit:contain}
-        header{display:flex;gap:10px;align-items:center;margin-bottom:8px}
-        #menuBtn{font-size:26px;cursor:pointer;color:white}
-        #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:16px}
+        /* [BLOQUE: LOGO SUPERIOR NO FIJO - SE DESPLAZA AL HACER SCROLL] */
+        .logo-banner {
+            background: #88003d;
+            padding: 12px 15px 4px 15px;
+            text-align: center;
+        }
+        .logo-main{display:block;margin:0 auto;height:70px;max-width:300px;width:100%;object-fit:contain}
+
+        /* [BLOQUE: BARRA DE BÚSQUEDA COMPACTA - ÚNICO ELEMENTO STICKY ARRIBA] */
+        .search-sticky {
+            background: #88003d;
+            padding: 8px 15px 10px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            border-bottom: 3px solid #d4af37;
+        }
+        header{display:flex;gap:10px;align-items:center}
+        #menuBtn{font-size:26px;cursor:pointer;color:white;line-height:1}
+        #buscar{flex:1;padding:10px;border-radius:8px;border:none;outline:none;font-size:15px}
+
+        /* [BLOQUE: INDICADOR RÁPIDO DE FILTRO ACTIVO] */
+        #filtro-activo-bar {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            background: #fffdf5;
+            border: 1px solid #d4af37;
+            color: #88003d;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        #filtro-activo-bar button {
+            background: #88003d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
         /* [BLOQUE: BOTÓN DE ACTIVAR MAGIA SENSORIAL Y AVISO] */
         #btn-magia {
             position: fixed;
-            top: 15px;
-            right: 15px;
+            top: 12px;
+            right: 12px;
             background: #d4af37;
             color: #000;
             border: 2px solid #fff;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             z-index: 10000;
             box-shadow: 0 3px 10px rgba(0,0,0,0.3);
@@ -40,8 +80,8 @@
 
         #aviso-magia {
             position: fixed;
-            top: 62px;
-            right: 15px;
+            top: 52px;
+            right: 12px;
             background: white;
             color: #88003d;
             padding: 8px 12px;
@@ -56,16 +96,20 @@
             text-align: center;
         }
 
-        /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL COLGANTE NAVIDEÑO] */
+        /* [BLOQUE: FILTRO DE MARCAS - CARRUSEL COLGANTE (NO FIJO AL BAJAR)] */
+        .marcas-wrapper {
+            background: #88003d;
+            padding: 4px 12px 12px 12px;
+            border-bottom: 2px solid #e0d6b8;
+        }
         #marcas{
             display:flex;
             justify-content:flex-start;
             gap:25px;
             overflow-x:auto;
             padding:12px 10px 8px 10px;
-            background:rgba(255,255,255,0.95);
-            border-radius:8px;
-            margin-top:5px;
+            background:rgba(255,255,255,0.96);
+            border-radius:10px;
             scrollbar-width:thin;
             -webkit-overflow-scrolling: touch;
         }
@@ -374,13 +418,25 @@
     <img src="https://lh3.googleusercontent.com/d/1wSiuIr6o-SJ22gTbc3rAk2TKFqgqDFUF" alt="Santa Claus Navideño">
 </div>
 
-<!-- [BLOQUE: HEADER, LOGOTIPO PRINCIPAL Y CARRUSEL COLGANTE FIJO / STICKY] -->
-<div class="header-container">
+<!-- [BLOQUE: LOGO SUPERIOR - SE DESPLAZA NATURALMENTE AL BAJAR] -->
+<div class="logo-banner">
     <img src="https://lh3.googleusercontent.com/d/1I0pEeU4MOuhjvA28dvKe2gn-rQlt-Gtn" alt="DISTRISNACKS Navideño" class="logo-main">
+</div>
+
+<!-- [BLOQUE: BUSCADOR COMPACTO STICKY + INDICADOR DE FILTRO] -->
+<div class="search-sticky">
     <header>
         <span id="menuBtn" onclick="toggleMenu()">☰</span>
         <input id="buscar" placeholder="Buscar producto o marca navideña..." autocomplete="off">
     </header>
+    <div id="filtro-activo-bar">
+        <span id="filtro-activo-texto"></span>
+        <button onclick="limpiarFiltros()">✕ Ver todo</button>
+    </div>
+</div>
+
+<!-- [BLOQUE: CARRUSEL DE MARCAS - YA NO QUEDA FIJO AL BAJAR] -->
+<div class="marcas-wrapper">
     <div id="marcas"></div>
 </div>
 
@@ -613,7 +669,7 @@
     });
 
     const MAX_FLAKES = 120;
-    const MIN_FLAKES_REPOSO = 12; // Nivel muy sutil en reposo para no marear
+    const MIN_FLAKES_REPOSO = 12;
     let coposActivos = 70;
     let vientoX = 0;
     let snowflakes = [];
@@ -628,7 +684,6 @@
         });
     }
 
-    // Disipación gradual cada 2 segundos hasta llegar a un nivel mínimo muy suave
     let disipacionTimer = setInterval(() => {
         if (coposActivos > MIN_FLAKES_REPOSO) {
             coposActivos = Math.max(MIN_FLAKES_REPOSO, coposActivos - 10);
@@ -740,7 +795,6 @@
                 ultimoShake = curTime;
                 playBellSound();
                 
-                // Ráfaga controlada que luego se disipa gradualmente
                 activarRafagaNieve(110, 1500);
 
                 dispararSantaVolador();
@@ -912,7 +966,29 @@
 
     function toggleMenu() { sidebar.classList.toggle("activo"); }
     function cerrarMenu() { sidebar.classList.remove("activo"); }
-    function limpiarFiltros() { marcaFiltro = ""; catFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
+
+    function actualizarBarraFiltro() {
+        const bar = document.getElementById("filtro-activo-bar");
+        const txt = document.getElementById("filtro-activo-texto");
+        if (marcaFiltro) {
+            txt.innerText = "Marca: " + marcaFiltro;
+            bar.style.display = "flex";
+        } else if (catFiltro) {
+            txt.innerText = "Categoría: " + catFiltro;
+            bar.style.display = "flex";
+        } else {
+            bar.style.display = "none";
+        }
+    }
+
+    function limpiarFiltros() {
+        marcaFiltro = "";
+        catFiltro = "";
+        buscar.value = "";
+        cerrarMenu();
+        actualizarBarraFiltro();
+        renderProductos();
+    }
 
     function renderSidebar() {
         const cats = [...new Set(productos.map(p => p.cat).filter(Boolean))];
@@ -920,7 +996,14 @@
         menuCats.innerHTML = h;
     }
 
-    function filtrarCat(c) { catFiltro = c; marcaFiltro = ""; buscar.value = ""; cerrarMenu(); renderProductos(); }
+    function filtrarCat(c) {
+        catFiltro = c;
+        marcaFiltro = "";
+        buscar.value = "";
+        cerrarMenu();
+        actualizarBarraFiltro();
+        renderProductos();
+    }
 
     function renderMarcas() {
         marcasDiv.innerHTML = "";
@@ -929,9 +1012,22 @@
         });
     }
 
-    function filtrarMarca(m) { marcaFiltro = m; catFiltro = ""; buscar.value = ""; renderProductos(); }
+    function filtrarMarca(m) {
+        marcaFiltro = m;
+        catFiltro = "";
+        buscar.value = "";
+        actualizarBarraFiltro();
+        renderProductos();
+    }
 
-    buscar.oninput = () => { if(buscar.value.trim() !== "") { catFiltro = ""; marcaFiltro = ""; } renderProductos(); };
+    buscar.oninput = () => {
+        if(buscar.value.trim() !== "") {
+            catFiltro = "";
+            marcaFiltro = "";
+            actualizarBarraFiltro();
+        }
+        renderProductos();
+    };
 
     const prodContenedor = document.getElementById("contenedor-principal");
     const marcasDiv = document.getElementById("marcas");
