@@ -12,6 +12,34 @@
         *{box-sizing:border-box}
         body{margin:0;font-family:Calibri, sans-serif;background:#f4f4f4; overflow-x: hidden;}
         
+        /* [BLOQUE: NOTIFICACIÓN SUAVE (TOAST) SIN INTERRUPCIONES BRUSCAS] */
+        #toast-aviso {
+            position: fixed;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #88003d;
+            color: #fff;
+            border: 2px solid #d4af37;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            max-width: 90%;
+            width: max-content;
+            text-align: center;
+            line-height: 1.3;
+        }
+        #toast-aviso.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         /* [BLOQUE: LOGO SUPERIOR NO FIJO - SE DESPLAZA AL HACER SCROLL] */
         .logo-banner {
             background: #88003d;
@@ -329,7 +357,8 @@
         #enviar:disabled, #btn-imprimir:disabled{background:#ccc;cursor:not-allowed; box-shadow:none;}
         
         #btn-imprimir{width:100%;padding:15px;background:#444;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;margin-top:10px;cursor:pointer}
-        .btn-vaciar{background:#ffe6e6;color:#c0392b;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer;font-weight:bold}
+        .btn-vaciar{background:#ffe6e6;color:#c0392b;border:none;padding:10px;width:100%;border-radius:8px;margin-top:10px;cursor:pointer;font-weight:bold;transition:0.2s}
+        .btn-vaciar.confirmando{background:#c0392b;color:white}
         .btn-soporte{position:fixed;bottom:85px;right:20px;background:#144522;color:white;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:80;font-size:24px;border:2px solid #d4af37}
 
         /* [BLOQUE: MODALES GENERALES] */
@@ -390,6 +419,9 @@
     </style>
 </head>
 <body>
+
+<!-- [AVISO SUAVE FLOTANTE (TOAST)] -->
+<div id="toast-aviso"></div>
 
 <!-- [BOTÓN FLOTANTE Y AVISO DE MAGIA SENSORIAL] -->
 <button id="btn-magia" onclick="activarMagiaSensores()">Activar Magia 🎄</button>
@@ -479,7 +511,7 @@
             <select id="select-clientes" onchange="cargarCliente(this.value)">
                 <option value="">-- Seleccionar cliente guardado --</option>
             </select>
-            <button onclick="eliminarClienteActual()" style="font-size:10px; margin-top:5px; color:red; border:none; background:none; cursor:pointer">Eliminar cliente seleccionado</button>
+            <button id="btn-eliminar-cliente" onclick="eliminarClienteActual()" style="font-size:11px; margin-top:6px; color:#c0392b; border:none; background:none; cursor:pointer; font-weight:bold;">Eliminar cliente seleccionado</button>
         </div>
     </div>
 
@@ -504,7 +536,7 @@
     
     <button id="enviar" onclick="mostrarConfirmacion()" disabled>Enviar pedido por WhatsApp</button>
     <button id="btn-imprimir" onclick="imprimirPedido()" disabled>🖨️ Imprimir Pedido (Térmica)</button>
-    <button class="btn-vaciar" onclick="vaciarCarrito()">Reiniciar / Nuevo Pedido</button>
+    <button id="btn-vaciar-carrito" class="btn-vaciar" onclick="vaciarCarrito()">Reiniciar / Nuevo Pedido</button>
 </div>
 
 <!-- [BLOQUE: MODAL PREVENTA] -->
@@ -559,9 +591,35 @@
 
 <!-- [BLOQUE: EFECTO DE AUDIO, NIEVE CON DISIPACIÓN GRADUAL Y CONTROL DE SENSORES/RULETA] -->
 <script>
+    let toastTimer = null;
+    function mostrarAvisoSuave(mensaje, duracionMs = 3500) {
+        const toast = document.getElementById('toast-aviso');
+        toast.innerText = mensaje;
+        toast.classList.add('visible');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('visible');
+        }, duracionMs);
+    }
+
+    // Instancia única global de AudioContext para evitar límites del navegador
+    let sharedAudioCtx = null;
+    function getAudioContext() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        if (!sharedAudioCtx) {
+            sharedAudioCtx = new AudioContextClass();
+        }
+        if (sharedAudioCtx.state === 'suspended') {
+            sharedAudioCtx.resume().catch(() => {});
+        }
+        return sharedAudioCtx;
+    }
+
     function playBellSound() {
         try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioCtx = getAudioContext();
+            if (!audioCtx) return;
             const now = audioCtx.currentTime;
             [1046.5, 1318.51, 1567.98, 2093.0].forEach((freq, index) => {
                 const osc = audioCtx.createOscillator();
@@ -805,20 +863,20 @@
         }
     }
 
-    /* LÓGICA DE RULETA CON VALIDACIÓN ESTRICTA DE COLUMNA Q */
+    /* LÓGICA DE RULETA CON VALIDACIÓN ESTRICTA DE COLUMNA Q Y AVISOS SUAVES */
     let premioGanadoActual = null;
     let tiempoRestantesTimer = null;
 
     function verificarYMostrarRuleta() {
         if (!premiosDisponiblesRuleta || premiosDisponiblesRuleta.length === 0) {
-            alert("¡Aún no hay premios o descuentos definidos en la tabla maestra (columna Q)! Vuelve a intentarlo más tarde.");
+            mostrarAvisoSuave("🎄 Aún no hay premios activos hoy en la ruleta navideña.");
             return;
         }
 
         let ultimaVez = localStorage.getItem("distri_ruleta_tiempo");
         let ahora = new Date().getTime();
         if (ultimaVez && (ahora - ultimaVez < 86400000)) {
-            alert("¡Ya giraste la ruleta hoy! Vuelve mañana para un nuevo intento.");
+            mostrarAvisoSuave("🎁 Ya giraste la ruleta hoy. ¡Vuelve mañana por un nuevo intento!");
             return;
         }
         document.getElementById('modal-ruleta').style.display = 'flex';
@@ -874,7 +932,7 @@
                 clearInterval(tiempoRestantesTimer);
                 premioGanadoActual = null;
                 banner.style.display = 'none';
-                alert("¡El tiempo de 10 minutos para reclamar tu premio de la ruleta ha caducado!");
+                mostrarAvisoSuave("⏳ El tiempo de 10 minutos para reclamar tu premio ha caducado.", 4500);
                 renderCarrito();
             }
         }, 1000);
@@ -1156,7 +1214,31 @@
     }
 
     function save() { localStorage.setItem("carrito_distri", JSON.stringify(carrito)); }
-    function vaciarCarrito() { playBellSound(); if(confirm("¿Deseas vaciar el carrito?")) { carrito = {}; save(); renderCarrito(); renderProductos(); } }
+
+    let confirmarVaciarTimer = null;
+    function vaciarCarrito() {
+        playBellSound();
+        const btn = document.getElementById('btn-vaciar-carrito');
+        if (!btn.classList.contains('confirmando')) {
+            btn.classList.add('confirmando');
+            btn.innerText = "⚠️ Toca de nuevo para vaciar todo el pedido";
+            if (confirmarVaciarTimer) clearTimeout(confirmarVaciarTimer);
+            confirmarVaciarTimer = setTimeout(() => {
+                btn.classList.remove('confirmando');
+                btn.innerText = "Reiniciar / Nuevo Pedido";
+            }, 3500);
+            return;
+        }
+        clearTimeout(confirmarVaciarTimer);
+        btn.classList.remove('confirmando');
+        btn.innerText = "Reiniciar / Nuevo Pedido";
+        carrito = {};
+        save();
+        renderCarrito();
+        renderProductos();
+        mostrarAvisoSuave("🗑️ Carrito reiniciado");
+    }
+
     function abrirCarrito() { playBellSound(); panel.classList.add('activo'); if(clientesDB.length > 0) historialArea.classList.remove("hidden"); }
 
     const historialArea = document.getElementById("historial-area");
@@ -1251,10 +1333,9 @@
         if(c) {
             cliente.value = c.nombre; negocio.value = c.negocio; direccion.value = c.dir; tipo.value = c.tipo;
             if(c.ultimoPedido && Object.keys(c.ultimoPedido).length > 0) {
-                if(confirm("¿Cargar último pedido guardado para este cliente?")) { 
-                    carrito = {...c.ultimoPedido}; 
-                    save(); 
-                }
+                carrito = {...c.ultimoPedido}; 
+                save();
+                mostrarAvisoSuave("📋 Último pedido cargado para " + c.nombre);
             }
             const data = { cliente: c.nombre, negocio: c.negocio, direccion: c.dir, tipo: c.tipo };
             localStorage.setItem("distri_sesion", JSON.stringify(data));
@@ -1264,14 +1345,32 @@
         }
     }
 
+    let confirmarEliminarClienteTimer = null;
     function eliminarClienteActual() {
         playBellSound();
         const n = document.getElementById("select-clientes").value;
-        if(n && confirm("¿Eliminar cliente?")) {
-            clientesDB = clientesDB.filter(c => c.nombre !== n);
-            localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
-            actualizarSelectClientes();
+        if (!n) {
+            mostrarAvisoSuave("Selecciona primero un cliente de la lista.");
+            return;
         }
+        const btn = document.getElementById("btn-eliminar-cliente");
+        if (btn.dataset.confirmando !== "1") {
+            btn.dataset.confirmando = "1";
+            btn.innerText = "⚠️ Toca de nuevo para confirmar eliminación";
+            if (confirmarEliminarClienteTimer) clearTimeout(confirmarEliminarClienteTimer);
+            confirmarEliminarClienteTimer = setTimeout(() => {
+                btn.dataset.confirmando = "0";
+                btn.innerText = "Eliminar cliente seleccionado";
+            }, 3500);
+            return;
+        }
+        clearTimeout(confirmarEliminarClienteTimer);
+        btn.dataset.confirmando = "0";
+        btn.innerText = "Eliminar cliente seleccionado";
+        clientesDB = clientesDB.filter(c => c.nombre !== n);
+        localStorage.setItem("clientes_distri", JSON.stringify(clientesDB));
+        actualizarSelectClientes();
+        mostrarAvisoSuave("Cliente eliminado del historial");
     }
 
     function imprimirPedido() {
